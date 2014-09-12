@@ -1,13 +1,12 @@
 from flask import Flask, session, jsonify, Response, request, json, render_template, redirect, current_app
-import pymongo
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import redis
 
 app = Flask(__name__)
 
-# mongo
-client = pymongo.MongoClient()
-db = client['registrar']
+# redis
+db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
 import server.api
 

@@ -6,6 +6,41 @@ import string
 import datetime
 from bson.objectid import ObjectId
 import re
+import requests
+
+#general
+def make_api_request(url, bearer, token):
+    headers = {
+        'Authorization-Bearer': bearer,
+        'Authorization-Token': token,
+        'Content-Type': 'application/json; charset=utf-8'}
+    r = requests.get(url, headers=headers)
+    print r.json()
+    return r.json()
+
+#Dining API
+@app.route('/v1/dining/venues', methods=['GET'])
+def retrieve_venues():
+    if (db.exists('dining:venues')):
+        return db.get('dining:venues')
+    else:
+        venues = make_api_request('https://esb.isc-seo.upenn.edu/8091/open_data/dining/venues',
+                                  'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
+        db.set('dining:venues', json.dumps(venues["result_data"]))
+        return json.dumps(venues["result_data"])
+
+@app.route('/v1/dining/venues/<venue_id>')
+def retrieve_menu(venue_id):
+    venue_id = venue_id
+    if (db.exists("dining:venues:%s" % (venue_id))):
+        return db.get("dining:venues:%s" % (venue_id))
+    else:
+        venue = make_api_request("https://esb.isc-seo.upenn.edu/8091/open_data/dining/menus/weekly/%s" % (venue_id),
+                                   'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
+        db.set('dining:venues:%s' % (venue_id), json.dumps(venue["result_data"]))
+        return json.dumps(venue["result_data"])
+
+#Registar API
 
 def get_serializable_course(course):
     return {
@@ -78,8 +113,9 @@ def get_type_search(search_query):
     return course
 
 
-@app.route('/v1/search/<search_query>', methods=['GET'])
+@app.route('/v1/registrar/<search_query>', methods=['GET'])
 def search(search_query):
+    search_query = search_query.upper()
     query_results = search_course(get_type_search(search_query))
     if not query_results:
         query_results = search_with_query(search_query)
