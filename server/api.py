@@ -40,7 +40,6 @@ def retrieve_menu(venue_id):
         db.set('dining:venues:%s' % (venue_id), json.dumps(venue["result_data"]))
         return json.dumps(venue["result_data"])
 
-#Registar API
 
 def get_serializable_course(course):
     return {
