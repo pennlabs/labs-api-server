@@ -58,38 +58,22 @@ def get_serializable_course(course):
         'prof': course.get('prof')
     }
 
-def create_or_query(fields, regex):
-    query = {'$or': []}
-    for field in fields:
-        query['$or'].append({field: regex})
-    return query
-
-def array_from_cursor(cursor, max_limit):
-    return_arr = []
-    for item in cursor:
-        if len(return_arr) >= max_limit:
-            break
-        return_arr.append(get_serializable_course(item))
-    return return_arr
-
-def search_with_query(search_query):
-    search_query_regex = { '$regex': search_query.replace(' ', '.*'), '$options': 'i'}
-
-    registrar_search_query = create_or_query(['dept', 'title', 'sectionNumber', 'courseNumber'],
-                                             search_query_regex)
-    registrar_search_results = db.registrar.find(registrar_search_query).limit(50)
-    courses = array_from_cursor(registrar_search_results, 50)
-
-    return {
-        'courses': courses
-    }
 
 def search_course(course):
     d = {key: value for key, value in course.iteritems()
          if value and key != 'gen_search'}
-    courses = db.registrar.find(d)
-    final_courses = array_from_cursor(courses, 50)
-    return {"courses" : final_courses}
+    id_param = ""
+    if len(course.get('dept', '')) > 0:
+        id_param += course.get('dept').lower()
+        if len(course.get('courseNumber', '')) > 0:
+            id_param += "-" + course.get('courseNumber').lower()
+            if len(course.get('sectionNumber', '')) > 0:
+                id_param += course.get('sectionNumber').lower()
+    else:
+        return {"error": "Please include a department in your search."}
+
+    final_courses = reg.search({'course_id': id_param})
+    return {"courses" : list(final_courses)}
 
 def get_type_search(search_query):
     course = {'courseNumber':'',
@@ -115,7 +99,9 @@ def get_type_search(search_query):
 @app.route('/v1/registrar/<search_query>', methods=['GET'])
 def search(search_query):
     search_query = search_query.upper()
-    query_results = search_course(get_type_search(search_query))
-    if not query_results:
-        query_results = search_with_query(search_query)
-    return jsonify(query_results)
+    if (db.exists('registrar_query:%s' % search_query)):
+        return jsonify(db.get('registrar_query:%s' % search_query))
+    else:
+        query_results = search_course(get_type_search(search_query))
+        db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
+        return jsonify(query_results)
