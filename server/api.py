@@ -1,4 +1,4 @@
-from flask import Flask, g, session, jsonify, Response, request, json, render_template, redirect, current_app
+from flask import Flask, g, session, jsonify, Response, request, json, render_template, redirect, current_app, jsonify
 from server import app, db
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
@@ -24,7 +24,7 @@ def retrieve_venues():
     else:
         venues = din.venues()
         db.set('dining:venues', json.dumps(venues["result_data"]))
-        return json.dumps(venues["result_data"])
+        return jsonify(venues["result_data"])
 
 
 @app.route('/dining/weekly_menu/<venue_id>', methods=['GET'])
@@ -56,7 +56,7 @@ def detail_search():
         data = penn_dir.detail_search(request.args)
         return json.dumps(data["result_data"])
     else:
-        return json.dumps({"error": "Please specify search parameters in the query string"})
+        return jsonify({"error": "Please specify search parameters in the query string"})
 
 
 @app.route('/directory/person/<person_id>', methods=['GET'])
@@ -66,7 +66,7 @@ def person_details(person_id):
     else:
         data = penn_dir.person_details(person_id)
         db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"]))
-        return json.dumps(data["result_data"])
+        return jsonify(data["result_data"])
 
 
 def get_serializable_course(course):
