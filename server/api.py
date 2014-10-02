@@ -7,38 +7,66 @@ import datetime
 from bson.objectid import ObjectId
 import re
 import requests
+from penn import directory, dining, registrar
 
-#general
-def make_api_request(url, bearer, token):
-    headers = {
-        'Authorization-Bearer': bearer,
-        'Authorization-Token': token,
-        'Content-Type': 'application/json; charset=utf-8'}
-    r = requests.get(url, headers=headers)
-    print r.json()
-    return r.json()
+din = dining.Dining('UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
+reg = registrar.Registrar("UPENN_OD_emxL_1000903", "pt3sicp3q81tgul5qkbeg3rji5")
+penn_dir = directory.Directory("UPENN_OD_emxM_1000904", "t4ii5rdud602n63ln2h1ld29hr")
 
-#Dining API
-@app.route('/v1/dining/venues', methods=['GET'])
+
+# Dining API
+@app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
+    venues = din.venues()
+    return json.dumps(venues["result_data"])
     if (db.exists('dining:venues')):
         return db.get('dining:venues')
     else:
-        venues = make_api_request('https://esb.isc-seo.upenn.edu/8091/open_data/dining/venues',
-                                  'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
+        venues = din.venues()
         db.set('dining:venues', json.dumps(venues["result_data"]))
         return jsonify(venues["result_data"])
 
-@app.route('/v1/dining/venues/<venue_id>')
-def retrieve_menu(venue_id):
+
+@app.route('/dining/weekly_menu/<venue_id>', methods=['GET'])
+def retrieve_weekly_menu(venue_id):
     venue_id = venue_id
-    if (db.exists("dining:venues:%s" % (venue_id))):
-        return db.get("dining:venues:%s" % (venue_id))
+    if (db.exists("dining:venues:weekly:%s" % (venue_id))):
+        return db.get("dining:venues:weekly:%s" % (venue_id))
     else:
-        venue = make_api_request("https://esb.isc-seo.upenn.edu/8091/open_data/dining/menus/weekly/%s" % (venue_id),
-                                   'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
-        db.set('dining:venues:%s' % (venue_id), json.dumps(venue["result_data"]))
-        return jsonify(venue["result_data"])
+        menu = din.menu_weekly(venue_id)
+        db.set('dining:venues:weekly:%s' % (venue_id), json.dumps(menu["result_data"]))
+        return json.dumps(menu["result_data"])
+
+
+@app.route('/dining/daily_menu/<venue_id>', methods=['GET'])
+def retrieve_daily_menu(venue_id):
+    venue_id = venue_id
+    if (db.exists("dining:venues:daily:%s" % (venue_id))):
+        return db.get("dining:venues:daily:%s" % (venue_id))
+    else:
+        menu = din.menu_daily(venue_id)
+        db.set('dining:venues:daily:%s' % (venue_id), json.dumps(menu["result_data"]))
+        return json.dumps(menu["result_data"])
+
+
+# Directory API
+@app.route('/directory/search', methods=['GET'])
+def detail_search():
+    if (len(request.args) > 0):
+        data = penn_dir.detail_search(request.args)
+        return json.dumps(data["result_data"])
+    else:
+        return jsonify({"error": "Please specify search parameters in the query string"})
+
+
+@app.route('/directory/person/<person_id>', methods=['GET'])
+def person_details(person_id):
+    if (db.exists("directory:person:%s" % (person_id))):
+        return db.get("directory:person:%s" % (person_id))
+    else:
+        data = penn_dir.person_details(person_id)
+        db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"]))
+        return jsonify(data["result_data"])
 
 
 def get_serializable_course(course):
@@ -58,11 +86,13 @@ def get_serializable_course(course):
         'prof': course.get('prof')
     }
 
+
 def create_or_query(fields, regex):
     query = {'$or': []}
     for field in fields:
         query['$or'].append({field: regex})
     return query
+
 
 def array_from_cursor(cursor, max_limit):
     return_arr = []
@@ -72,8 +102,9 @@ def array_from_cursor(cursor, max_limit):
         return_arr.append(get_serializable_course(item))
     return return_arr
 
+
 def search_with_query(search_query):
-    search_query_regex = { '$regex': search_query.replace(' ', '.*'), '$options': 'i'}
+    search_query_regex = {'$regex': search_query.replace(' ', '.*'), '$options': 'i'}
 
     registrar_search_query = create_or_query(['dept', 'title', 'sectionNumber', 'courseNumber'],
                                              search_query_regex)
@@ -84,17 +115,19 @@ def search_with_query(search_query):
         'courses': courses
     }
 
+
 def search_course(course):
     d = {key: value for key, value in course.iteritems()
          if value and key != 'gen_search'}
     courses = db.registrar.find(d)
     final_courses = array_from_cursor(courses, 50)
-    return {"courses" : final_courses}
+    return {"courses": final_courses}
+
 
 def get_type_search(search_query):
-    course = {'courseNumber':'',
-              'sectionNumber':'',
-              'dept':''}
+    course = {'courseNumber': '',
+              'sectionNumber': '',
+              'dept': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), '', search_query)
     split = re.split('(\d+)', search_punc)
     for s in split:
@@ -112,7 +145,7 @@ def get_type_search(search_query):
     return course
 
 
-@app.route('/v1/registrar/<search_query>', methods=['GET'])
+@app.route('/registrar/<search_query>', methods=['GET'])
 def search(search_query):
     search_query = search_query.upper()
     query_results = search_course(get_type_search(search_query))
