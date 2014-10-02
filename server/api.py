@@ -1,4 +1,4 @@
-from flask import Flask, g, session, jsonify, Response, request, json, render_template, redirect, current_app
+from flask import Flask, g, session, jsonify, Response, request, json, render_template, redirect, current_app, jsonify
 from server import app, db
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
@@ -27,7 +27,7 @@ def retrieve_venues():
         venues = make_api_request('https://esb.isc-seo.upenn.edu/8091/open_data/dining/venues',
                                   'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
         db.set('dining:venues', json.dumps(venues["result_data"]))
-        return json.dumps(venues["result_data"])
+        return jsonify(venues["result_data"])
 
 @app.route('/v1/dining/venues/<venue_id>')
 def retrieve_menu(venue_id):
@@ -38,7 +38,7 @@ def retrieve_menu(venue_id):
         venue = make_api_request("https://esb.isc-seo.upenn.edu/8091/open_data/dining/menus/weekly/%s" % (venue_id),
                                    'UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
         db.set('dining:venues:%s' % (venue_id), json.dumps(venue["result_data"]))
-        return json.dumps(venue["result_data"])
+        return jsonify(venue["result_data"])
 
 
 def get_serializable_course(course):
