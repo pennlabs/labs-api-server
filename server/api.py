@@ -11,12 +11,10 @@ from penn import directory, dining, registrar
 
 din = dining.Dining('UPENN_OD_emwd_1000807', '5h2g1ihbitu91uhgh3un9rliav')
 reg = registrar.Registrar("UPENN_OD_emxL_1000903", "pt3sicp3q81tgul5qkbeg3rji5")
-penn_dir = directory.Directory("UPENN_OD_emxM_1000904",
-    "t4ii5rdud602n63ln2h1ld29hr")
+penn_dir = directory.Directory("UPENN_OD_emxM_1000904", "t4ii5rdud602n63ln2h1ld29hr")
 
 
-
-#Dining API
+# Dining API
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     venues = din.venues()
@@ -28,6 +26,7 @@ def retrieve_venues():
         db.set('dining:venues', json.dumps(venues["result_data"]))
         return json.dumps(venues["result_data"])
 
+
 @app.route('/dining/weekly_menu/<venue_id>', methods=['GET'])
 def retrieve_weekly_menu(venue_id):
     venue_id = venue_id
@@ -37,6 +36,7 @@ def retrieve_weekly_menu(venue_id):
         menu = din.menu_weekly(venue_id)
         db.set('dining:venues:weekly:%s' % (venue_id), json.dumps(menu["result_data"]))
         return json.dumps(menu["result_data"])
+
 
 @app.route('/dining/daily_menu/<venue_id>', methods=['GET'])
 def retrieve_daily_menu(venue_id):
@@ -49,7 +49,7 @@ def retrieve_daily_menu(venue_id):
         return json.dumps(menu["result_data"])
 
 
-#Directory API
+# Directory API
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
     if (len(request.args) > 0):
@@ -86,11 +86,13 @@ def get_serializable_course(course):
         'prof': course.get('prof')
     }
 
+
 def create_or_query(fields, regex):
     query = {'$or': []}
     for field in fields:
         query['$or'].append({field: regex})
     return query
+
 
 def array_from_cursor(cursor, max_limit):
     return_arr = []
@@ -100,8 +102,9 @@ def array_from_cursor(cursor, max_limit):
         return_arr.append(get_serializable_course(item))
     return return_arr
 
+
 def search_with_query(search_query):
-    search_query_regex = { '$regex': search_query.replace(' ', '.*'), '$options': 'i'}
+    search_query_regex = {'$regex': search_query.replace(' ', '.*'), '$options': 'i'}
 
     registrar_search_query = create_or_query(['dept', 'title', 'sectionNumber', 'courseNumber'],
                                              search_query_regex)
@@ -112,17 +115,19 @@ def search_with_query(search_query):
         'courses': courses
     }
 
+
 def search_course(course):
     d = {key: value for key, value in course.iteritems()
          if value and key != 'gen_search'}
     courses = db.registrar.find(d)
     final_courses = array_from_cursor(courses, 50)
-    return {"courses" : final_courses}
+    return {"courses": final_courses}
+
 
 def get_type_search(search_query):
-    course = {'courseNumber':'',
-              'sectionNumber':'',
-              'dept':''}
+    course = {'courseNumber': '',
+              'sectionNumber': '',
+              'dept': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), '', search_query)
     split = re.split('(\d+)', search_punc)
     for s in split:
