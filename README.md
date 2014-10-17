@@ -11,10 +11,6 @@ Setup
 * Install requirements using `pip install requirements.txt`
 * Run mobile API server with `python runserver.py`
 
-# Overview
-
-Returns a mixed collection of relevant resources (courses, instructors, departments) matching a specified query.
-
 ## Dining
 
 ### Venues
@@ -27,7 +23,7 @@ Return a list of all dining venues
             <td><code>http://api.pennlabs.org:5000/dining/venues</code></td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
@@ -51,7 +47,7 @@ Return the week's menus for the venue with venue_id
             <td><code>http://api.pennlabs.org:5000/dining/weekly_menu/{venue_id}</code></td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
@@ -75,7 +71,7 @@ Return the daily menu for the venue with venue_id
             <td><code>http://api.pennlabs.org:5000/dining/daily_menu/{venue_id}</td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
@@ -101,7 +97,7 @@ Search by name in the Penn Directory
             <td><code>http://api.pennlabs.org:5000/directory/search</td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
@@ -125,7 +121,7 @@ Search by name in the Penn Directory
                           <td><tt>name</tt></td>
                           <td><strong>Required</strong></td>
                           <td>The name to be searched for in the directory. This value is parsed into compontent parts and searched in different reasonable configurations.</td>
-                          <td><tt>J D</tt>, <tt>Doe, Jon</tt>, <tt>Jon</tt></td>
+                          <td><tt>Alex</tt>, <tt>John Doe</tt></td>
                       </tr>
                     </tbody>
                 </table>
@@ -148,7 +144,7 @@ Return the person with person_id
             <td><code>http://api.pennlabs.org:5000/directory/person/{person_id}</td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
@@ -165,7 +161,7 @@ Return the person with person_id
 ## Registrar
 
 ### Search
-Search for courses by dept, course no., and section
+Search for courses by Department, Course Number, and Section
 
 <table>
     <tbody>
@@ -174,7 +170,7 @@ Search for courses by dept, course no., and section
             <td><code>http://api.pennlabs.org:5000/registrar/search</td>
         </tr>
         <tr>
-            <td>HTTP Methods</td>8
+            <td>HTTP Methods</td>
             <td>GET</td>
         </tr>
         <tr>
