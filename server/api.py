@@ -62,11 +62,39 @@ def retrieve_daily_menu(venue_id):
 # Directory API
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
-    if (len(request.args) > 0):
-        data = penn_dir.detail_search(request.args)
-        return jsonify(data["result_data"])
-    else:
+    if not request.args.has_key('name'):
         return jsonify({"error": "Please specify search parameters in the query string"})
+
+    name = request.args['name']
+    arr = name.split()
+    params = []
+
+
+    if len(arr) > 1:
+
+        if arr[0][-1] == ',':
+            params = [{'last_name':arr[0][:-1], 'first_name':arr[1]}]
+        else:
+            params = [
+                {'last_name':arr[-1], 'first_name':arr[0]},
+                {'last_name':arr[0], 'first_name':arr[-1]}
+            ]
+
+    else:
+        params = [{'last_name':name},{'first_name':name}]
+
+    ids = set()
+    final = []
+    for param in params:
+        data = penn_dir.detail_search(param)
+        for result in data['result_data']:
+            person_id = result['result_data'][0]['person_id']
+            if person_id not in ids:
+                final.append(result)
+                ids.add(person_id)
+
+
+    return jsonify({'result_data':final})
 
 
 @app.route('/directory/person/<person_id>', methods=['GET'])
