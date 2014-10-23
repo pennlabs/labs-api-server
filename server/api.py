@@ -109,7 +109,6 @@ def detail_search():
 
 
     return jsonify(final)
->>>>>>> 0b83e73... Sped up search by cutting details
 
 
 @app.route('/directory/person/<person_id>', methods=['GET'])
@@ -180,8 +179,9 @@ def get_type_search(search_query):
     return course
 
 
-@app.route('/registrar/<search_query>', methods=['GET'])
-def search(search_query):
+@app.route('/registrar/search', methods=['GET'])
+def search():
+    search_query = request.args['q']
     now = datetime.datetime.today()
     endDay = datetime.datetime(now.year, now.month, now.day + 1)
     search_query = search_query.upper()
