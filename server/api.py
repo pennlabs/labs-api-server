@@ -70,6 +70,10 @@ def detail_search():
     params = []
 
 
+
+    if (db.exists("directory:search:%s" % (name))):
+        return jsonify(json.loads(db.get("directory:search:%s" % (name))))
+
     if len(arr) > 1:
 
         if arr[0][-1] == ',':
@@ -86,15 +90,24 @@ def detail_search():
     ids = set()
     final = []
     for param in params:
-        data = penn_dir.detail_search(param)
+        data = penn_dir.search(param)
         for result in data['result_data']:
-            person_id = result['result_data'][0]['person_id']
+            person_id = result['person_id']
             if person_id not in ids:
                 final.append(result)
                 ids.add(person_id)
 
+    now = datetime.datetime.today()
+    td = datetime.timedelta(days = 30)
+    month = now + td
 
-    return jsonify({'result_data':final})
+    final = {'result_data':final}
+
+    db.set('directory:search:%s' % (name), json.dumps(final))
+    db.pexpireat('directory:search:%s' % (name), month)
+
+
+    return jsonify(final)
 
 
 @app.route('/directory/person/<person_id>', methods=['GET'])
