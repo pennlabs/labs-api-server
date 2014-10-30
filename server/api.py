@@ -113,12 +113,12 @@ def person_details(person_id):
     td = datetime.timedelta(days = 30)
     month = now + td
     if (db.exists("directory:person:%s" % (person_id))):
-        return db.get("directory:person:%s" % (person_id))
+        return jsonify(json.loads(db.get("directory:person:%s" % (person_id))))
     else:
         data = penn_dir.person_details(person_id)
-        db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"]))
+        db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"][0]))
         db.pexpireat('directory:person:%s' % (person_id), month)
-        return jsonify(data["result_data"])
+        return jsonify(data["result_data"][0])
 
 def is_dept(keyword):
     depts = {
