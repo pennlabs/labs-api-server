@@ -116,9 +116,9 @@ def person_details(person_id):
         return db.get("directory:person:%s" % (person_id))
     else:
         data = penn_dir.person_details(person_id)
-        db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"]))
+        db.set('directory:person:%s' % (person_id), json.dumps(data))
         db.pexpireat('directory:person:%s' % (person_id), month)
-        return jsonify(data["result_data"])
+        return jsonify(data);
 
 def is_dept(keyword):
     depts = {
