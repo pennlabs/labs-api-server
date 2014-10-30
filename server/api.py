@@ -62,6 +62,7 @@ def retrieve_daily_menu(venue_id):
 # Directory API
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
+
     if not request.args.has_key('name'):
         return jsonify({"error": "Please specify search parameters in the query string"})
 
@@ -69,9 +70,8 @@ def detail_search():
     arr = name.split()
     params = []
 
-
     if (db.exists("directory:search:%s" % (name))):
-      return jsonify(json.loads(db.get("directory:search:%s" % (name))))
+        return jsonify(json.loads(db.get("directory:search:%s" % (name))))
 
     if len(arr) > 1:
 
@@ -104,8 +104,13 @@ def detail_search():
 
     db.set('directory:search:%s' % (name), json.dumps(final))
     db.pexpireat('directory:search:%s' % (name), month)
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> master
     return jsonify(final)
 
 
