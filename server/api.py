@@ -34,7 +34,7 @@ def retrieve_venues():
 def retrieve_weekly_menu(venue_id):
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
-    endWeek = datetime.datetime(now.year, now.month, now.day + daysTillWeek)
+    endWeek = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=daysTillWeek);
     venue_id = venue_id
     if (db.exists("dining:venues:weekly:%s" % (venue_id))):
         return jsonify(json.loads(db.get("dining:venues:weekly:%s" % (venue_id))))
@@ -48,7 +48,7 @@ def retrieve_weekly_menu(venue_id):
 @app.route('/dining/daily_menu/<venue_id>', methods=['GET'])
 def retrieve_daily_menu(venue_id):
     now = datetime.datetime.today()
-    endDay = datetime.datetime(now.year, now.month, now.day + 1)
+    endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
     venue_id = venue_id
     if (db.exists("dining:venues:daily:%s" % (venue_id))):
         return jsonify(json.loads(db.get("dining:venues:daily:%s" % (venue_id))))
@@ -69,8 +69,6 @@ def detail_search():
     name = request.args['name']
     arr = name.split()
     params = []
-
-
 
     if (db.exists("directory:search:%s" % (name))):
         return jsonify(json.loads(db.get("directory:search:%s" % (name))))
@@ -106,8 +104,13 @@ def detail_search():
 
     db.set('directory:search:%s' % (name), json.dumps(final))
     db.pexpireat('directory:search:%s' % (name), month)
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> master
     return jsonify(final)
 
 
@@ -123,6 +126,172 @@ def person_details(person_id):
         db.set('directory:person:%s' % (person_id), json.dumps(data["result_data"]))
         db.pexpireat('directory:person:%s' % (person_id), month)
         return jsonify(data["result_data"])
+
+def is_dept(keyword):
+    depts = {
+      "AAMW" : "Art & Arch of Med. World",
+      "ACCT" : "Accounting",
+      "AFRC" : "Africana Studies",
+      "AFST" : "African Studies Program",
+      "ALAN" : "Asian Languages",
+      "AMCS" : "Applied Math & Computatnl Sci.",
+      "ANAT" : "Anatomy",
+      "ANCH" : "Ancient History",
+      "ANEL" : "Ancient Near East Languages",
+      "ANTH" : "Anthropology",
+      "ARAB" : "Arabic",
+      "ARCH" : "Architecture",
+      "ARTH" : "Art History",
+      "ASAM" : "Asian American Studies",
+      "ASTR" : "Astronomy",
+      "BCHE" : "Biochemistry (Undergrads)",
+      "BE" : "Bioengineering",
+      "BENG" : "Bengali",
+      "BEPP" : "Business Econ & Public Policy",
+      "BFMD" : "Benjamin Franklin Seminars-Med",
+      "BIBB" : "Biological Basis of Behavior",
+      "BIOE" : "Bioethics",
+      "BIOL" : "Biology",
+      "BIOM" : "Biomedical Studies",
+      "BMB" : "Biochemistry & Molecular Biophy",
+      "BSTA" : "Biostatistics",
+      "CAMB" : "Cell and Molecular Biology",
+      "CBE" : "Chemical & Biomolecular Engr",
+      "CHEM" : "Chemistry",
+      "CHIN" : "Chinese",
+      "CINE" : "Cinema Studies",
+      "CIS" : "Computer and Information Sci",
+      "CIT" : "Computer and Information Tech",
+      "CLST" : "Classical Studies",
+      "COGS" : "Cognitive Science",
+      "COLL" : "College",
+      "COML" : "Comparative Literature",
+      "COMM" : "Communications",
+      "CPLN" : "City Planning",
+      "CRIM" : "Criminology",
+      "DEMG" : "Demography",
+      "DORT" : "Orthodontics",
+      "DOSP" : "Oral Surgery and Pharmacology",
+      "DPED" : "Pediatric Dentistry",
+      "DRST" : "Restorative Dentistry",
+      "DTCH" : "Dutch",
+      "DYNM" : "Organizational Dynamics",
+      "EALC" : "East Asian Languages & Civilztn",
+      "EAS" : "Engineering & Applied Science",
+      "ECON" : "Economics",
+      "EDUC" : "Education",
+      "EEUR" : "East European",
+      "ENGL" : "English",
+      "ENGR" : "Engineering",
+      "ENM" : "Engineering Mathematics",
+      "ENVS" : "Environmental Studies",
+      "EPID" : "Epidemiology",
+      "ESE" : "Electric & Systems Engineering",
+      "FNAR" : "Fine Arts",
+      "FNCE" : "Finance",
+      "FOLK" : "Folklore",
+      "FREN" : "French",
+      "FRSM" : "Non-Sas Freshman Seminar",
+      "GAFL" : "Government Administration",
+      "GAS" : "Graduate Arts & Sciences",
+      "GCB" : "Genomics & Comp. Biology",
+      "GEOL" : "Geology",
+      "GREK" : "Greek",
+      "GRMN" : "Germanic Languages",
+      "GSWS" : "Gender,Sexuality & Women's Stud",
+      "GUJR" : "Gujarati",
+      "HCMG" : "Health Care Management",
+      "HEBR" : "Hebrew",
+      "HIND" : "Hindi",
+      "HIST" : "History",
+      "HPR" : "Health Policy Research",
+      "HSOC" : "Health & Societies",
+      "HSPV" : "Historic Preservation",
+      "HSSC" : "History & Sociology of Science",
+      "IMUN" : "Immunology",
+      "INTG" : "Integrated Studies",
+      "INTL" : "International Programs",
+      "INTR" : "International Relations",
+      "IPD" : "Integrated Product Design",
+      "ITAL" : "Italian",
+      "JPAN" : "Japanese",
+      "JWST" : "Jewish Studies Program",
+      "KORN" : "Korean",
+      "LALS" : "Latin American & Latino Studies",
+      "LARP" : "Landscape Arch & Regional Plan",
+      "LATN" : "Latin",
+      "LAW" : "Law",
+      "LGIC" : "Logic, Information and Comp.",
+      "LGST" : "Legal Studies & Business Ethics",
+      "LING" : "Linguistics",
+      "LSMP" : "Life Sciences Management Prog",
+      "MAPP" : "Master of Applied Positive Psyc",
+      "MATH" : "Mathematics",
+      "MEAM" : "Mech Engr and Applied Mech",
+      "MED" : "Medical",
+      "MGEC" : "Management of Economics",
+      "MGMT" : "Management",
+      "MKTG" : "Marketing",
+      "MLA" : "Master of Liberal Arts Program",
+      "MLYM" : "Malayalam",
+      "MMP" : "Master of Medical Physics",
+      "MSCI" : "Military Science",
+      "MSE" : "Materials Science and Engineer",
+      "MSSP" : "Social Policy",
+      "MTR" : "Mstr Sci Transltl Research",
+      "MUSA" : "Master of Urban Spatial Analyt",
+      "MUSC" : "Music",
+      "NANO" : "Nanotechnology",
+      "NELC" : "Near Eastern Languages & Civlzt",
+      "NETS" : "Networked and Social Systems",
+      "NGG" : "Neuroscience",
+      "NPLD" : "Nonprofit Leadership",
+      "NSCI" : "Naval Science",
+      "NURS" : "Nursing",
+      "OPIM" : "Operations and Information Mgmt",
+      "PERS" : "Persian",
+      "PHIL" : "Philosophy",
+      "PHRM" : "Pharmacology",
+      "PHYS" : "Physics",
+      "PPE" : "Philosophy, Politics, Economics",
+      "PRTG" : "Portuguese",
+      "PSCI" : "Political Science",
+      "PSYC" : "Psychology",
+      "PUBH" : "Public Health Studies",
+      "PUNJ" : "Punjabi",
+      "REAL" : "Real Estate",
+      "RELS" : "Religious Studies",
+      "ROML" : "Romance Languages",
+      "RUSS" : "Russian",
+      "SAST" : "South Asia Studies",
+      "SCND" : "Scandinavian",
+      "SKRT" : "Sanskrit",
+      "SLAV" : "Slavic",
+      "SOCI" : "Sociology",
+      "SPAN" : "Spanish",
+      "STAT" : "Statistics",
+      "STSC" : "Science, Technology & Society",
+      "SWRK" : "Social Work",
+      "TAML" : "Tamil",
+      "TCOM" : "Telecommunications & Networking",
+      "TELU" : "Telugu",
+      "THAR" : "Theatre Arts",
+      "TURK" : "Turkish",
+      "URBS" : "Urban Studies",
+      "URDU" : "Urdu",
+      "VCSN" : "Clinical Studies - Nbc Elect",
+      "VCSP" : "Clinical Studies - Phila Elect",
+      "VIPR" : "Viper",
+      "VISR" : "Vet School Ind Study & Research",
+      "VLST" : "Visual Studies",
+      "VMED" : "Csp/Csn Medicine Courses",
+      "WH" : "Wharton Undergraduate",
+      "WHCP" : "Wharton Communication Pgm",
+      "WHG" : "Wharton Graduate",
+      "WRIT" : "Writing Program",
+      "YDSH" : "Yiddish"
+    }
+    return keyword.upper() in depts.keys()
 
 
 def get_serializable_course(course):
@@ -144,7 +313,7 @@ def get_serializable_course(course):
 
 def search_course(course):
     d = {key: value for key, value in course.iteritems()
-         if value and key != 'gen_search'}
+         if value and key != 'desc_search'}
     id_param = ""
     if len(course.get('dept', '')) > 0:
         id_param += course.get('dept').lower()
@@ -155,27 +324,39 @@ def search_course(course):
     else:
         return {"error": "Please include a department in your search."}
 
-    final_courses = reg.search({'course_id': id_param})
+    params = {'course_id': id_param}
+
+    if len(course['desc_search']) > 0:
+        params['description'] = course['desc_search']
+    final_courses = reg.search(params)
     return {"courses" : list(final_courses)}
 
 def get_type_search(search_query):
     course = {'courseNumber': '',
               'sectionNumber': '',
-              'dept': ''}
+              'dept': '',
+              'desc_search': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), '', search_query)
-    split = re.split('(\d+)', search_punc)
+    split = search_punc.split()
+    found_desc = False
+    in_desc = False
     for s in split:
         s = s.strip()
-        if s.isalpha() and (len(s) == 4 or len(s) == 3):
+        if s.isalpha() and is_dept(s):
+            in_desc = False
             course['dept'] = s
         elif s.isdigit():
+            in_desc = False
             if (len(s) == 3):
                 course['courseNumber'] = s
             if (len(s) == 6):
                 course['courseNumber'] = s[:3]
                 course['sectionNumber'] = s[-3:]
         else:
-            course['gen_search'] = search_query
+            if not found_desc or in_desc:
+                found_desc = True
+                in_desc = True
+                course['desc_search'] += s
     return course
 
 
@@ -183,12 +364,12 @@ def get_type_search(search_query):
 def search():
     search_query = request.args['q']
     now = datetime.datetime.today()
-    endDay = datetime.datetime(now.year, now.month, now.day + 1)
+    endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
     search_query = search_query.upper()
-    if (db.exists('registrar_query:%s' % search_query)):
-        return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
-    else:
-        query_results = search_course(get_type_search(search_query))
-        db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
-        db.pexpireat('registrar_query:%s' % search_query, endDay)
-        return jsonify(query_results)
+    # if (db.exists('registrar_query:%s' % search_query)):
+    #     return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
+    # else:
+    query_results = search_course(get_type_search(search_query))
+    db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
+    db.pexpireat('registrar_query:%s' % search_query, endDay)
+    return jsonify(query_results)
