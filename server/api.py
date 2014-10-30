@@ -104,13 +104,6 @@ def detail_search():
 
     db.set('directory:search:%s' % (name), json.dumps(final))
     db.pexpireat('directory:search:%s' % (name), month)
-<<<<<<< HEAD
-
-
-=======
-
-
->>>>>>> master
     return jsonify(final)
 
 
