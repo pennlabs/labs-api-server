@@ -48,7 +48,7 @@ def retrieve_weekly_menu(venue_id):
 @app.route('/dining/daily_menu/<venue_id>', methods=['GET'])
 def retrieve_daily_menu(venue_id):
     now = datetime.datetime.today()
-    endDay = datetime.datetime(now.year, now.month, now.day + 1)
+    endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
     venue_id = venue_id
     if (db.exists("dining:venues:daily:%s" % (venue_id))):
         return jsonify(json.loads(db.get("dining:venues:daily:%s" % (venue_id))))
@@ -69,12 +69,9 @@ def detail_search():
     arr = name.split()
     params = []
 
-    person = penn_dir.search({'last_name':'Wissmann'})['result_data']
-    print person
 
-
-    # if (db.exists("directory:search:%s" % (name))):
-    #     return jsonify(json.loads(db.get("directory:search:%s" % (name))))
+    if (db.exists("directory:search:%s" % (name))):
+      return jsonify(json.loads(db.get("directory:search:%s" % (name))))
 
     if len(arr) > 1:
 
@@ -92,10 +89,7 @@ def detail_search():
     ids = set()
     final = []
     for param in params:
-        print param
         data = penn_dir.search(param)
-        print "------------------"
-        print data
         for result in data['result_data']:
             person_id = result['person_id']
             if person_id not in ids:
@@ -292,8 +286,6 @@ def is_dept(keyword):
       "WRIT" : "Writing Program",
       "YDSH" : "Yiddish"
     }
-    print depts.keys()
-    print keyword.upper()
     return keyword.upper() in depts.keys()
 
 
@@ -340,15 +332,11 @@ def get_type_search(search_query):
               'dept': '',
               'desc_search': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), '', search_query)
-    print search_punc
     split = search_punc.split()
-    print split
     found_desc = False
     in_desc = False
     for s in split:
         s = s.strip()
-        print s
-        print is_dept(s)
         if s.isalpha() and is_dept(s):
             in_desc = False
             course['dept'] = s
@@ -371,7 +359,7 @@ def get_type_search(search_query):
 def search():
     search_query = request.args['q']
     now = datetime.datetime.today()
-    endDay = datetime.datetime(now.year, now.month, now.day + 1)
+    endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
     search_query = search_query.upper()
     # if (db.exists('registrar_query:%s' % search_query)):
     #     return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
