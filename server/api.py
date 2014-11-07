@@ -329,8 +329,12 @@ def get_type_search(search_query):
               'sectionNumber': '',
               'dept': '',
               'desc_search': ''}
-    search_punc = re.sub('[%s]' % re.escape(string.punctuation), '', search_query)
-    split = search_punc.split()
+    search_punc = re.sub('[%s]' % re.escape(string.punctuation), ' ', search_query)
+    print search_punc
+    def repl(matchobj):
+        return matchobj.group(0)[0] + " " + matchobj.group(0)[1]
+    search_presplit = re.sub('(\d[a-zA-z]|[a-zA-z]\d)', repl, search_punc)
+    split = search_presplit.split()
     found_desc = False
     in_desc = False
     for s in split:
