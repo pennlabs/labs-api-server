@@ -19,7 +19,8 @@ penn_dir = directory.Directory("UPENN_OD_emxM_1000904", "t4ii5rdud602n63ln2h1ld2
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     now = datetime.datetime.today()
-    td = datetime.timedelta(days = 30)
+    daysTillWeek = 6 - now.weekday()
+    td = datetime.timedelta(days = daysTillWeek)
     month = now + td
     if (db.exists('dining:venues')):
         return jsonify(json.loads(db.get('dining:venues')))
@@ -305,22 +306,21 @@ def get_serializable_course(course):
     }
 
 def search_course(course):
-    d = {key: value for key, value in course.iteritems()
-         if value and key != 'desc_search'}
-    id_param = ""
+    params = dict()
     if len(course.get('dept', '')) > 0:
+        id_param = ""
         id_param += course.get('dept').lower()
         if len(course.get('courseNumber', '')) > 0:
             id_param += "-" + course.get('courseNumber').lower()
             if len(course.get('sectionNumber', '')) > 0:
                 id_param += course.get('sectionNumber').lower()
-    else:
-        return {"error": "Please include a department in your search."}
-
-    params = {'course_id': id_param}
+        params['course_id'] = id_param
 
     if len(course['desc_search']) > 0:
         params['description'] = course['desc_search']
+
+    if len(params) == 0:
+      return None
     final_courses = reg.search(params)
     return {"courses" : list(final_courses)}
 
@@ -335,9 +335,9 @@ def get_type_search(search_query):
     in_desc = False
     for s in split:
         s = s.strip()
-        if s.isalpha() and is_dept(s):
+        if s.isalpha() and is_dept(s.upper()):
             in_desc = False
-            course['dept'] = s
+            course['dept'] = s.upper()
         elif s.isdigit():
             in_desc = False
             if (len(s) == 3):
@@ -349,7 +349,11 @@ def get_type_search(search_query):
             if not found_desc or in_desc:
                 found_desc = True
                 in_desc = True
-                course['desc_search'] += s
+                if len(course['desc_search']) == 0:
+                    course['desc_search'] = s
+                else:
+                    course['desc_search'] += " " + s
+    print course
     return course
 
 
@@ -358,11 +362,12 @@ def search():
     search_query = request.args['q']
     now = datetime.datetime.today()
     endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
-    search_query = search_query.upper()
     # if (db.exists('registrar_query:%s' % search_query)):
     #     return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
     # else:
     query_results = search_course(get_type_search(search_query))
+    if query_results is None:
+        return jsonify({"Error": "The search query could not be processed"})
     db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
     db.pexpireat('registrar_query:%s' % search_query, endDay)
     return jsonify(query_results)
