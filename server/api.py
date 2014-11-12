@@ -22,6 +22,7 @@ def retrieve_venues():
     daysTillWeek = 6 - now.weekday()
     td = datetime.timedelta(days = daysTillWeek)
     month = now + td
+    month.replace(hour=23, minute=59, second=59)
     if (db.exists('dining:venues')):
         return jsonify(json.loads(db.get('dining:venues')))
     else:
