@@ -82,7 +82,6 @@ def detail_search():
     else:
         params = [{'last_name':name},{'first_name':name}]
 
-    print params
     ids = set()
     final = []
     for param in params:
@@ -364,10 +363,10 @@ def search():
     search_query = request.args['q']
     now = datetime.datetime.today()
     endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
-    # if (db.exists('registrar_query:%s' % search_query)):
-    #     return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
-    # else:
-    query_results = search_course(get_type_search(search_query))
+    if (db.exists('registrar_query:%s' % search_query)):
+        return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
+    else:
+      query_results = search_course(get_type_search(search_query))
     if query_results is None:
         return jsonify({"Error": "The search query could not be processed"})
     db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
