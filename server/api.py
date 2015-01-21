@@ -327,7 +327,6 @@ def get_type_search(search_query):
               'dept': '',
               'desc_search': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), ' ', search_query)
-    print search_punc
     def repl(matchobj):
         return matchobj.group(0)[0] + " " + matchobj.group(0)[1]
     search_presplit = re.sub('(\d[a-zA-z]|[a-zA-z]\d)', repl, search_punc)
@@ -354,7 +353,6 @@ def get_type_search(search_query):
                     course['desc_search'] = s
                 else:
                     course['desc_search'] += " " + s
-    print course
     return course
 
 
@@ -366,9 +364,18 @@ def search():
     if (db.exists('registrar_query:%s' % search_query)):
         return jsonify(json.loads(db.get('registrar_query:%s' % search_query)))
     else:
-      query_results = search_course(get_type_search(search_query))
+        query_results = search_course(get_type_search(search_query))
     if query_results is None:
         return jsonify({"Error": "The search query could not be processed"})
     db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
     db.pexpireat('registrar_query:%s' % search_query, endDay)
     return jsonify(query_results)
+
+@app.route('/buildings/<building_code>', methods=['GET'])
+def building(building_code):
+    if db.exists("buildings:%s" % (building_code)):
+        building_info = db.get("buildings:%s" % (building_code))
+        return jsonify(json.loads(building_info))
+    else:
+        return None
+
