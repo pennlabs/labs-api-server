@@ -9,12 +9,13 @@ import re
 import requests
 from penndata import *
 
+
 # Dining API
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days = daysTillWeek)
+    td = datetime.timedelta(days=daysTillWeek)
     month = now + td
     month.replace(hour=23, minute=59, second=59)
     if (db.exists('dining:venues')):
@@ -30,7 +31,7 @@ def retrieve_venues():
 def retrieve_weekly_menu(venue_id):
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
-    endWeek = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=daysTillWeek);
+    endWeek = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=daysTillWeek)
     venue_id = venue_id
     if (db.exists("dining:venues:weekly:%s" % (venue_id))):
         return jsonify(json.loads(db.get("dining:venues:weekly:%s" % (venue_id))))
@@ -59,7 +60,7 @@ def retrieve_daily_menu(venue_id):
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
 
-    if not request.args.has_key('name'):
+    if "name" not in request.args:
         return jsonify({"error": "Please specify search parameters in the query string"})
 
     name = request.args['name']
@@ -72,15 +73,15 @@ def detail_search():
     if len(arr) > 1:
 
         if arr[0][-1] == ',':
-            params = [{'last_name':arr[0][:-1], 'first_name':arr[1]}]
+            params = [{'last_name': arr[0][:-1], 'first_name': arr[1]}]
         else:
             params = [
-                {'last_name':arr[-1], 'first_name':arr[0]},
-                {'last_name':arr[0], 'first_name':arr[-1]}
+                {'last_name': arr[-1], 'first_name': arr[0]},
+                {'last_name': arr[0], 'first_name': arr[-1]}
             ]
 
     else:
-        params = [{'last_name':name},{'first_name':name}]
+        params = [{'last_name': name}, {'first_name': name}]
 
     ids = set()
     final = []
@@ -95,10 +96,10 @@ def detail_search():
                 ids.add(person_id)
 
     now = datetime.datetime.today()
-    td = datetime.timedelta(days = 30)
+    td = datetime.timedelta(days=30)
     month = now + td
 
-    final = {'result_data':final}
+    final = {'result_data': final}
 
     db.set('directory:search:%s' % (name), json.dumps(final))
     db.pexpireat('directory:search:%s' % (name), month)
@@ -108,7 +109,7 @@ def detail_search():
 @app.route('/directory/person/<person_id>', methods=['GET'])
 def person_details(person_id):
     now = datetime.datetime.today()
-    td = datetime.timedelta(days = 30)
+    td = datetime.timedelta(days=30)
     month = now + td
     if (db.exists("directory:person:%s" % (person_id))):
         return jsonify(json.loads(db.get("directory:person:%s" % (person_id))))
@@ -118,169 +119,170 @@ def person_details(person_id):
         db.pexpireat('directory:person:%s' % (person_id), month)
         return jsonify(data["result_data"][0])
 
+
 def is_dept(keyword):
     depts = {
-      "AAMW" : "Art & Arch of Med. World",
-      "ACCT" : "Accounting",
-      "AFRC" : "Africana Studies",
-      "AFST" : "African Studies Program",
-      "ALAN" : "Asian Languages",
-      "AMCS" : "Applied Math & Computatnl Sci.",
-      "ANAT" : "Anatomy",
-      "ANCH" : "Ancient History",
-      "ANEL" : "Ancient Near East Languages",
-      "ANTH" : "Anthropology",
-      "ARAB" : "Arabic",
-      "ARCH" : "Architecture",
-      "ARTH" : "Art History",
-      "ASAM" : "Asian American Studies",
-      "ASTR" : "Astronomy",
-      "BCHE" : "Biochemistry (Undergrads)",
-      "BE" : "Bioengineering",
-      "BENG" : "Bengali",
-      "BEPP" : "Business Econ & Public Policy",
-      "BFMD" : "Benjamin Franklin Seminars-Med",
-      "BIBB" : "Biological Basis of Behavior",
-      "BIOE" : "Bioethics",
-      "BIOL" : "Biology",
-      "BIOM" : "Biomedical Studies",
-      "BMB" : "Biochemistry & Molecular Biophy",
-      "BSTA" : "Biostatistics",
-      "CAMB" : "Cell and Molecular Biology",
-      "CBE" : "Chemical & Biomolecular Engr",
-      "CHEM" : "Chemistry",
-      "CHIN" : "Chinese",
-      "CINE" : "Cinema Studies",
-      "CIS" : "Computer and Information Sci",
-      "CIT" : "Computer and Information Tech",
-      "CLST" : "Classical Studies",
-      "COGS" : "Cognitive Science",
-      "COLL" : "College",
-      "COML" : "Comparative Literature",
-      "COMM" : "Communications",
-      "CPLN" : "City Planning",
-      "CRIM" : "Criminology",
-      "DEMG" : "Demography",
-      "DORT" : "Orthodontics",
-      "DOSP" : "Oral Surgery and Pharmacology",
-      "DPED" : "Pediatric Dentistry",
-      "DRST" : "Restorative Dentistry",
-      "DTCH" : "Dutch",
-      "DYNM" : "Organizational Dynamics",
-      "EALC" : "East Asian Languages & Civilztn",
-      "EAS" : "Engineering & Applied Science",
-      "ECON" : "Economics",
-      "EDUC" : "Education",
-      "EEUR" : "East European",
-      "ENGL" : "English",
-      "ENGR" : "Engineering",
-      "ENM" : "Engineering Mathematics",
-      "ENVS" : "Environmental Studies",
-      "EPID" : "Epidemiology",
-      "ESE" : "Electric & Systems Engineering",
-      "FNAR" : "Fine Arts",
-      "FNCE" : "Finance",
-      "FOLK" : "Folklore",
-      "FREN" : "French",
-      "FRSM" : "Non-Sas Freshman Seminar",
-      "GAFL" : "Government Administration",
-      "GAS" : "Graduate Arts & Sciences",
-      "GCB" : "Genomics & Comp. Biology",
-      "GEOL" : "Geology",
-      "GREK" : "Greek",
-      "GRMN" : "Germanic Languages",
-      "GSWS" : "Gender,Sexuality & Women's Stud",
-      "GUJR" : "Gujarati",
-      "HCMG" : "Health Care Management",
-      "HEBR" : "Hebrew",
-      "HIND" : "Hindi",
-      "HIST" : "History",
-      "HPR" : "Health Policy Research",
-      "HSOC" : "Health & Societies",
-      "HSPV" : "Historic Preservation",
-      "HSSC" : "History & Sociology of Science",
-      "IMUN" : "Immunology",
-      "INTG" : "Integrated Studies",
-      "INTL" : "International Programs",
-      "INTR" : "International Relations",
-      "IPD" : "Integrated Product Design",
-      "ITAL" : "Italian",
-      "JPAN" : "Japanese",
-      "JWST" : "Jewish Studies Program",
-      "KORN" : "Korean",
-      "LALS" : "Latin American & Latino Studies",
-      "LARP" : "Landscape Arch & Regional Plan",
-      "LATN" : "Latin",
-      "LAW" : "Law",
-      "LGIC" : "Logic, Information and Comp.",
-      "LGST" : "Legal Studies & Business Ethics",
-      "LING" : "Linguistics",
-      "LSMP" : "Life Sciences Management Prog",
-      "MAPP" : "Master of Applied Positive Psyc",
-      "MATH" : "Mathematics",
-      "MEAM" : "Mech Engr and Applied Mech",
-      "MED" : "Medical",
-      "MGEC" : "Management of Economics",
-      "MGMT" : "Management",
-      "MKTG" : "Marketing",
-      "MLA" : "Master of Liberal Arts Program",
-      "MLYM" : "Malayalam",
-      "MMP" : "Master of Medical Physics",
-      "MSCI" : "Military Science",
-      "MSE" : "Materials Science and Engineer",
-      "MSSP" : "Social Policy",
-      "MTR" : "Mstr Sci Transltl Research",
-      "MUSA" : "Master of Urban Spatial Analyt",
-      "MUSC" : "Music",
-      "NANO" : "Nanotechnology",
-      "NELC" : "Near Eastern Languages & Civlzt",
-      "NETS" : "Networked and Social Systems",
-      "NGG" : "Neuroscience",
-      "NPLD" : "Nonprofit Leadership",
-      "NSCI" : "Naval Science",
-      "NURS" : "Nursing",
-      "OPIM" : "Operations and Information Mgmt",
-      "PERS" : "Persian",
-      "PHIL" : "Philosophy",
-      "PHRM" : "Pharmacology",
-      "PHYS" : "Physics",
-      "PPE" : "Philosophy, Politics, Economics",
-      "PRTG" : "Portuguese",
-      "PSCI" : "Political Science",
-      "PSYC" : "Psychology",
-      "PUBH" : "Public Health Studies",
-      "PUNJ" : "Punjabi",
-      "REAL" : "Real Estate",
-      "RELS" : "Religious Studies",
-      "ROML" : "Romance Languages",
-      "RUSS" : "Russian",
-      "SAST" : "South Asia Studies",
-      "SCND" : "Scandinavian",
-      "SKRT" : "Sanskrit",
-      "SLAV" : "Slavic",
-      "SOCI" : "Sociology",
-      "SPAN" : "Spanish",
-      "STAT" : "Statistics",
-      "STSC" : "Science, Technology & Society",
-      "SWRK" : "Social Work",
-      "TAML" : "Tamil",
-      "TCOM" : "Telecommunications & Networking",
-      "TELU" : "Telugu",
-      "THAR" : "Theatre Arts",
-      "TURK" : "Turkish",
-      "URBS" : "Urban Studies",
-      "URDU" : "Urdu",
-      "VCSN" : "Clinical Studies - Nbc Elect",
-      "VCSP" : "Clinical Studies - Phila Elect",
-      "VIPR" : "Viper",
-      "VISR" : "Vet School Ind Study & Research",
-      "VLST" : "Visual Studies",
-      "VMED" : "Csp/Csn Medicine Courses",
-      "WH" : "Wharton Undergraduate",
-      "WHCP" : "Wharton Communication Pgm",
-      "WHG" : "Wharton Graduate",
-      "WRIT" : "Writing Program",
-      "YDSH" : "Yiddish"
+      "AAMW": "Art & Arch of Med. World",
+      "ACCT": "Accounting",
+      "AFRC": "Africana Studies",
+      "AFST": "African Studies Program",
+      "ALAN": "Asian Languages",
+      "AMCS": "Applied Math & Computatnl Sci.",
+      "ANAT": "Anatomy",
+      "ANCH": "Ancient History",
+      "ANEL": "Ancient Near East Languages",
+      "ANTH": "Anthropology",
+      "ARAB": "Arabic",
+      "ARCH": "Architecture",
+      "ARTH": "Art History",
+      "ASAM": "Asian American Studies",
+      "ASTR": "Astronomy",
+      "BCHE": "Biochemistry (Undergrads)",
+      "BE": "Bioengineering",
+      "BENG": "Bengali",
+      "BEPP": "Business Econ & Public Policy",
+      "BFMD": "Benjamin Franklin Seminars-Med",
+      "BIBB": "Biological Basis of Behavior",
+      "BIOE": "Bioethics",
+      "BIOL": "Biology",
+      "BIOM": "Biomedical Studies",
+      "BMB": "Biochemistry & Molecular Biophy",
+      "BSTA": "Biostatistics",
+      "CAMB": "Cell and Molecular Biology",
+      "CBE": "Chemical & Biomolecular Engr",
+      "CHEM": "Chemistry",
+      "CHIN": "Chinese",
+      "CINE": "Cinema Studies",
+      "CIS": "Computer and Information Sci",
+      "CIT": "Computer and Information Tech",
+      "CLST": "Classical Studies",
+      "COGS": "Cognitive Science",
+      "COLL": "College",
+      "COML": "Comparative Literature",
+      "COMM": "Communications",
+      "CPLN": "City Planning",
+      "CRIM": "Criminology",
+      "DEMG": "Demography",
+      "DORT": "Orthodontics",
+      "DOSP": "Oral Surgery and Pharmacology",
+      "DPED": "Pediatric Dentistry",
+      "DRST": "Restorative Dentistry",
+      "DTCH": "Dutch",
+      "DYNM": "Organizational Dynamics",
+      "EALC": "East Asian Languages & Civilztn",
+      "EAS": "Engineering & Applied Science",
+      "ECON": "Economics",
+      "EDUC": "Education",
+      "EEUR": "East European",
+      "ENGL": "English",
+      "ENGR": "Engineering",
+      "ENM": "Engineering Mathematics",
+      "ENVS": "Environmental Studies",
+      "EPID": "Epidemiology",
+      "ESE": "Electric & Systems Engineering",
+      "FNAR": "Fine Arts",
+      "FNCE": "Finance",
+      "FOLK": "Folklore",
+      "FREN": "French",
+      "FRSM": "Non-Sas Freshman Seminar",
+      "GAFL": "Government Administration",
+      "GAS": "Graduate Arts & Sciences",
+      "GCB": "Genomics & Comp. Biology",
+      "GEOL": "Geology",
+      "GREK": "Greek",
+      "GRMN": "Germanic Languages",
+      "GSWS": "Gender,Sexuality & Women's Stud",
+      "GUJR": "Gujarati",
+      "HCMG": "Health Care Management",
+      "HEBR": "Hebrew",
+      "HIND": "Hindi",
+      "HIST": "History",
+      "HPR": "Health Policy Research",
+      "HSOC": "Health & Societies",
+      "HSPV": "Historic Preservation",
+      "HSSC": "History & Sociology of Science",
+      "IMUN": "Immunology",
+      "INTG": "Integrated Studies",
+      "INTL": "International Programs",
+      "INTR": "International Relations",
+      "IPD": "Integrated Product Design",
+      "ITAL": "Italian",
+      "JPAN": "Japanese",
+      "JWST": "Jewish Studies Program",
+      "KORN": "Korean",
+      "LALS": "Latin American & Latino Studies",
+      "LARP": "Landscape Arch & Regional Plan",
+      "LATN": "Latin",
+      "LAW": "Law",
+      "LGIC": "Logic, Information and Comp.",
+      "LGST": "Legal Studies & Business Ethics",
+      "LING": "Linguistics",
+      "LSMP": "Life Sciences Management Prog",
+      "MAPP": "Master of Applied Positive Psyc",
+      "MATH": "Mathematics",
+      "MEAM": "Mech Engr and Applied Mech",
+      "MED": "Medical",
+      "MGEC": "Management of Economics",
+      "MGMT": "Management",
+      "MKTG": "Marketing",
+      "MLA": "Master of Liberal Arts Program",
+      "MLYM": "Malayalam",
+      "MMP": "Master of Medical Physics",
+      "MSCI": "Military Science",
+      "MSE": "Materials Science and Engineer",
+      "MSSP": "Social Policy",
+      "MTR": "Mstr Sci Transltl Research",
+      "MUSA": "Master of Urban Spatial Analyt",
+      "MUSC": "Music",
+      "NANO": "Nanotechnology",
+      "NELC": "Near Eastern Languages & Civlzt",
+      "NETS": "Networked and Social Systems",
+      "NGG": "Neuroscience",
+      "NPLD": "Nonprofit Leadership",
+      "NSCI": "Naval Science",
+      "NURS": "Nursing",
+      "OPIM": "Operations and Information Mgmt",
+      "PERS": "Persian",
+      "PHIL": "Philosophy",
+      "PHRM": "Pharmacology",
+      "PHYS": "Physics",
+      "PPE": "Philosophy, Politics, Economics",
+      "PRTG": "Portuguese",
+      "PSCI": "Political Science",
+      "PSYC": "Psychology",
+      "PUBH": "Public Health Studies",
+      "PUNJ": "Punjabi",
+      "REAL": "Real Estate",
+      "RELS": "Religious Studies",
+      "ROML": "Romance Languages",
+      "RUSS": "Russian",
+      "SAST": "South Asia Studies",
+      "SCND": "Scandinavian",
+      "SKRT": "Sanskrit",
+      "SLAV": "Slavic",
+      "SOCI": "Sociology",
+      "SPAN": "Spanish",
+      "STAT": "Statistics",
+      "STSC": "Science, Technology & Society",
+      "SWRK": "Social Work",
+      "TAML": "Tamil",
+      "TCOM": "Telecommunications & Networking",
+      "TELU": "Telugu",
+      "THAR": "Theatre Arts",
+      "TURK": "Turkish",
+      "URBS": "Urban Studies",
+      "URDU": "Urdu",
+      "VCSN": "Clinical Studies - Nbc Elect",
+      "VCSP": "Clinical Studies - Phila Elect",
+      "VIPR": "Viper",
+      "VISR": "Vet School Ind Study & Research",
+      "VLST": "Visual Studies",
+      "VMED": "Csp/Csn Medicine Courses",
+      "WH": "Wharton Undergraduate",
+      "WHCP": "Wharton Communication Pgm",
+      "WHG": "Wharton Graduate",
+      "WRIT": "Writing Program",
+      "YDSH": "Yiddish"
     }
     return keyword.upper() in depts.keys()
 
@@ -302,6 +304,7 @@ def get_serializable_course(course):
         'prof': course.get('prof')
     }
 
+
 def search_course(course):
     params = dict()
     if len(course.get('dept', '')) > 0:
@@ -319,7 +322,8 @@ def search_course(course):
     if len(params) == 0:
       return None
     final_courses = reg.search(params)
-    return {"courses" : list(final_courses)}
+    return {"courses": list(final_courses)}
+
 
 def get_type_search(search_query):
     course = {'courseNumber': '',
@@ -327,6 +331,7 @@ def get_type_search(search_query):
               'dept': '',
               'desc_search': ''}
     search_punc = re.sub('[%s]' % re.escape(string.punctuation), ' ', search_query)
+
     def repl(matchobj):
         return matchobj.group(0)[0] + " " + matchobj.group(0)[1]
     search_presplit = re.sub('(\d[a-zA-z]|[a-zA-z]\d)', repl, search_punc)
@@ -367,9 +372,10 @@ def search():
         query_results = search_course(get_type_search(search_query))
     if query_results is None:
         return jsonify({"Error": "The search query could not be processed"})
-    db.set('registrar_query:%s' % search_query,  json.dumps(query_results))
+    db.set('registrar_query:%s' % search_query, json.dumps(query_results))
     db.pexpireat('registrar_query:%s' % search_query, endDay)
     return jsonify(query_results)
+
 
 @app.route('/buildings/<building_code>', methods=['GET'])
 def building(building_code):
@@ -378,4 +384,3 @@ def building(building_code):
         return jsonify(json.loads(building_info))
     else:
         return None
-

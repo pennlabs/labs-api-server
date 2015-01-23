@@ -3,11 +3,12 @@ from server.penndata import *
 import server.api
 import json
 
+
 class MobileAppApiTests(unittest.TestCase):
 
   def testVenues(self):
     with server.api.app.test_request_context():
-    # Simple test. Did the request go through?
+      # Simple test. Did the request go through?
       venue_data = server.api.retrieve_venues()
       venue_dict = json.loads(venue_data.data)
       venues = venue_dict['document']['venue']
@@ -17,19 +18,22 @@ class MobileAppApiTests(unittest.TestCase):
     with server.api.app.test_request_context():
       menu_res = server.api.retrieve_weekly_menu('593')
       menu_dict = json.loads(menu_res.data)
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertEquals("University of Pennsylvania 1920 Commons",
+                        menu_dict["Document"]["location"])
 
   def testDailyMenu(self):
     with server.api.app.test_request_context():
       menu_res = server.api.retrieve_daily_menu('593')
       menu_dict = json.loads(menu_res.data)
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertEquals("University of Pennsylvania 1920 Commons",
+                        menu_dict["Document"]["location"])
 
   def testDirectorySearch(self):
     with server.api.app.test_request_context('/?name=Zdancewic'):
       res = server.api.detail_search()
       steve = json.loads(res.data)
-      self.assertEquals("stevez@cis.upenn.edu", steve["result_data"][0]["list_email"])
+      self.assertEquals("stevez@cis.upenn.edu",
+                        steve["result_data"][0]["list_email"])
 
   def testPersonDetails(self):
     with server.api.app.test_request_context():
