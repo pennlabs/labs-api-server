@@ -36,6 +36,8 @@ def retrieve_weekly_menu(venue_id):
         return jsonify(json.loads(db.get("dining:venues:weekly:%s" % (venue_id))))
     else:
         menu = din.menu_weekly(venue_id)
+        if venue_id == "638":
+          menu["result_data"]["Document"]["location"] = "Kosher Dining at Falk"
         db.set('dining:venues:weekly:%s' % (venue_id), json.dumps(menu["result_data"]))
         db.pexpireat('dining:venues:weekly:%s' % (venue_id), endWeek)
         return jsonify(menu["result_data"])
