@@ -51,5 +51,11 @@ class MobileAppApiTests(unittest.TestCase):
       for val in course_data["courses"]:
         self.assertEquals("CIS", val["course_department"])
 
+  def testBuildingSearch(self):
+    with server.api.app.test_request_context("/?q=Ware"):
+      res = server.api.building_search()
+      building_data = json.loads(res.data)
+      self.assertEquals(building_data["result_data"][0]["city"], "Philadelphia")
+
 if __name__ == '__main__':
   unittest.main()
