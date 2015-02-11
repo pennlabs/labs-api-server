@@ -381,3 +381,17 @@ def building(building_code):
     else:
         return None
 
+@app.route('/buildings/search', methods=['GET'])
+def building_search():
+    search_query = request.args['q']
+    now = datetime.datetime.today()
+    endMonth = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=30)
+    if (db.exists('building_search:%s' % search_query)):
+        return jsonify(json.loads(db.get('building_search:%s' % search_query)))
+    else:
+        query_results = map_search.search(search_query)
+    if query_results is None:
+        return jsonify({"Error": "The search query could not be processed"})
+    db.set('building_search:%s' % search_query,  json.dumps(query_results))
+    db.pexpireat('building_search:%s' % search_query, endMonth)
+    return jsonify(query_results)
