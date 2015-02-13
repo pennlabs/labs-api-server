@@ -57,5 +57,10 @@ class MobileAppApiTests(unittest.TestCase):
       building_data = json.loads(res.data)
       self.assertEquals(building_data["result_data"][0]["city"], "Philadelphia")
 
+  def testStopInventory(self):
+    with server.api.app.test_request_context():
+      res = json.loads(server.api.transit_stops().data)
+      self.assertTrue(len(res["result_data"]) > 0)
+
 if __name__ == '__main__':
   unittest.main()
