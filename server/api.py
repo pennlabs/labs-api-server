@@ -275,20 +275,20 @@ def fastest_route():
         if route not in route_dict:
           route_dict[route] = {
             'minFrom': distFrom,
-            'fromStop': stop['BusStopName'],
+            'fromStop': stop,
             'fromOrder': order,
             'minTo': distTo,
-            'toStop': stop['BusStopName'],
+            'toStop': stop,
             'toOrder': order
           }
         else:
           if distFrom < route_dict[route]['minFrom']:
             route_dict[route]['minFrom'] = distFrom
-            route_dict[route]['fromStop'] = stop['BusStopName']
+            route_dict[route]['fromStop'] = stop
             route_dict[route]['fromOrder'] = order
           elif distTo < route_dict[route]['minTo']:
             route_dict[route]['minTo'] = distTo
-            route_dict[route]['toStop'] = stop['BusStopName']
+            route_dict[route]['toStop'] = stop
             route_dict[route]['toOrder'] = order
 
   # Filter out route suggestions going the wrong way
