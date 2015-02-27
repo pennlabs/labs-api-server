@@ -52,10 +52,10 @@ class MobileAppApiTests(unittest.TestCase):
         self.assertEquals("CIS", val["course_department"])
 
   def testBuildingSearch(self):
-    with server.api.app.test_request_context("/?q=Ware"):
+    with server.api.app.test_request_context("/?q=Towne"):
       res = server.api.building_search()
       building_data = json.loads(res.data)
-      self.assertEquals(building_data["result_data"][0]["city"], "Philadelphia")
+      self.assertEquals(building_data["result_data"][0]["title"], "Towne")
 
   def testStopInventory(self):
     with server.api.app.test_request_context():
