@@ -62,5 +62,11 @@ class MobileAppApiTests(unittest.TestCase):
       res = json.loads(server.api.transit_stops().data)
       self.assertTrue(len(res["result_data"]) > 0)
 
+  def testBasicRouting(self):
+    with server.api.app.test_request_context("/?latFrom=39.9546024&lonFrom=-75.1838311&latTo=39.9538555&lonTo=-75.2200868"):
+      res = json.loads(server.api.fastest_route().data)
+      self.assertEquals("DRL, 200 S 33rd St.", res['fromStop']['BusStopName'])
+      self.assertEquals("48th & Spruce", res['toStop']['BusStopName'])
+
 if __name__ == '__main__':
   unittest.main()
