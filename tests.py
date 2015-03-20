@@ -67,5 +67,15 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertEquals("DRL, 200 S 33rd St.", res['fromStop']['BusStopName'])
       self.assertEquals("48th & Spruce", res['toStop']['BusStopName'])
 
+  def testLaundryAllHalls(self):
+    with server.app.test_request_context():
+      res = json.loads(server.laundry.all_halls().data)
+      self.assertEquals(res['DuBois House']['hall_no'], 1)
+
+  def testLaundryOneHall(self):
+    with server.app.test_request_context():
+      res = json.loads(server.laundry.hall(26).data)
+      self.assertEquals(res['hall_name'], 'Harrison-24th FL')
+
 if __name__ == '__main__':
   unittest.main()

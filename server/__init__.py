@@ -13,6 +13,7 @@ import server.transit
 import server.dining
 import server.buildings
 import server.directory
+import server.laundry
 
 if __name__ == '__main__':
     app.run(debug=True)
