@@ -11,6 +11,76 @@ Setup
 * Install requirements using `pip install requirements.txt`
 * Run mobile API server with `python runserver.py`
 
+## Buildings
+
+### Search
+Use a word or phrase to search for a Penn building
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/buildings/search</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                            <th>Example Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                          <td><tt>q</tt></td>
+                          <td><strong>Required</strong></td>
+                          <td>The building search query</td>
+                          <td><tt>Harrison</tt>, <tt>Levine Hall</tt></td>
+                      </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### By Building Code
+Return the building corresponding to the given code
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/buildings/{building_code}</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+
 ## Dining
 
 ### Venues
@@ -20,7 +90,7 @@ Return a list of all dining venues
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/dining/venues</code></td>
+            <td><code>http://api.pennlabs.org/dining/venues</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -44,7 +114,7 @@ Return the week's menus for the venue with venue_id
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/dining/weekly_menu/{venue_id}</code></td>
+            <td><code>http://api.pennlabs.org/dining/weekly_menu/{venue_id}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -68,7 +138,7 @@ Return the daily menu for the venue with venue_id
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/dining/daily_menu/{venue_id}</td>
+            <td><code>http://api.pennlabs.org/dining/daily_menu/{venue_id}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -94,7 +164,7 @@ Search by name in the Penn Directory
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/directory/search</td>
+            <td><code>http://api.pennlabs.org/directory/search</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -132,16 +202,16 @@ Search by name in the Penn Directory
 
 #### Example
 
-GET: `http://api.pennlabs.org:5000/directory/search?name=Alex%20Wissmann`
+GET: `http://api.pennlabs.org/directory/search?name=Alex%20Wissmann`
 
-### Person
+### Person By ID
 Return the person with person_id
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/directory/person/{person_id}</td>
+            <td><code>http://api.pennlabs.org/directory/person/{person_id}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -167,7 +237,7 @@ Search for courses by Department, Course Number, and Section
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org:5000/registrar/search</td>
+            <td><code>http://api.pennlabs.org/registrar/search</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -205,4 +275,140 @@ Search for courses by Department, Course Number, and Section
 
 #### Example
 
-GET: `http://api.pennlabs.org:5000/registrar/search?q=cis-110`
+GET: `http://api.pennlabs.org/registrar/search?q=cis-110`
+
+## Laundry
+
+### All Halls
+Return information on all laundry rooms
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/directory/laundry/halls</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### Hall by hall_no
+Get information for a specific room by the hall_no. hall_no is given in the All Halls response.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/directory/laundry/hall/{hall_no}</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+## Transit
+
+### Routing
+Finds a route, from all Penn Transit routes, which provides the shortest total walking distance to get from (latFrom, lonFrom) to (latTo, lonTo). If there is no path with a shorter walking distance than the total distance, an error is returned.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/transit/routing</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                          <td><tt>latFrom</tt></td>
+                          <td><strong>Required</strong></td>
+                          <td>Starting Latitude</td>
+                      </tr>
+                      <tr>
+                          <td><tt>lonFrom</tt></td>
+                          <td><strong>Required</strong></td>
+                          <td>Starting Longitude</td>
+                      </tr>
+                      <tr>
+                          <td><tt>latTo</tt></td>
+                          <td><strong>Required</strong></td>
+                          <td>Ending Latitude</td>
+                      </tr>
+                      <tr>
+                          <td><tt>lonTo</tt></td>
+                          <td><strong>Required</strong></td>
+                          <td>Ending Longitude</td>
+                      </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+#### Example
+
+GET: `http://api.pennlabs.org/transit/routing?latFrom=39.9533568&lonFrom=-75.2161194&latTo=39.9495731&lonTo=-75.12924031`
+
+### Stops
+Get information on all stops
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/transit/stops</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
