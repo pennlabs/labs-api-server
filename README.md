@@ -412,3 +412,27 @@ Get information on all stops
         </tr>
     </tbody>
 </table>
+
+### Routes
+Get information on all routes. This has the same information as the stops endpoint, but is indexed by route.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/transit/routes</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
