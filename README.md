@@ -330,7 +330,7 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
 ## Transit
 
 ### Routing
-Finds a route, from all Penn Transit routes, which provides the shortest total walking distance to get from (latFrom, lonFrom) to (latTo, lonTo). If there is no path with a shorter walking distance than the total distance, an error is returned.
+Finds a route, from all Penn Transit routes, which provides the shortest total walking distance to get from (latFrom, lonFrom) to (latTo, lonTo). If there is no path which shortens the travelers walking distance, an error is returned.
 
 <table>
     <tbody>

@@ -5,24 +5,33 @@ from base import *
 from penndata import *
 from utils import *
 
+
+def get_stop_info():
+  return {'result_data': populate_stop_info(transit.stopinventory())}
+
 @app.route('/transit/stops', methods=['GET'])
 def transit_stops():
   now = datetime.datetime.today()
   endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
-  def get_data():
-    return transit.stopinventory()
 
-  return cached_route('transit:stops', endDay - now, get_data)
+  return cached_route('transit:stops', endDay - now, get_stop_info)
+
+@app.route('/transit/routes', methods=['GET'])
+def transit_routes():
+  now = datetime.datetime.today()
+  endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
+  def get_data():
+    return {'result_data': populate_route_info(transit.stopinventory())}
+
+  return cached_route('transit:routes', endDay - now, get_data)
 
 @app.route('/transit/routing', methods=['GET'])
 def fastest_route():
   now = datetime.datetime.today()
   endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
   def get_data():
-    return transit.stopinventory()
-  stops = cache_get('transit:stops', endDay - now, get_data)
-
-  stop_data = populate_stop_info(stops)
+    return {'result_data': populate_stop_info(transit.stopinventory())}
+  stop_data = cache_get('transit:stops', endDay - now, get_data)
 
   latFrom, lonFrom = float(request.args['latFrom']), float(request.args['lonFrom'])
   latTo, lonTo = float(request.args['latTo']), float(request.args['lonTo'])
@@ -35,9 +44,8 @@ def fastest_route():
       distTo = haversine(lonTo, latTo, float(stop["Longitude"]), float(stop["Latitude"]))
 
       # Update the corresponding closest from and to stops for each route
-      for route_tup in stop['routes']:
-        route = route_tup[0]
-        order = route_tup[1]
+      for route in stop['routes']:
+        order = stop['routes'][route]
 
         if route not in route_dict:
           route_dict[route] = {
@@ -74,8 +82,6 @@ def fastest_route():
     del info['toStop']['routes']
   if 'routes' in info['fromStop']:
     del info['fromStop']['routes']
-  del info['fromOrder']
-  del info['toOrder']
   return jsonify(info)
 
 def populate_stop_info(stops):
@@ -87,14 +93,31 @@ def populate_stop_info(stops):
         for stop in d['Stop']:
           if stop['title'] in stop_dict:
             if 'routes' not in stop_dict[stop['title']]:
-              stop_dict[stop['title']]['routes'] = set()
-            stop_dict[stop['title']]['routes'].add((route['key'], int(stop['stopOrder'])))
+              stop_dict[stop['title']]['routes'] = dict()
+            stop_dict[stop['title']]['routes'][route['key']] = int(stop['stopOrder'])
 
-    for key in stop_dict:
-      if 'routes' in stop_dict[key]:
-        stop_dict[key]['routes'] = list(stop_dict[key]['routes'])
     return stop_dict.values()
   except Exception:
     print "JSON Error in building stops"
     return {}
 
+def populate_route_info(stops):
+  stop_info = cache_get('transit:stops', datetime.timedelta(days=1), get_stop_info)
+  routes = dict()
+  for stop in stop_info['result_data']:
+    if 'routes' in stop:
+      items = stop['routes'].items()
+      del stop['routes']
+      for route_name, val in items:
+        stop["order"] = val
+        if route_name in routes:
+          routes[route_name]['stops'].append(stop)
+        else:
+          routes[route_name] = {
+            'stops': [stop],
+            'name': route_name
+          }
+  route_data = routes.values()
+  for route in route_data:
+    route['stops'] = sorted(route['stops'], key= lambda stop: stop["order"])
+  return route_data

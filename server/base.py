@@ -7,6 +7,7 @@ def cached_route(redis_key, td, func):
 
   data = cache_get(redis_key, td, func)
   secs = int(db.ttl(redis_key))
+  print data
   return make_response(jsonify(data), 200, {'Cache-Control': 'max-age=%d' % secs})
 
 
