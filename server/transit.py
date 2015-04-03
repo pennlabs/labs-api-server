@@ -115,9 +115,7 @@ def populate_route_info(stops):
         else:
           routes[route_name] = {
             'stops': [stop],
-            'name': route_name
           }
-  route_data = routes.values()
-  for route in route_data:
+  for route in routes.values():
     route['stops'] = sorted(route['stops'], key= lambda stop: stop["order"])
-  return route_data
+  return routes
