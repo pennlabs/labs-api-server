@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from server import app
 import datetime
+import copy
 from base import *
 from penndata import *
 from utils import *
@@ -95,7 +96,6 @@ def populate_stop_info(stops):
             if 'routes' not in stop_dict[stop['title']]:
               stop_dict[stop['title']]['routes'] = dict()
             stop_dict[stop['title']]['routes'][route['key']] = int(stop['stopOrder'])
-
     return stop_dict.values()
   except Exception:
     print "JSON Error in building stops"
@@ -106,15 +106,19 @@ def populate_route_info(stops):
   routes = dict()
   for stop in stop_info['result_data']:
     if 'routes' in stop:
+      if stop['BusStopName'] == '20th & Locust St':
+        print stop['routes']
       items = stop['routes'].items()
       del stop['routes']
       for route_name, val in items:
-        stop["order"] = val
+        to_insert = copy.deepcopy(stop)
+        to_insert["order"] = val
+
         if route_name in routes:
-          routes[route_name]['stops'].append(stop)
+          routes[route_name]['stops'].append(to_insert)
         else:
           routes[route_name] = {
-            'stops': [stop],
+            'stops': [to_insert],
           }
   for route in routes.values():
     route['stops'] = sorted(route['stops'], key= lambda stop: stop["order"])
