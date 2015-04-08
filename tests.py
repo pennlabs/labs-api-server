@@ -9,7 +9,9 @@ class MobileAppApiTests(unittest.TestCase):
     # Simple test. Did the request go through?
       venue_data = server.dining.retrieve_venues()
       venue_dict = json.loads(venue_data.data)
-      venues = venue_dict['document']['venue']
+      print venue_dict
+      venues = venue_dict['result_data']['document']['venue']
+      print venues
       self.assertTrue(len(venues[0]['venueType']) > 0)
 
   def testDiningWeeklyMenu(self):
@@ -70,7 +72,7 @@ class MobileAppApiTests(unittest.TestCase):
   def testLaundryAllHalls(self):
     with server.app.test_request_context():
       res = json.loads(server.laundry.all_halls().data)
-      self.assertEquals(res['DuBois House']['hall_no'], 1)
+      self.assertEquals(res['halls'][0]['hall_no'], 1)
 
   def testLaundryOneHall(self):
     with server.app.test_request_context():

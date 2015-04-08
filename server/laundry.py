@@ -4,7 +4,7 @@ from penndata import *
 
 @app.route('/laundry/halls', methods=['GET'])
 def all_halls():
-  return jsonify(laundry.all_status())
+  return jsonify({"halls": laundry.all_status()})
 
 @app.route('/laundry/hall/<hall_no>', methods=['GET'])
 def hall(hall_no):
