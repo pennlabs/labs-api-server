@@ -9,7 +9,7 @@ class MobileAppApiTests(unittest.TestCase):
     # Simple test. Did the request go through?
       venue_data = server.dining.retrieve_venues()
       venue_dict = json.loads(venue_data.data)
-      venues = venue_dict['document']['venue']
+      venues = venue_dict['result_data']['document']['venue']
       self.assertTrue(len(venues[0]['venueType']) > 0)
 
   def testDiningWeeklyMenu(self):
@@ -62,10 +62,11 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue(len(res["result_data"]) > 0)
 
   def testTransitBasicRouting(self):
-    with server.app.test_request_context("/?latFrom=39.9546024&lonFrom=-75.1838311&latTo=39.9538555&lonTo=-75.2200868"):
-      res = json.loads(server.transit.fastest_route().data)
-      self.assertEquals("DRL, 200 S 33rd St.", res['fromStop']['BusStopName'])
-      self.assertEquals("48th & Spruce", res['toStop']['BusStopName'])
+    with server.app.test_request_context("/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954"):
+      res = json.loads(server.transit.fastest_route().data)['result_data']
+      self.assertEquals("Food Court, 3409 Walnut St.", res['path'][0]['BusStopName'])
+      self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
+      self.assertEquals("PennBUS East", res['route_name'])
 
   def testLaundryAllHalls(self):
     with server.app.test_request_context():
