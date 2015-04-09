@@ -1,6 +1,7 @@
 *.pyc
 venv
 .ropeproject
+penn/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

@@ -71,7 +71,7 @@ class MobileAppApiTests(unittest.TestCase):
   def testLaundryAllHalls(self):
     with server.app.test_request_context():
       res = json.loads(server.laundry.all_halls().data)
-      self.assertEquals(res['DuBois House']['hall_no'], 1)
+      self.assertEquals(res['halls'][0]['hall_no'], 1)
 
   def testLaundryOneHall(self):
     with server.app.test_request_context():
