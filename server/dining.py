@@ -8,7 +8,7 @@ from utils import *
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
   def get_data():
-    return din.venues()
+    return din.venues()['result_data']
   td = datetime.timedelta(days = 30)
   return cached_route('dining:venues', td, get_data)
 

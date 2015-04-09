@@ -9,7 +9,7 @@ class MobileAppApiTests(unittest.TestCase):
     # Simple test. Did the request go through?
       venue_data = server.dining.retrieve_venues()
       venue_dict = json.loads(venue_data.data)
-      venues = venue_dict['result_data']['document']['venue']
+      venues = venue_dict['document']['venue']
       self.assertTrue(len(venues[0]['venueType']) > 0)
 
   def testDiningWeeklyMenu(self):
