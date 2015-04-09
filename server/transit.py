@@ -22,7 +22,7 @@ def transit_routes():
   now = datetime.datetime.today()
   endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
   def get_data():
-    return {'result_data': populate_route_info(transit.stopinventory())}
+    return {'result_data': populate_route_info()}
 
   return cached_route('transit:routes', endDay - now, get_data)
 
@@ -30,60 +30,61 @@ def transit_routes():
 def fastest_route():
   now = datetime.datetime.today()
   endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
+
   def get_data():
-    return {'result_data': populate_stop_info(transit.stopinventory())}
-  stop_data = cache_get('transit:stops', endDay - now, get_data)
+    return {'result_data': populate_route_info()}
+
+  route_data = cache_get('transit:routes', endDay - now, get_data)['result_data']
+
+  good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']
+
+  route_data = {key: route_data[key] for key in route_data if key in good_routes}
 
   latFrom, lonFrom = float(request.args['latFrom']), float(request.args['lonFrom'])
   latTo, lonTo = float(request.args['latTo']), float(request.args['lonTo'])
   bird_dist = haversine(lonFrom, latFrom, lonTo, latTo)
-  route_dict = dict()
+  possible_routes = []
+  for route_name, stops in route_data.items():
+    minFrom = -1
+    minTo = -1
+    fromStop = None
+    toStop = None
+    for stop in stops:
 
-  for stop in stop_data:
-    if 'routes' in stop:
       distFrom = haversine(lonFrom, latFrom, float(stop["Longitude"]), float(stop["Latitude"]))
       distTo = haversine(lonTo, latTo, float(stop["Longitude"]), float(stop["Latitude"]))
+      if minFrom == -1:
+        fromStop = stop
+        minFrom = distFrom
+      elif distFrom < minFrom:
+        fromStop = stop
+        minFrom = distFrom
 
-      # Update the corresponding closest from and to stops for each route
-      for route in stop['routes']:
-        order = stop['routes'][route]
+      if minTo == -1:
+        minTo = distTo
+        toStop = stop
+      elif distTo < minTo:
+        minTo = distTo
+        toStop = stop
 
-        if route not in route_dict:
-          route_dict[route] = {
-            'walkingDistanceBefore': distFrom,
-            'fromStop': stop,
-            'fromOrder': order,
-            'walkingDistanceAfter': distTo,
-            'toStop': stop,
-            'toOrder': order
-          }
-        else:
-          if distFrom < route_dict[route]['walkingDistanceBefore']:
-            route_dict[route]['walkingDistanceBefore'] = distFrom
-            route_dict[route]['fromStop'] = stop
-            route_dict[route]['fromOrder'] = order
-          elif distTo < route_dict[route]['walkingDistanceAfter']:
-            route_dict[route]['walkingDistanceAfter'] = distTo
-            route_dict[route]['toStop'] = stop
-            route_dict[route]['toOrder'] = order
+    if fromStop and toStop and fromStop['order'] < toStop['order']:
+      possible_routes.append({
+        'route_name': route_name,
+        'walkingDistanceBefore': minFrom,
+        'path': stops[fromStop['order']:toStop['order']+1],
+        'walkingDistanceAfter': minTo
+        })
 
-  # Filter out route suggestions going the wrong way
-  good_routes = filter(lambda x: route_dict[x]['fromOrder'] < route_dict[x]['toOrder'], route_dict.keys())
 
-  if len(good_routes) == 0:
+  if len(possible_routes) == 0:
     return jsonify({"Error": "We couldn't find a helpful Penn Transit route for those locations."})
   # Choose the route with the minimum total walking distance
-  final_route = min(good_routes, key=lambda x: route_dict[x]['walkingDistanceBefore']+route_dict[x]['walkingDistanceAfter'])
+  final_route = min(possible_routes, key=lambda x: x['walkingDistanceBefore'] + x['walkingDistanceAfter'])
 
-  info = route_dict[final_route]
-  if info['walkingDistanceBefore'] + info['walkingDistanceAfter'] > bird_dist:
+  if final_route['walkingDistanceBefore'] + final_route['walkingDistanceAfter'] > bird_dist:
     return jsonify({"Error": "We couldn't find a helpful Penn Transit route for those locations."})
-  info['route'] = final_route
-  if 'routes' in info['toStop']:
-    del info['toStop']['routes']
-  if 'routes' in info['fromStop']:
-    del info['fromStop']['routes']
-  return jsonify(info)
+
+  return jsonify({'result_data': final_route})
 
 def populate_stop_info(stops):
   try:
@@ -101,13 +102,11 @@ def populate_stop_info(stops):
     print "JSON Error in building stops"
     return {}
 
-def populate_route_info(stops):
+def populate_route_info():
   stop_info = cache_get('transit:stops', datetime.timedelta(days=1), get_stop_info)
   routes = dict()
   for stop in stop_info['result_data']:
     if 'routes' in stop:
-      if stop['BusStopName'] == '20th & Locust St':
-        print stop['routes']
       items = stop['routes'].items()
       del stop['routes']
       for route_name, val in items:
@@ -115,11 +114,9 @@ def populate_route_info(stops):
         to_insert["order"] = val
 
         if route_name in routes:
-          routes[route_name]['stops'].append(to_insert)
+          routes[route_name].append(to_insert)
         else:
-          routes[route_name] = {
-            'stops': [to_insert],
-          }
-  for route in routes.values():
-    route['stops'] = sorted(route['stops'], key= lambda stop: stop["order"])
+          routes[route_name] = [to_insert]
+  for route in routes:
+    routes[route] = sorted(routes[route], key= lambda stop: stop["order"])
   return routes
