@@ -81,7 +81,7 @@ def fastest_route():
         'walkingDistanceBefore': minFrom,
         'path': path,
         'walkingDistanceAfter': minTo
-        });
+        })
 
 
   if len(possible_routes) == 0:
