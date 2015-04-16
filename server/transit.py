@@ -35,7 +35,7 @@ def fastest_route():
   endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
 
   def get_data():
-    return {'result_data': populate_route_info()}
+    return {'result_data': routes_with_directions(populate_route_info())}
 
   route_data = cache_get('transit:routes', endDay - now, get_data)['result_data']
 
@@ -101,9 +101,9 @@ def routes_with_directions(route_data):
       lonFrom = stops[i]["Longitude"]
       latTo = stops[i+1]["Latitude"]
       lonTo = stops[i+1]["Longitude"]
-
-      r = requests.get('https://maps.googleapis.com/maps/api/directions/json?key=%s&origin=%.8f,%.8f&destination=%.8f,%.8f' %
-      (getenv('GOOGLEMAPS_API_KEY'), latFrom, lonFrom, latTo, lonTo) )
+      url = 'https://maps.googleapis.com/maps/api/directions/json?key=%s&origin=%.8f,%.8f&destination=%.8f,%.8f' % (getenv('GOOGLEMAPS_API_KEY'), latFrom, lonFrom, latTo, lonTo)
+      r = requests.get(url)
+      print url
       # rate limiting
       sleep(2)
       json_data = r.json()
