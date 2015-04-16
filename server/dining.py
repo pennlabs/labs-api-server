@@ -9,7 +9,9 @@ from utils import *
 def retrieve_venues():
   def get_data():
     return din.venues()['result_data']
-  td = datetime.timedelta(days = 30)
+  now = datetime.datetime.today()
+  daysTillWeek = 6 - now.weekday()
+  td = datetime.timedelta(days=daysTillWeek)
   return cached_route('dining:venues', td, get_data)
 
 
