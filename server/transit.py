@@ -108,7 +108,7 @@ def routes_with_directions(route_data):
       sleep(2)
       json_data = r.json()
       if json_data['status'] != 'OK':
-        print 'error', json_data['error_message']
+        raise ValueError(json_data['error_message'])
       else:
         steps = json_data['routes'][0]['legs'][0]['steps']
         stops[i+1]['path_to'] = map(lambda step: {'Latitude':  step['end_location']['lat'], 'Longitude': step['end_location']['lng']}, steps)
