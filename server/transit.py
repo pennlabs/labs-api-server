@@ -2,9 +2,12 @@ from flask import request, jsonify
 from server import app
 import datetime
 import copy
+from time import sleep
 from base import *
 from penndata import *
 from utils import *
+import requests
+from os import getenv
 
 
 def get_stop_info():
@@ -19,12 +22,12 @@ def transit_stops():
 
 @app.route('/transit/routes', methods=['GET'])
 def transit_routes():
-  now = datetime.datetime.today()
-  endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
   def get_data():
-    return {'result_data': populate_route_info()}
+    return {'result_data': routes_with_directions(populate_route_info())}
 
-  return cached_route('transit:routes', endDay - now, get_data)
+  # cache lasts a month, since directions data is time intensive, and routes don't really change.
+  data = cached_route('transit:routes', datetime.timedelta(days=30), get_data)
+  return data
 
 @app.route('/transit/routing', methods=['GET'])
 def fastest_route():
@@ -35,10 +38,6 @@ def fastest_route():
     return {'result_data': populate_route_info()}
 
   route_data = cache_get('transit:routes', endDay - now, get_data)['result_data']
-
-  good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']
-
-  route_data = {key: route_data[key] for key in route_data if key in good_routes}
 
   latFrom, lonFrom = float(request.args['latFrom']), float(request.args['lonFrom'])
   latTo, lonTo = float(request.args['latTo']), float(request.args['lonTo'])
@@ -68,10 +67,19 @@ def fastest_route():
         toStop = stop
 
     if fromStop and toStop and fromStop['order'] < toStop['order']:
+      def add_path_points(l, stop):
+        if stop['order'] == fromStop['order']:
+          return l + [stop]
+        else:
+          path_to = stop['path_to']
+          del stop['path_to']
+          return l + path_to + [stop]
+
+      path = reduce(add_path_points, stops[fromStop['order']:toStop['order']+1], [])
       possible_routes.append({
         'route_name': route_name,
         'walkingDistanceBefore': minFrom,
-        'path': stops[fromStop['order']:toStop['order']+1],
+        'path': path,
         'walkingDistanceAfter': minTo
         })
 
@@ -85,6 +93,28 @@ def fastest_route():
     return jsonify({"Error": "We couldn't find a helpful Penn Transit route for those locations."})
 
   return jsonify({'result_data': final_route})
+
+def routes_with_directions(route_data):
+  for route_name, stops in route_data.items():
+    for i in xrange(len(stops)-1):
+      latFrom = stops[i]["Latitude"]
+      lonFrom = stops[i]["Longitude"]
+      latTo = stops[i+1]["Latitude"]
+      lonTo = stops[i+1]["Longitude"]
+
+      r = requests.get('https://maps.googleapis.com/maps/api/directions/json?key=%s&origin=%.8f,%.8f&destination=%.8f,%.8f' %
+      (getenv('GOOGLEMAPS_API_KEY'), latFrom, lonFrom, latTo, lonTo) )
+      # rate limiting
+      sleep(2)
+      json_data = r.json()
+      if json_data['status'] != 'OK':
+        print 'error', json_data['error_message']
+      else:
+        steps = json_data['routes'][0]['legs'][0]['steps']
+        stops[i+1]['path_to'] = map(lambda step: {'Latitude':  step['end_location']['lat'], 'Longitude': step['end_location']['lng']}, steps)
+  return route_data
+
+
 
 def populate_stop_info(stops):
   try:
@@ -119,4 +149,7 @@ def populate_route_info():
           routes[route_name] = [to_insert]
   for route in routes:
     routes[route] = sorted(routes[route], key= lambda stop: stop["order"])
+  good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']
+  routes = {key: routes[key] for key in routes if key in good_routes}
+
   return routes
