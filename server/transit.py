@@ -73,7 +73,7 @@ def fastest_route():
         else:
           path_to = stop['path_to']
           del stop['path_to']
-          return l + path_to + [stop]
+          return l + path_to[:-1] + [stop]
 
       path = reduce(add_path_points, stops[fromStop['order']:toStop['order']+1], [])
       possible_routes.append({
