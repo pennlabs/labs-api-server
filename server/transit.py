@@ -7,7 +7,6 @@ from base import *
 from penndata import *
 from utils import *
 import requests
-from os import getenv
 
 
 def get_stop_info():
@@ -91,7 +90,6 @@ def fastest_route():
         if stop['order'] == fromStop['order']:
           return l + [stop]
         else:
-          print stop
           path_to = stop['path_to']
           del stop['path_to']
           return l + path_to + [stop]
@@ -142,14 +140,12 @@ def routes_with_directions(route_data):
     all_waypoints = r.json()[0]
     i = 0
     for stop in route['stops']:
-      print 'looking for', stop
       stop['path_to'] = []
 
       # margin of error is necessary to identify which waypoints are actually stops
       while abs(all_waypoints[i]["Latitude"] - stop["Latitude"]) + abs(all_waypoints[i]["Longitude"] - stop["Longitude"])  > 0.0001:
 
         stop['path_to'].append(all_waypoints[i])
-        print all_waypoints[i], 'added to path'
         i += 1
         if i >= len(all_waypoints):
           raise ValueError('pennrides and ISC Data do not match')

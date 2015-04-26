@@ -1,22 +1,19 @@
 from server import app, db
 from functools import wraps
 from flask import request, Response
-import hashlib
-from os import urandom
+import hashlib, binascii
 
 @app.route('/auth', methods=['GET'])
 def auth():
   authInfo = None
-  print request.cookies
   for key, val in request.cookies.items():
     if '_shibsession_' in key:
       authInfo = key + val
       break
-  print authInfo
   if authInfo:
-    authToken = hashlib.pbkdf2_hmac('sha256', authInfo, urandom(), 100000)
-    print authToken
-    db.set('authToken:%s' % authToken);
+    # Salt is not necessary since we are hashing a session token
+    authToken = binascii.hexlify(hashlib.pbkdf2_hmac('sha256', authInfo, b'salt', 100000))
+    db.set('authToken:%s' % authToken, 1);
     return authToken
   else:
     return Response(response="no shibboleth cookie", status=400)
