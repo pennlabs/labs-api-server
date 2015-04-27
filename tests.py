@@ -2,6 +2,14 @@ import unittest
 import server
 import json
 
+
+## Fake
+authHeaders = [
+  ('cookie', '_shibsession_64656661756c7468747470733a2f2f706f6f7272696368617264736c69737448c36f6d2f73686962695c6c657468=_ddb1128649n08aa8e7a462de9970df3e')
+]
+
+
+
 class MobileAppApiTests(unittest.TestCase):
 
   def testDiningVenues(self):
@@ -77,6 +85,11 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       res = json.loads(server.laundry.hall(26).data)
       self.assertEquals(res['hall_name'], 'Harrison-24th FL')
+
+  def testAuth(self):
+    with server.app.test_request_context(headers=authHeaders):
+      authToken = server.auth.auth()
+      self.assertEquals('c28cfa2ee70adff8bb84c363fd134b3034d2cd15e88cf2f2ce5f646a10e1344f', authToken)
 
 if __name__ == '__main__':
   unittest.main()

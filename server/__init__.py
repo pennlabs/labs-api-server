@@ -14,6 +14,7 @@ import server.dining
 import server.buildings
 import server.directory
 import server.laundry
+import server.auth
 
 if __name__ == '__main__':
     app.run(debug=True)
