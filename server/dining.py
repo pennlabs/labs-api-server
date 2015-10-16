@@ -30,7 +30,7 @@ def retrieve_weekly_menu(venue_id):
 @app.route('/dining/daily_menu/<venue_id>', methods=['GET'])
 def retrieve_daily_menu(venue_id):
   now = datetime.datetime.today()
-  endDay = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(days=1)
+  end_time = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(hours=4)
   def get_data():
     return din.menu_daily(venue_id)["result_data"]
-  return cached_route('dining:venues:daily:%s' % venue_id, endDay-now, get_data)
+  return cached_route('dining:venues:daily:%s' % venue_id, end_time - now, get_data)
