@@ -7,7 +7,6 @@ argparse==1.2.1
 beautifulsoup4==4.3.2
 html5lib==0.999
 itsdangerous==0.24
-pymongo==2.7.2
 pytz==2014.7
 redis==2.10.3
 requests==2.4.3
