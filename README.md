@@ -286,7 +286,7 @@ Return information on all laundry rooms
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/directory/laundry/halls</td>
+            <td><code>http://api.pennlabs.org/laundry/halls</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -310,7 +310,7 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/directory/laundry/hall/{hall_no}</td>
+            <td><code>http://api.pennlabs.org/laundry/hall/{hall_no}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
