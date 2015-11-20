@@ -8,7 +8,7 @@ Setup
 -----
 * Install [redis](http://redis.io/)
 * Create new virtualenv
-* Install requirements using `pip install requirements.txt`
+* Install requirements using `pip install -r requirements.txt`
 * Run mobile API server with `python runserver.py`
 
 ## Buildings
