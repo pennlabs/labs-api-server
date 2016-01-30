@@ -1,10 +1,7 @@
-from flask import jsonify
+from flask import jsonify, request
 from base import *
 from server import app
-from pennathletics import athletes
-from flask import request
-from pennathletics import sportsdata
-from pennathletics import scraper
+from pennathletics import athletes, sportsdata, scraper
 
 @app.route('/athletics')
 def get_sports():
