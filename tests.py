@@ -20,6 +20,30 @@ class MobileAppApiTests(unittest.TestCase):
       venues = venue_dict['document']['venue']
       self.assertTrue(len(venues[0]['venueType']) > 0)
 
+  def testDiningV2Venues(self):
+    with server.app.test_request_context():
+      venue_res = server.dining.retrieve_venues_v2()
+      venue_dict = json.loads(venue_res.data)
+      self.assertEquals("1920 Commons", venue_dict["document"]["venue"][0]["name"])
+
+  def testDiningV2Menu(self):
+    with server.app.test_request_context():
+      menu_res = server.dining.retrieve_menu_v2('593', '2016-02-08')
+      menu_dict = json.loads(menu_res.data)
+      self.assertTrue(len(menu_dict["days"][0]["cafes"]["593"]["dayparts"]) > 0)
+
+  def testDiningV2Hours(self):
+    with server.app.test_request_context():
+      hours_res = server.dining.retrieve_hours_v2('593')
+      hours_dict = json.loads(hours_res.data)
+      self.assertEquals("1920 Commons", hours_dict["cafes"]["593"]["name"])
+
+  def testDiningV2Item(self):
+    with server.app.test_request_context():
+      item_res = server.dining.retrieve_item_v2('3899220')
+      item_dict = json.loads(item_res.data)
+      self.assertEquals("tomato tzatziki sauce and pita", item_dict["items"]["3899220"]["label"])
+
   def testDiningWeeklyMenu(self):
     with server.app.test_request_context():
       menu_res = server.dining.retrieve_weekly_menu('593')
