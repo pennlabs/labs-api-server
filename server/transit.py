@@ -200,9 +200,6 @@ def populate_route_info():
   for route in routes:
     routes[route] = sorted(routes[route], key= lambda stop: stop["order"])
 
-  # This last stop is erroneous, so manually taking it out
-  routes['Campus Loop'] = routes['Campus Loop'][:-1]
-
   # Filter out bad routes
   good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']
 
