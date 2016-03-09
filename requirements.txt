@@ -7,9 +7,9 @@ argparse==1.2.1
 beautifulsoup4==4.3.2
 html5lib==0.999
 itsdangerous==0.24
+requests==2.4.3
 penncoursereview==0.1.0
 pytz==2014.7
 redis==2.10.3
-requests==2.4.3
 six==1.9.0
 wsgiref==0.1.2
