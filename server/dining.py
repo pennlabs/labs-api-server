@@ -58,8 +58,6 @@ def retrieve_weekly_menu(venue_id):
   td = datetime.timedelta(days=daysTillWeek)
   def get_data():
     menu = din.menu_weekly(venue_id)
-    if venue_id == "638":
-      menu["result_data"]["Document"]["location"] = "University of Pennsylvania Kosher Dining at Falk"
     return menu["result_data"]
   return cached_route('dining:venues:weekly:%s' % venue_id, td, get_data)
 
