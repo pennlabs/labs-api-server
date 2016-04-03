@@ -128,13 +128,30 @@ def routes_with_directions(route_data):
       {
         route_name: "Route 1"
         stops: []
+      },
+      {
+        route_name: "PennBUS West"
+        stops: [
+          {
+            BusStopName: "The Quad, 3700 Spruce St.",
+            Latitude: 39.9,
+            Longitude: -75.2,
+            BusStopId: 29207,
+            order: 0,
+            path_to: [
+              {
+                Latitude: 39.95,
+                Longitude: -75.19
+              }
+            ]
+          }
+        ]
       }
     ]
     and populates each stop['path_to'] with map waypoints between it and the previous
     stop. These are used to give full, correct paths when routing.
   """
   for route in route_data:
-
     url = 'http://www.pennrides.com/Route/%d/Waypoints/' % pennride_id[route['route_name']]
     r = requests.get(url)
     all_waypoints = r.json()[0]
