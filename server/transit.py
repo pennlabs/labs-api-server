@@ -151,6 +151,12 @@ def routes_with_directions(route_data):
     and populates each stop['path_to'] with map waypoints between it and the previous
     stop. These are used to give full, correct paths when routing.
   """
+  def is_stop(waypoint, stop, epsilon=0.0001):
+      """Return whether waypoint is actually a stop based on a margin of error"""
+      diff_latitude = abs(waypoint["Latitude"] - stop["Latitude"])
+      diff_longitude = abs(waypoint["Longitude"] - stop["Longitude"])
+      return diff_latitude + diff_longitude > epsilon
+
   for route in route_data:
     url = 'http://www.pennrides.com/Route/%d/Waypoints/' % pennride_id[route['route_name']]
     r = requests.get(url)
@@ -159,9 +165,7 @@ def routes_with_directions(route_data):
     for stop in route['stops']:
       stop['path_to'] = []
 
-      # margin of error is necessary to identify which waypoints are actually stops
-      while abs(all_waypoints[i]["Latitude"] - stop["Latitude"]) + abs(all_waypoints[i]["Longitude"] - stop["Longitude"])  > 0.0001:
-
+      while is_stop(all_waypoints[i], stop):
         stop['path_to'].append(all_waypoints[i])
         i += 1
         if i >= len(all_waypoints):
