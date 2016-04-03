@@ -190,9 +190,8 @@ def populate_stop_info(stops):
               stop_dict[stop['title']]['routes'] = dict()
             stop_dict[stop['title']]['routes'][route['key']] = int(stop['stopOrder'])
     return stop_dict.values()
-  except Exception:
-    print "JSON Error in building stops"
-    return {}
+  except:
+    return {"error": "JSON error in building stops"}
 
 def populate_route_info():
   """
