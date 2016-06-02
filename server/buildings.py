@@ -8,7 +8,7 @@ from .utils import *
 @app.route('/buildings/<building_code>', methods=['GET'])
 def building(building_code):
   if db.exists("buildings:%s" % (building_code)):
-    building_info = db.get("buildings:%s" % (building_code))
+    building_info = db.get("buildings:%s" % (building_code)).decode('utf8')
     return jsonify(json.loads(building_info))
   else:
     return None
