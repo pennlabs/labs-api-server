@@ -3,12 +3,14 @@ from server import app
 import string
 import datetime
 import re
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
+
 
 def is_dept(keyword):
   return keyword.upper() in depts.keys()
+
 
 def get_serializable_course(course):
   return {

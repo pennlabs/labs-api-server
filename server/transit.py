@@ -2,10 +2,11 @@ from flask import request, jsonify
 from server import app
 import datetime
 import copy
+from functools import reduce
 from time import sleep
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 import requests
 
 
@@ -189,7 +190,7 @@ def populate_stop_info(stops):
             if 'routes' not in stop_dict[stop['title']]:
               stop_dict[stop['title']]['routes'] = dict()
             stop_dict[stop['title']]['routes'][route['key']] = int(stop['stopOrder'])
-    return stop_dict.values()
+    return list(stop_dict.values())
   except:
     return {"error": "JSON error in building stops"}
 
