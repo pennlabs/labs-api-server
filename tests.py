@@ -112,7 +112,7 @@ class MobileAppApiTests(unittest.TestCase):
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
       authToken = server.auth.auth()
-      self.assertEquals('c28cfa2ee70adff8bb84c363fd134b3034d2cd15e88cf2f2ce5f646a10e1344f', authToken)
+      self.assertEquals(b'5e625cf41e3b7838c79b49d890a203c568a44c3b27362b0a06ab6f08bec8f677', authToken)
 
 if __name__ == '__main__':
   unittest.main()
