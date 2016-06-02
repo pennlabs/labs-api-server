@@ -7,6 +7,7 @@ argparse==1.2.1
 beautifulsoup4==4.4.1
 html5lib==0.999
 itsdangerous==0.24
+pennathletics==0.0.1
 requests==2.4.3
 penncoursereview==0.1.1
 pytz==2014.7

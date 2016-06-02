@@ -438,3 +438,8 @@ Get information on all routes. This has the same information as the stops endpoi
         </tr>
     </tbody>
 </table>
+
+## Athletics
+
+Documentation for the athletics endpoints is located at the Labs pennathletics
+library SDK repository [README](https://github.com/pennlabs/pennathletics/blob/master/README.md#sports)
