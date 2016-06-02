@@ -3,18 +3,21 @@ from base import *
 from server import app
 from pennathletics import athletes, sportsdata, scraper
 
+
 @app.route('/athletics')
 def get_sports():
-    return jsonify({"sports": sportsdata.SPORTS.keys()}) 
+    return jsonify({"sports": sportsdata.SPORTS.keys()})
+
 
 @app.route('/athletics/<sport_id>')
 def list_years(sport_id):
-    return jsonify({"years": scraper.get_years(sport_id)}) 
+    return jsonify({"years": scraper.get_years(sport_id)})
+
 
 @app.route('/athletics/<sport_id>/<year>')
 def search_players(sport_id, year):
-    params = request.args;
-    new_dict = dict((k,v) for k,v in params.items())
+    params = request.args
+    new_dict = params.to_dict(flat=False)
     if 'no' in new_dict:
         new_dict['no'] = int(new_dict['no'])
     if 'weight' in params:
