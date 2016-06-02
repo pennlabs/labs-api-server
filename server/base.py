@@ -12,7 +12,7 @@ def cached_route(redis_key, td, func):
 
 def cache_get(redis_key, td, func):
   if db.exists(redis_key):
-    return json.loads(db.get(redis_key))
+    return json.loads(db.get(redis_key).decode('utf8'))
   else:
     data = func()
     db.set(redis_key, json.dumps(data))

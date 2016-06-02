@@ -2,10 +2,11 @@ from flask import request, jsonify
 from server import app
 import datetime
 import copy
+from functools import reduce
 from time import sleep
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 import requests
 
 
@@ -128,13 +129,36 @@ def routes_with_directions(route_data):
       {
         route_name: "Route 1"
         stops: []
+      },
+      {
+        route_name: "PennBUS West"
+        stops: [
+          {
+            BusStopName: "The Quad, 3700 Spruce St.",
+            Latitude: 39.9,
+            Longitude: -75.2,
+            BusStopId: 29207,
+            order: 0,
+            path_to: [
+              {
+                Latitude: 39.95,
+                Longitude: -75.19
+              }
+            ]
+          }
+        ]
       }
     ]
     and populates each stop['path_to'] with map waypoints between it and the previous
     stop. These are used to give full, correct paths when routing.
   """
-  for route in route_data:
+  def is_stop(waypoint, stop, epsilon=0.0002):
+      """Return whether waypoint is actually a stop based on a margin of error"""
+      diff_latitude = abs(waypoint["Latitude"] - stop["Latitude"])
+      diff_longitude = abs(waypoint["Longitude"] - stop["Longitude"])
+      return diff_latitude + diff_longitude > epsilon
 
+  for route in route_data:
     url = 'http://www.pennrides.com/Route/%d/Waypoints/' % pennride_id[route['route_name']]
     r = requests.get(url)
     all_waypoints = r.json()[0]
@@ -142,9 +166,7 @@ def routes_with_directions(route_data):
     for stop in route['stops']:
       stop['path_to'] = []
 
-      # margin of error is necessary to identify which waypoints are actually stops
-      while abs(all_waypoints[i]["Latitude"] - stop["Latitude"]) + abs(all_waypoints[i]["Longitude"] - stop["Longitude"])  > 0.0001:
-
+      while is_stop(all_waypoints[i], stop):
         stop['path_to'].append(all_waypoints[i])
         i += 1
         if i >= len(all_waypoints):
@@ -168,10 +190,9 @@ def populate_stop_info(stops):
             if 'routes' not in stop_dict[stop['title']]:
               stop_dict[stop['title']]['routes'] = dict()
             stop_dict[stop['title']]['routes'][route['key']] = int(stop['stopOrder'])
-    return stop_dict.values()
-  except Exception:
-    print "JSON Error in building stops"
-    return {}
+    return list(stop_dict.values())
+  except:
+    return {"error": "JSON error in building stops"}
 
 def populate_route_info():
   """
@@ -199,9 +220,6 @@ def populate_route_info():
           routes[route_name] = [to_insert]
   for route in routes:
     routes[route] = sorted(routes[route], key= lambda stop: stop["order"])
-
-  # This last stop is erroneous, so manually taking it out
-  routes['Campus Loop'] = routes['Campus Loop'][:-1]
 
   # Filter out bad routes
   good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']

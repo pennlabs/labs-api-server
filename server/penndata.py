@@ -1,7 +1,8 @@
-from penn import Transit, Directory, Dining, Registrar, Map, Laundry
+from penn import Transit, Directory, Dining, DiningV2, Registrar, Map, Laundry
 from os import getenv
 
 din = Dining(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
+dinV2 = DiningV2(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
 reg = Registrar(getenv("REG_USERNAME"), getenv("REG_PASSWORD"))
 penn_dir = Directory(getenv("DIR_USERNAME"), getenv("DIR_PASSWORD"))
 map_search = Map(getenv("NEM_USERNAME"), getenv("NEM_PASSWORD"))

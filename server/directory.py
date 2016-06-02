@@ -1,14 +1,14 @@
 from flask import request, jsonify
 from server import app
 import datetime
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 
 
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
-  if not request.args.has_key('name'):
+  if 'name' not in request.args:
     return jsonify({"error": "Please specify search parameters in the query string"})
 
   name = request.args['name']
