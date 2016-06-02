@@ -1,8 +1,8 @@
 from server import app
 import datetime
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 
 
 @app.route('/dining/v2/venues', methods=['GET'])

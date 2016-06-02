@@ -3,9 +3,9 @@ from server import app
 import datetime
 import copy
 from time import sleep
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 import requests
 
 

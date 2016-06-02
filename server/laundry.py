@@ -1,6 +1,6 @@
 from flask import jsonify
 from server import app
-from penndata import *
+from .penndata import *
 from requests.exceptions import HTTPError
 
 

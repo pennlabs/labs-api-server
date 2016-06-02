@@ -1,9 +1,9 @@
 from flask import request, json, jsonify
 from server import app, db
 import datetime
-from base import *
-from penndata import *
-from utils import *
+from .base import *
+from .penndata import *
+from .utils import *
 
 @app.route('/buildings/<building_code>', methods=['GET'])
 def building(building_code):
