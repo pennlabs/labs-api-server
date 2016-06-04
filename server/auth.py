@@ -1,8 +1,15 @@
 from server import app, db
 from functools import wraps
-from flask import request, Response
+from flask import request, Response, jsonify
 import hashlib
 import binascii
+
+
+def json_status(json, status_code=None):
+  resp = jsonify(json)
+  if status_code:
+    resp.status_code = status_code
+  return resp
 
 
 @app.route('/auth', methods=['GET'])
@@ -22,6 +29,19 @@ def auth():
     return authToken
   else:
     return Response(response="no shibboleth cookie", status=400)
+
+
+@app.route('/validate/<string:token>', methods=['GET'])
+def validate(token):
+  # Currently disabled for architectural reasons
+  # TODO: Make validation only work on https routes *only* when not
+  #       in testing or debug modes.
+  # if not request.base_url.startswith('https'):
+  #   return json_status({"status": "insecure access over http"}, 401)
+  if db.exists('authToken:%s' % token):
+    return json_status({"status": "valid"})
+  else:
+    return json_status({"status": "invalid"}, 401)
 
 
 def auth_decorator(f):

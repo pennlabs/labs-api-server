@@ -443,3 +443,29 @@ Get information on all routes. This has the same information as the stops endpoi
 
 Documentation for the athletics endpoints is located at the Labs pennathletics
 library SDK repository [README](https://github.com/pennlabs/pennathletics/blob/master/README.md#sports)
+
+## Authentication
+
+### Validate token
+Validate whether token is valid. **Note**: You must access this endpoint over TLS/SSL (https).
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/validate/{token}</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
