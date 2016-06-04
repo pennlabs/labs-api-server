@@ -1,6 +1,6 @@
 from server import app, db
 from functools import wraps
-from flask import request, Response
+from flask import request, Response, jsonify
 import hashlib
 import binascii
 
@@ -22,6 +22,16 @@ def auth():
     return authToken
   else:
     return Response(response="no shibboleth cookie", status=400)
+
+
+@app.route('/validate/<string:token>', methods=['GET'])
+def validate(token):
+  if not request.base_url.startswith('https'):
+    return jsonify({"status": "insecure access over http"}), 401
+  if db.exists('authToken:%s' % token):
+    return jsonify({"status": "valid"})
+  else:
+    return jsonify({"status": "invalid"}), 401
 
 
 def auth_decorator(f):
