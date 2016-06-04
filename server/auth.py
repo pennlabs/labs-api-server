@@ -5,6 +5,13 @@ import hashlib
 import binascii
 
 
+def json_status(json, status_code=None):
+  resp = jsonify(json)
+  if status_code:
+    resp.status_code = status_code
+  return resp
+
+
 @app.route('/auth', methods=['GET'])
 def auth():
   authInfo = None
@@ -26,12 +33,15 @@ def auth():
 
 @app.route('/validate/<string:token>', methods=['GET'])
 def validate(token):
-  if not request.base_url.startswith('https'):
-    return jsonify({"status": "insecure access over http"}), 401
+  # Currently disabled for architectural reasons
+  # TODO: Make validation only work on https routes *only* when not
+  #       in testing or debug modes.
+  # if not request.base_url.startswith('https'):
+  #   return json_status({"status": "insecure access over http"}, 401)
   if db.exists('authToken:%s' % token):
-    return jsonify({"status": "valid"})
+    return json_status({"status": "valid"})
   else:
-    return jsonify({"status": "invalid"}), 401
+    return json_status({"status": "invalid"}, 401)
 
 
 def auth_decorator(f):
