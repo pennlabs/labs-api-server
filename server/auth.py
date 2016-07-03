@@ -33,11 +33,9 @@ def auth():
 
 @app.route('/validate/<string:token>', methods=['GET'])
 def validate(token):
-  # Currently disabled for architectural reasons
-  # TODO: Make validation only work on https routes *only* when not
-  #       in testing or debug modes.
-  # if not request.base_url.startswith('https'):
-  #   return json_status({"status": "insecure access over http"}, 401)
+  debug = app.debug or app.testing
+  if not request.base_url.startswith('https') and not debug:
+    return json_status({"status": "insecure access over http"}, 401)
   if db.exists('authToken:%s' % token):
     return json_status({"status": "valid"})
   else:
