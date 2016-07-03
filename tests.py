@@ -11,6 +11,9 @@ AUTH_TOKEN = b'5e625cf41e3b7838c79b49d890a203c568a44c3b27362b0a06ab6f08bec8f677'
 
 
 class MobileAppApiTests(unittest.TestCase):
+  def setUp(self):
+    server.app.config['TESTING'] = True
+
   def testDiningVenues(self):
     with server.app.test_request_context():
     # Simple test. Did the request go through?
@@ -132,6 +135,13 @@ class MobileAppApiTests(unittest.TestCase):
       server.auth.auth()
       res = json.loads(server.auth.validate("badtoken").data.decode('utf8'))
       self.assertEquals(res['status'], 'invalid')
+
+  def test_token_validation_no_https(self):
+    with server.app.test_request_context(headers=authHeaders):
+      server.app.config['TESTING'] = False
+      server.auth.auth()
+      res = json.loads(server.auth.validate(AUTH_TOKEN).data.decode('utf8'))
+      self.assertEquals(res['status'], 'insecure access over http')
 
 if __name__ == '__main__':
   unittest.main()
