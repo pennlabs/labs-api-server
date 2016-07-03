@@ -136,5 +136,12 @@ class MobileAppApiTests(unittest.TestCase):
       res = json.loads(server.auth.validate("badtoken").data.decode('utf8'))
       self.assertEquals(res['status'], 'invalid')
 
+  def test_token_validation_no_https(self):
+    with server.app.test_request_context(headers=authHeaders):
+      server.app.config['TESTING'] = False
+      server.auth.auth()
+      res = json.loads(server.auth.validate(AUTH_TOKEN).data.decode('utf8'))
+      self.assertEquals(res['status'], 'insecure access over http')
+
 if __name__ == '__main__':
   unittest.main()
