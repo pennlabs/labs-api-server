@@ -11,6 +11,6 @@ sys.setdefaultencoding('utf-8')
 def get_nso_events():
     r = requests.get("http://www.nso.upenn.edu/event-calendar.rss")
     split = r.text.split("\n")
-    filtered = [i for i in split if "<pubDate>" not in i]
+    filtered = [i if  "<pubDate" not in i else "<pubDate>Wed, 02 Aug 2016 08:00:00 EST</pubDate>" for i in split]
     output = "\n".join(filtered)
     return Response(output, mimetype="text/xml")
