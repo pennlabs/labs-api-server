@@ -25,8 +25,10 @@ def changeTitle(a):
 
 def subFour(string, index):
     val = string[index:index+6]
-    new_val = str(int(val) - 40000)
+    new_val = str((int(val) - 40000 + 240000)%240000)
     if len(new_val) < 6:
         new_val = "0" + new_val
+    if len(new_val) == 2:
+        new_val = "000000"
     return string.replace(val, new_val)
 
