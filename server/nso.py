@@ -4,6 +4,7 @@ from server import app
 import requests
 import re
 import sys
+import datetime
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -11,10 +12,16 @@ sys.setdefaultencoding('utf-8')
 def get_nso_events():
     r = requests.get("http://www.nso.upenn.edu/event-calendar.rss")
     split = r.text.split("\n")
-    filtered = [i if "<pubDate" not in i else "<pubDate>Wed, 02 Aug 2016 08:00:00 EST</pubDate>" for i in split]
+    filtered = [i if "<pubDate" not in i else "<pubDate>" + parseDate(i) + " EST</pubDate>" for i in split]
     filtered = [i if ("<title" not in i or "NSO Event Calendar" in i) else changeTitle(i) for i in filtered]
     output = "\n".join(filtered)
     return Response(output, mimetype="text/xml")
+
+def parseDate(s):
+    split = s.split("pubDate")
+    s = split[1][1:-8]
+    d = datetime.datetime.strptime(s,"%Y-%m-%dT%H:%M:%S")
+    return d.strftime("%a, %d %b %Y %X %Z")
 
 def changeTitle(a):
     index = a.index("event") + 17
