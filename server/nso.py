@@ -3,7 +3,6 @@ from server import app
 import requests
 import sys
 import datetime
-sys.setdefaultencoding('utf-8')
 
 
 @app.route('/nso')
