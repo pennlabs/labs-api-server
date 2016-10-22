@@ -5,9 +5,9 @@ from bs4 import BeautifulSoup
 import urllib2
 
 
-@app.route('/studyspaces', methods=['GET'])
-def parseTimes():
-	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=1799&d=2016-10-22&cap=0"
+@app.route('/studyspaces/<date>', methods=['GET'])
+def parseTimes(date):
+	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=1799&d=%s&cap=0" % date
 	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
 
 	timeSlots = soup.find_all('form')
