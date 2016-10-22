@@ -5,9 +5,23 @@ from bs4 import BeautifulSoup
 from datetime import time
 import urllib2
 
+groupStudyCodes = {
+	"Biomedical Library - Group Study Rooms" : 505,
+	"Dental Library - Group Study Rooms" : 13107,
+	"Dental Library - Seminar Room" : 13532,
+	"Education Commons" : 848,
+	"Glossberg Record Room" : 1819,
+	"Levin Building Group Study Rooms" : 13489,
+	"Lippincott Library" : 1768,
+	"Lippincott Library Seminar Rooms" : 2587,
+	"Noldus Observer" : 3621,
+	"Van Pelt-Dietrich Library Center Group Study Rooms" : 1799,
+	"Van Pelt-Dietrich Library Center Seminar Rooms" : 4409,
+	"Weigle Information Commons" : 1722
+} # this should be moved somewhere else
 
-@app.route('/studyspaces/<id>/<date>', methods=['GET'])
-def parseTimes(id,date):
+@app.route('/studyspaces/<id>/<date>', methods=['GET']) # id is given by dictionary above
+def parseTimes(id,date): # Returns JSON with available rooms
 	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=%s&d=%s&cap=0" % (id,date)
 	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
 
@@ -18,7 +32,10 @@ def parseTimes(id,date):
 	
 	for i in unparsedRooms:
 		room = BeautifulSoup(str(i),'lxml')
-		roomName = room.fieldset.legend.h2.contents[0] # extract the room names
+		try:
+			roomName = room.fieldset.legend.h2.contents[0] # extract the room names
+		except AttributeError:
+			continue
 		newRoom = str(roomName)[:-1]
 		times = []
 
@@ -32,6 +49,7 @@ def parseTimes(id,date):
 			dictItem['end_time'] = startAndEnd[1].upper()
 			roomTimes.append(dictItem)
 			dictItem['date'] = dateParse(date)
+
 	return jsonify({'studyspaces' : roomTimes})
 
 def dateParse(d):
