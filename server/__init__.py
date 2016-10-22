@@ -18,6 +18,7 @@ import server.auth
 import server.pcr
 import server.athletics
 import server.nso
+import server.studyspaces
 
 if __name__ == '__main__':
     app.run(debug=True)
