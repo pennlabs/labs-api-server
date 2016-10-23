@@ -20,8 +20,20 @@ groupStudyCodes = {
 	"Weigle Information Commons" : 1722
 } # this should be moved somewhere else
 
-@app.route('/studyspaces/<id>/<date>', methods=['GET']) # id is given by dictionary above
-def parseTimes(id,date): # Returns JSON with available rooms
+@app.route('/studyspaces/<date>', methods=['GET']) # id is given by dictionary above
+def parseTimes(date): # Returns JSON with available rooms
+	id = request.args['id']
+	print request.args
+	if(id != None):
+		return jsonify({'studyspaces' : extractTimes(id,date)})
+	else:
+		l = []
+		for key in groupStudyCodes:
+			l += extractTimes(groupStudyCodes[key],date)
+		return jsonify({'studyspaces' : l})
+
+
+def extractTimes(id,date):
 	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=%s&d=%s&cap=0" % (id,date)
 	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
 
@@ -50,7 +62,7 @@ def parseTimes(id,date): # Returns JSON with available rooms
 			roomTimes.append(dictItem)
 			dictItem['date'] = dateParse(date)
 
-	return jsonify({'studyspaces' : roomTimes})
+	return {'studyspaces' : roomTimes}
 
 def dateParse(d):
 	l = d.split("-")
