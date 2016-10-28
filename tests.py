@@ -56,7 +56,7 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       menu_res = server.dining.retrieve_daily_menu('593')
       menu_dict = json.loads(menu_res.data.decode('utf8'))
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertEquals("1920 Commons", menu_dict["Document"]["location"])
 
   def testDirectorySearch(self):
     with server.app.test_request_context('/?name=Zdancewic'):
