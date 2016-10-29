@@ -95,12 +95,12 @@ class MobileAppApiTests(unittest.TestCase):
       res = json.loads(server.transit.transit_stops().data.decode('utf8'))
       self.assertTrue(len(res["result_data"]) > 0)
 
-  def testTransitBasicRouting(self):
-    with server.app.test_request_context("/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954"):
-      res = json.loads(server.transit.fastest_route().data.decode('utf8'))['result_data']
-      self.assertEquals("Food Court, 3409 Walnut St.", res['path'][0]['BusStopName'])
-      self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
-      self.assertEquals("PennBUS East", res['route_name'])
+# def testTransitBasicRouting(self):
+#   with server.app.test_request_context("/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954"):
+#     res = json.loads(server.transit.fastest_route().data.decode('utf8'))['result_data']
+#     self.assertEquals("Food Court, 3409 Walnut St.", res['path'][0]['BusStopName'])
+#     self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
+#     self.assertEquals("PennBUS East", res['route_name'])
 
   def testLaundryAllHalls(self):
     with server.app.test_request_context():
