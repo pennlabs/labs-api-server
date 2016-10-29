@@ -1,8 +1,7 @@
+import datetime
 from flask import Response
 from server import app
 import requests
-import sys
-import datetime
 
 
 @app.route('/nso')
