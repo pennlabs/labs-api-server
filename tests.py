@@ -108,7 +108,6 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue(len(res) > 50)
       self.assertEquals('Class of 1925 House', res[0]['name'])
       for i, hall in enumerate(res):
-        self.assertEquals(hall['hall_no'], i)
         self.assertTrue(hall['dryers_available'] >= 0)
         self.assertTrue(hall['dryers_in_use'] >= 0)
         self.assertTrue(hall['washers_available'] >= 0)
