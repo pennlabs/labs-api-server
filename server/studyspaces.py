@@ -2,37 +2,22 @@ from flask import request, jsonify
 from .base import *
 from server import app
 from bs4 import BeautifulSoup
-from datetime import time
 import urllib2
-
-groupStudyCodes = {
-	505 : "Biomedical Library - Group Study Rooms",
-	13107 : "Dental Library - Group Study Rooms",
-	13532 : "Dental Library - Seminar Room",
-	848 : "Education Commons",
-	1819 : "Glossberg Record Room",
-	13489 : "Levin Building Group Study Rooms",
-	1768 : "Lippincott Library",
-	2587 : "Lippincott Library Seminar Rooms",
-	3621 : "Noldus Observer",
-	1799 : "Van Pelt-Dietrich Library Center Group Study Rooms",
-	4409 : "Van Pelt-Dietrich Library Center Seminar Rooms",
-	1722 : "Weigle Information Commons"
-} # this should be moved somewhere else
 
 @app.route('/studyspaces/<date>', methods=['GET']) # id is given by dictionary above
 def parseTimes(date): # Returns JSON with available rooms
+	groupStudyCodes = getIDs()
 	if 'id' in request.args:
 		id = request.args['id']
-		return jsonify({'studyspaces' : extractTimes(id,date)})
+		return jsonify({'studyspaces' : extractTimes(id,date,groupStudyCodes)})
 	else:
 		l = []
 		for id in groupStudyCodes:
-			l += extractTimes(id,date)
+			l += extractTimes(id,date,groupStudyCodes)
 		return jsonify({'studyspaces' : l})
 
 
-def extractTimes(id,date):
+def extractTimes(id,date,groupStudyCodes): 
 	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=%s&d=%s&cap=0" % (int(id),date)
 	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
 
@@ -69,3 +54,16 @@ def dateParse(d): # parses the date into a better format
 	l = d.split("-")
 	final = [l[1],l[2],l[0]]
 	return '-'.join(final)
+
+def getIDs(): # extracts the ID's of the room into groupStudyCodes
+	groupStudyCodes = {}
+	url = "http://libcal.library.upenn.edu/booking/vpdlc"
+	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
+	l = soup.find_all('option')
+	for element in l:
+		if element['value'] != '0':
+			url2 = "http://libcal.library.upenn.edu" + str(element['value'])
+			soup2 = BeautifulSoup(urllib2.urlopen(url2).read(), 'lxml')
+			id = soup2.find('input', attrs={"id" : "gid"})['value']
+			groupStudyCodes[int(id)] = element.contents[0]
+	return groupStudyCodes
