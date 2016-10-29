@@ -50,7 +50,7 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       menu_res = server.dining.retrieve_weekly_menu('593')
       menu_dict = json.loads(menu_res.data.decode('utf8'))
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertTrue("1920 Commons" in menu_dict["Document"]["location"])
 
   def testDiningDailyMenu(self):
     with server.app.test_request_context():
