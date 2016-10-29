@@ -3,21 +3,51 @@ from .base import *
 from server import app
 from bs4 import BeautifulSoup
 import urllib2
+import requests
+
+def getIDs(): # extracts the ID's of the room into groupStudyCodes
+	groupStudyCodes = []
+	url = "http://libcal.library.upenn.edu/booking/vpdlc"
+	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
+	l = soup.find_all('option')
+	for element in l:
+		if element['value'] != '0':
+			url2 = "http://libcal.library.upenn.edu" + str(element['value'])
+			soup2 = BeautifulSoup(urllib2.urlopen(url2).read(), 'lxml')
+			id = soup2.find('input', attrs={"id" : "gid"})['value']
+			newDict = {} 
+			newDict['id'] = int(id)
+			newDict['name'] = element.contents[0]
+			groupStudyCodes.append(newDict)
+	return groupStudyCodes
+
+def getIDDict(): # extracts the ID's of the room into a dictionary
+	groupStudyCodes = {}
+	url = "http://libcal.library.upenn.edu/booking/vpdlc"
+	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
+	l = soup.find_all('option')
+	for element in l:
+		if element['value'] != '0':
+			url2 = "http://libcal.library.upenn.edu" + str(element['value'])
+			soup2 = BeautifulSoup(urllib2.urlopen(url2).read(), 'lxml')
+			id = soup2.find('input', attrs={"id" : "gid"})['value']
+			groupStudyCodes[int(id)] = element.contents[0]
+	return groupStudyCodes
 
 @app.route('/studyspaces/<date>', methods=['GET']) # id is given by dictionary above
 def parseTimes(date): # Returns JSON with available rooms
-	groupStudyCodes = getIDs()
+	d = getIDDict()
 	if 'id' in request.args:
 		id = request.args['id']
-		return jsonify({'studyspaces' : extractTimes(id,date,groupStudyCodes)})
+		return jsonify({'studyspaces' : extractTimes(id,date,d[int(id)])})
 	else:
-		l = []
-		for id in groupStudyCodes:
-			l += extractTimes(id,date,groupStudyCodes)
-		return jsonify({'studyspaces' : l})
+		m = []
+		for element in d:
+			m += extractTimes(element,date,d[element])
+		return jsonify({'studyspaces' : m})
 
 
-def extractTimes(id,date,groupStudyCodes): 
+def extractTimes(id,date,name): 
 	url = "http://libcal.library.upenn.edu/rooms_acc.php?gid=%s&d=%s&cap=0" % (int(id),date)
 	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
 
@@ -47,7 +77,7 @@ def extractTimes(id,date,groupStudyCodes):
 			dictItem['end_time'] = startAndEnd[1].upper()
 			roomTimes.append(dictItem)
 			dictItem['date'] = dateParse(date)
-			dictItem['building'] = groupStudyCodes[int(id)]
+			dictItem['building'] = name
 	return roomTimes
 
 def dateParse(d): # parses the date into a better format
@@ -55,15 +85,6 @@ def dateParse(d): # parses the date into a better format
 	final = [l[1],l[2],l[0]]
 	return '-'.join(final)
 
-def getIDs(): # extracts the ID's of the room into groupStudyCodes
-	groupStudyCodes = {}
-	url = "http://libcal.library.upenn.edu/booking/vpdlc"
-	soup = BeautifulSoup(urllib2.urlopen(url).read(), 'lxml')
-	l = soup.find_all('option')
-	for element in l:
-		if element['value'] != '0':
-			url2 = "http://libcal.library.upenn.edu" + str(element['value'])
-			soup2 = BeautifulSoup(urllib2.urlopen(url2).read(), 'lxml')
-			id = soup2.find('input', attrs={"id" : "gid"})['value']
-			groupStudyCodes[int(id)] = element.contents[0]
-	return groupStudyCodes
+@app.route('/studyspaceid', methods=['GET'])
+def display(): # returns JSON containing which ID corresponds to what room
+	return jsonify({'studyspaceid' : getIDs()})
