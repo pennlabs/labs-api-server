@@ -1,7 +1,7 @@
 from server import app
 import datetime
 from .base import cached_route
-from penndata import din, dinV2
+from .penndata import din, dinV2
 
 
 @app.route('/dining/v2/venues', methods=['GET'])
