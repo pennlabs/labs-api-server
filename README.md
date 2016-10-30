@@ -329,6 +329,49 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     </tbody>
 </table>
 
+## Study Spaces
+
+### For One Building
+Returns all the available rooms on a given date in a specified building.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/studyspaces/{date}</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>id</code></td>
+                            <td><strong>Optional</strong></td>
+                            <td>Building ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 ## Transit
 
 ### Routing
