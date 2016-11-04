@@ -331,8 +331,32 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
 
 ## Study Spaces
 
-### For One Building
-Returns all the available rooms on a given date in a specified building.
+### All Buildings
+Lists all the buildings with study rooms along with their corresponding ID's.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/studyspaces/</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### Available Rooms in One Building or All Buildings
+Returns all the available rooms on a given date in a specified building. If <code>id</code> is not specified, API will list all the avaiable rooms in all buildings.
 
 <table>
     <tbody>

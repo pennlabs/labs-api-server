@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from server import app
-from .penndata import *
+from .penndata import studyspaces
 
 
 @app.route('/studyspaces/avail/<date>', methods=['GET'])
@@ -14,12 +14,13 @@ def parse_times(date):
     """
     d = get_id_dict()
     if 'id' in request.args:
+        id = request.args['id']
         try:
-            id = request.args['id']
+            name = d[int(id)]
         except KeyError:
             # check for invalid ID's
-            return jsonify({'studyspaces': "Invalid ID number."})
-        return jsonify({'studyspaces': extract_times(id, date, d[int(id)])})
+            return jsonify({'error': "Invalid ID number."})
+        return jsonify({'studyspaces': extract_times(id, date, name})
     else:
         m = []
         for element in d:
@@ -27,9 +28,9 @@ def parse_times(date):
         return jsonify({'studyspaces': m})
 
 
-@app.route('/studyspaces/ids', methods=['GET'])
+@app.route('/studyspaces/', methods=['GET'])
 def display_id_pairs():
     """
     Returns JSON containing which ID corresponds to what room.
     """
-    return jsonify({'studyspaceid': get_id_json()})
+    return jsonify({'studyspaces': get_id_json()})
