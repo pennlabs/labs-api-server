@@ -122,7 +122,6 @@ class MobileAppApiTests(unittest.TestCase):
   def testStudyspacesIDs(self):
     with server.app.test_request_context():
       res = json.loads(server.studyspaces.display_id_pairs().data.decode('utf8'))
-      print res
       self.assertTrue(len(res) > 0)
       for i in res['studyspaces']:
         self.assertTrue(i['id'] > 0)
