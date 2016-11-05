@@ -3,7 +3,7 @@ from server import app
 from .penndata import studyspaces
 
 
-@app.route('/studyspaces/avail/<date>', methods=['GET'])
+@app.route('/studyspaces/<date>', methods=['GET'])
 def parse_times(date):
     """
     Returns JSON with available rooms.

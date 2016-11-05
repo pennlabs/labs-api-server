@@ -362,7 +362,7 @@ Returns all the available rooms on a given date in a specified building. Date is
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/studyspaces/avail/{date}</code></td>
+            <td><code>http://api.pennlabs.org/studyspaces/{date}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
