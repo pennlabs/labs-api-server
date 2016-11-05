@@ -23,7 +23,8 @@ def retrieve_weather_data():
     if contents != '':
         cache = contents.split("\n")
         time_stamp = cache[0]
-        cached_date = datetime.datetime.strptime(time_stamp, "%m %d %Y %H %M %S")
+        cached_date = datetime.datetime.strptime(time_stamp,
+                                                 "%m %d %Y %H %M %S")
         delta = abs(cached_date - d)
         if delta.seconds >= 600:
             g = open('.cache', 'w')
