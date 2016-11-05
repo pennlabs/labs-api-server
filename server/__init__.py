@@ -19,6 +19,7 @@ import server.pcr
 import server.athletics
 import server.nso
 import server.studyspaces
+import server.weather
 
 if __name__ == '__main__':
     app.run(debug=True)

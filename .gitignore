@@ -3,6 +3,8 @@ venv
 .ropeproject
 penn/
 penn
+.cache
+.app.id~
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
