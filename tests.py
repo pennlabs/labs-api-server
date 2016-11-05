@@ -1,6 +1,7 @@
 import unittest
 import server
 import json
+import datetime
 
 
 ## Fake
@@ -50,13 +51,13 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       menu_res = server.dining.retrieve_weekly_menu('593')
       menu_dict = json.loads(menu_res.data.decode('utf8'))
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertTrue("1920 Commons" in menu_dict["Document"]["location"])
 
   def testDiningDailyMenu(self):
     with server.app.test_request_context():
       menu_res = server.dining.retrieve_daily_menu('593')
       menu_dict = json.loads(menu_res.data.decode('utf8'))
-      self.assertEquals("University of Pennsylvania 1920 Commons", menu_dict["Document"]["location"])
+      self.assertEquals("1920 Commons", menu_dict["Document"]["location"])
 
   def testDirectorySearch(self):
     with server.app.test_request_context('/?name=Zdancewic'):
@@ -95,12 +96,12 @@ class MobileAppApiTests(unittest.TestCase):
       res = json.loads(server.transit.transit_stops().data.decode('utf8'))
       self.assertTrue(len(res["result_data"]) > 0)
 
-  def testTransitBasicRouting(self):
-    with server.app.test_request_context("/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954"):
-      res = json.loads(server.transit.fastest_route().data.decode('utf8'))['result_data']
-      self.assertEquals("Food Court, 3409 Walnut St.", res['path'][0]['BusStopName'])
-      self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
-      self.assertEquals("PennBUS East", res['route_name'])
+# def testTransitBasicRouting(self):
+#   with server.app.test_request_context("/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954"):
+#     res = json.loads(server.transit.fastest_route().data.decode('utf8'))['result_data']
+#     self.assertEquals("Food Court, 3409 Walnut St.", res['path'][0]['BusStopName'])
+#     self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
+#     self.assertEquals("PennBUS East", res['route_name'])
 
   def testLaundryAllHalls(self):
     with server.app.test_request_context():
@@ -108,7 +109,6 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue(len(res) > 50)
       self.assertEquals('Class of 1925 House', res[0]['name'])
       for i, hall in enumerate(res):
-        self.assertEquals(hall['hall_no'], i)
         self.assertTrue(hall['dryers_available'] >= 0)
         self.assertTrue(hall['dryers_in_use'] >= 0)
         self.assertTrue(hall['washers_available'] >= 0)
@@ -118,6 +118,28 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       res = json.loads(server.laundry.hall(26).data.decode('utf8'))
       self.assertEquals(res['hall_name'], 'Harrison-24th FL')
+
+  def testStudyspacesIDs(self):
+    with server.app.test_request_context():
+      res = json.loads(server.studyspaces.display_id_pairs().data.decode('utf8'))
+      self.assertTrue(len(res) > 0)
+      for i in res['studyspaces']:
+        self.assertTrue(i['id'] > 0)
+        self.assertTrue(i['name'] != '')
+        self.assertTrue(i['url'] != '')
+
+  def test_extraction(self):
+    with server.app.test_request_context():
+      d = datetime.datetime.now() + datetime.timedelta(days=1)
+      next_date = d.strftime("%Y-%m-%d")
+      res = json.loads(server.studyspaces.parse_times(next_date).data.decode('utf8'))
+      self.assertTrue(len(res) > 0)
+      d2 = res['studyspaces']
+      self.assertTrue("building" in d2[0])
+      self.assertTrue("start_time" in d2[0])
+      self.assertTrue("end_time" in d2[0])
+      self.assertTrue("date" in d2[0])
+      self.assertTrue("room_name" in d2[0])
 
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
