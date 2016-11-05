@@ -144,7 +144,6 @@ class MobileAppApiTests(unittest.TestCase):
     def testWeather(self):
         with server.app.test_request_context():
             res = json.loads(server.weather.retrieve_weather_data().data.decode('utf8'))
-            print res
             self.assertTrue(len(res) > 0)
             s = res['weather_data']
             parts = ["base", "clouds", "cod", "coord", "dt", "id", "main", "name",
