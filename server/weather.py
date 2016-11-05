@@ -16,10 +16,9 @@ def retrieve_weather_data():
     def get_data():
         url = 'http://api.openweathermap.org/data/2.5/weather?q=Philadelphia&units=imperial&APPID=%s' % os.environ['APPID']
         json = requests.get(url).json()
-        print json
-        return {'weather': json}
+        return {'weather_data': json}
 
-    td = datetime.timedelta(seconds=600)
+    td = datetime.timedelta(seconds=50)
 
     return cached_route('weather', td, get_data)
 
