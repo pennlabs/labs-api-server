@@ -128,7 +128,7 @@ class MobileAppApiTests(unittest.TestCase):
         self.assertTrue(i['name'] != '')
         self.assertTrue(i['url'] != '')
 
-  def testExtraction(self):
+  def testStudyspaceExtraction(self):
     with server.app.test_request_context():
       d = datetime.datetime.now() + datetime.timedelta(days=1)
       next_date = d.strftime("%Y-%m-%d")
@@ -140,6 +140,16 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue("end_time" in d2[0])
       self.assertTrue("date" in d2[0])
       self.assertTrue("room_name" in d2[0])
+
+  def testWeather(self):
+    with server.app.test_request_context():
+      res = json.loads(server.weather.retrieve_weather_data().data.decode('utf8'))
+      self.asserttrue(len(res) > 0)
+      s = res['weather_data']
+      parts = ["base", "clouds", "cod", "coord", "dt", "id", "main", "name",
+               "sys", "visibility", "weather", "wind"]
+      for i in parts:
+        self.assertTrue(i in s)
 
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
