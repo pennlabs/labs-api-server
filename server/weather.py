@@ -11,7 +11,7 @@ def retrieve_weather_data():
     Stores data in a cache whenever data is retrieved; cache is updated
     if it has not been updated within 10 minutes.
     '''
-    f = open('.cache', 'r')
+    f = open('.cache', 'w+')
     APPID = read_api_key()
 
     url = 'http://api.openweathermap.org/data/2.5/weather?q=Philadelphia&units=imperial&APPID=%s' % APPID
@@ -35,7 +35,7 @@ def retrieve_weather_data():
             return jsonify({'weather_data': ast.literal_eval(cache[1])})
     else:
         g = open('.cache', 'w')
-        update_file(g, d, url)
+        json = update_file(g, d, url)
         g.close()
         return jsonify({'weather_data': json})
 
