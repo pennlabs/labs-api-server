@@ -396,6 +396,32 @@ Returns all the available rooms on a given date in a specified building. Date is
     </tbody>
 </table>
 
+## Weather
+
+### Current Weather
+Retrieves the current weather in Philly via the <a href="http://openweathermap.org/api">Open Weather Map API</a>.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/weather/</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ## Transit
 
 ### Routing
