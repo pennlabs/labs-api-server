@@ -356,7 +356,7 @@ Lists all the buildings with study rooms along with their corresponding ID's.
 </table>
 
 ### Available Rooms in One Building or All Buildings
-Returns all the available rooms on a given date in a specified building. If <code>id</code> is not specified, API will list all the avaiable rooms in all buildings.
+Returns all the available rooms on a given date in a specified building. Date is the format <code>YYYY-MM-DD</code> If <code>id</code> is not specified, API will list all the avaiable rooms in all buildings.
 
 <table>
     <tbody>

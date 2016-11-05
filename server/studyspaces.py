@@ -12,7 +12,7 @@ def parse_times(date):
         /studyspaces/avail/<date> gives all available
         /studyspaces/avail/<date>?id=<id> gives the avaiable room with <id>
     """
-    d = get_id_dict()
+    d = studyspaces.get_id_dict()
     if 'id' in request.args:
         id = request.args['id']
         try:
@@ -20,11 +20,11 @@ def parse_times(date):
         except KeyError:
             # check for invalid ID's
             return jsonify({'error': "Invalid ID number."})
-        return jsonify({'studyspaces': extract_times(id, date, name})
+        return jsonify({'studyspaces': studyspaces.extract_times(id, date, name)})
     else:
         m = []
         for element in d:
-            m += extract_times(element, date, d[element])
+            m += studyspaces.extract_times(element, date, d[element])
         return jsonify({'studyspaces': m})
 
 
@@ -33,4 +33,4 @@ def display_id_pairs():
     """
     Returns JSON containing which ID corresponds to what room.
     """
-    return jsonify({'studyspaces': get_id_json()})
+    return jsonify({'studyspaces': studyspaces.get_id_json()})
