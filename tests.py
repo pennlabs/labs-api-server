@@ -1,6 +1,7 @@
 import unittest
 import server
 import json
+import datetime
 
 
 ## Fake
@@ -117,6 +118,28 @@ class MobileAppApiTests(unittest.TestCase):
     with server.app.test_request_context():
       res = json.loads(server.laundry.hall(26).data.decode('utf8'))
       self.assertEquals(res['hall_name'], 'Harrison-24th FL')
+
+  def testStudyspacesIDs(self):
+    with server.app.test_request_context():
+      res = json.loads(server.studyspaces.display_id_pairs().data.decode('utf8'))
+      self.assertTrue(len(res) > 0)
+      for i in res['studyspaces']:
+        self.assertTrue(i['id'] > 0)
+        self.assertTrue(i['name'] != '')
+        self.assertTrue(i['url'] != '')
+
+  def test_extraction(self):
+    with server.app.test_request_context():
+      d = datetime.datetime.now() + datetime.timedelta(days=1)
+      next_date = d.strftime("%Y-%m-%d")
+      res = json.loads(server.studyspaces.parse_times(next_date).data.decode('utf8'))
+      self.assertTrue(len(res) > 0)
+      d2 = res['studyspaces']
+      self.assertTrue("building" in d2[0])
+      self.assertTrue("start_time" in d2[0])
+      self.assertTrue("end_time" in d2[0])
+      self.assertTrue("date" in d2[0])
+      self.assertTrue("room_name" in d2[0])
 
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
