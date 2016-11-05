@@ -128,7 +128,7 @@ class MobileAppApiTests(unittest.TestCase):
         self.assertTrue(i['name'] != '')
         self.assertTrue(i['url'] != '')
 
-  def test_extraction(self):
+  def testExtraction(self):
     with server.app.test_request_context():
       d = datetime.datetime.now() + datetime.timedelta(days=1)
       next_date = d.strftime("%Y-%m-%d")
@@ -146,19 +146,19 @@ class MobileAppApiTests(unittest.TestCase):
       authToken = server.auth.auth()
       self.assertEquals(AUTH_TOKEN, authToken)
 
-  def test_token_validation(self):
+  def testTokenValidation(self):
     with server.app.test_request_context(headers=authHeaders):
       server.auth.auth()
       res = json.loads(server.auth.validate(AUTH_TOKEN).data.decode('utf8'))
       self.assertEquals(res['status'], 'valid')
 
-  def test_invalid_token_validation(self):
+  def testInvalidTokenValidation(self):
     with server.app.test_request_context(headers=authHeaders):
       server.auth.auth()
       res = json.loads(server.auth.validate("badtoken").data.decode('utf8'))
       self.assertEquals(res['status'], 'invalid')
 
-  def test_token_validation_no_https(self):
+  def testTokenValidationNoHttps(self):
     with server.app.test_request_context(headers=authHeaders):
       server.app.config['TESTING'] = False
       server.auth.auth()
