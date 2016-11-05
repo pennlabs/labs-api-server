@@ -405,7 +405,7 @@ Retrieves the current weather in Philly via the <a href="http://openweathermap.o
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/weather/</td>
+            <td><code>http://api.pennlabs.org/weather/</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -422,6 +422,7 @@ Retrieves the current weather in Philly via the <a href="http://openweathermap.o
     </tbody>
 </table>
 
+#### <a href="weather.json">Example</a>
 ## Transit
 
 ### Routing
