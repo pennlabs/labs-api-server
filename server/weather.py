@@ -18,6 +18,6 @@ def retrieve_weather_data():
         json = requests.get(url).json()
         return {'weather_data': json}
 
-    td = datetime.timedelta(seconds=50)
+    td = datetime.timedelta(seconds=600)
 
     return cached_route('weather', td, get_data)
