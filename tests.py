@@ -128,7 +128,7 @@ class MobileAppApiTests(unittest.TestCase):
         self.assertTrue(i['name'] != '')
         self.assertTrue(i['url'] != '')
 
-  def test_extraction(self):
+  def testStudyspaceExtraction(self):
     with server.app.test_request_context():
       d = datetime.datetime.now() + datetime.timedelta(days=1)
       next_date = d.strftime("%Y-%m-%d")
@@ -141,24 +141,42 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue("date" in d2[0])
       self.assertTrue("room_name" in d2[0])
 
+  def testWeather(self):
+    with server.app.test_request_context():
+      res = json.loads(server.weather.retrieve_weather_data().data.decode('utf8'))
+      self.assertTrue(len(res) > 0)
+      s = res['weather_data']
+      self.assertTrue("clouds" in s)
+      self.assertTrue("name" in s)
+      self.assertTrue("coord" in s)
+      self.assertTrue("sys" in s)
+      self.assertTrue("base" in s)
+      self.assertTrue("visibility" in s)
+      self.assertTrue("cod" in s)
+      self.assertTrue("weather" in s)
+      self.assertTrue("dt" in s)
+      self.assertTrue("main" in s)
+      self.assertTrue("id" in s)
+      self.assertTrue("wind" in s)
+
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
       authToken = server.auth.auth()
       self.assertEquals(AUTH_TOKEN, authToken)
 
-  def test_token_validation(self):
+  def testTokenValidation(self):
     with server.app.test_request_context(headers=authHeaders):
       server.auth.auth()
       res = json.loads(server.auth.validate(AUTH_TOKEN).data.decode('utf8'))
       self.assertEquals(res['status'], 'valid')
 
-  def test_invalid_token_validation(self):
+  def testInvalidTokenValidation(self):
     with server.app.test_request_context(headers=authHeaders):
       server.auth.auth()
       res = json.loads(server.auth.validate("badtoken").data.decode('utf8'))
       self.assertEquals(res['status'], 'invalid')
 
-  def test_token_validation_no_https(self):
+  def testTokenValidationNoHttps(self):
     with server.app.test_request_context(headers=authHeaders):
       server.app.config['TESTING'] = False
       server.auth.auth()
