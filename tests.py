@@ -147,7 +147,18 @@ class MobileAppApiTests(unittest.TestCase):
       self.assertTrue(len(res) > 0)
       s = res['weather_data']
       print s
+      self.assertTrue("clouds" in s)
+      self.assertTrue("name" in s)
+      self.assertTrue("coord" in s)
+      self.assertTrue("sys" in s)
+      self.assertTrue("base" in s)
+      self.assertTrue("visibility" in s)
       self.assertTrue("cod" in s)
+      self.assertTrue("weather" in s)
+      self.assertTrue("dt" in s)
+      self.assertTrue("main" in s)
+      self.assertTrue("id" in s)
+      self.assertTrue("wind" in s)
 
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
