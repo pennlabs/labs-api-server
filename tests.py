@@ -146,6 +146,7 @@ class MobileAppApiTests(unittest.TestCase):
       res = json.loads(server.weather.retrieve_weather_data().data.decode('utf8'))
       self.assertTrue(len(res) > 0)
       s = res['weather_data']
+      print s
       self.assertTrue("cod" in s)
 
   def testAuth(self):

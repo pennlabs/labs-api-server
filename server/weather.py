@@ -11,10 +11,10 @@ def retrieve_weather_data():
     Stores data in a cache whenever data is retrieved; cache is updated
     if it has not been updated within 10 minutes.
     '''
-    APPID = os.getenv('APPID')
+    OWM_API_KEY = os.getenv('OWM_API_KEY')
 
     def get_data():
-        url = 'http://api.openweathermap.org/data/2.5/weather?q=Philadelphia&units=imperial&APPID=%s' % APPID
+        url = 'http://api.openweathermap.org/data/2.5/weather?q=Philadelphia&units=imperial&APPID=%s' % OWM_API_KEY
         json = requests.get(url).json()
         return {'weather_data': json}
 
