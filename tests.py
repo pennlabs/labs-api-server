@@ -161,7 +161,7 @@ class MobileAppApiTests(unittest.TestCase):
 
   def testCalendarToday(self):
     with server.app.test_request_context():
-      res = json.loads(server.calendar.pull_today())
+      res = json.loads(server.calendar3year.pull_today().data.decode('utf8'))
       s = res['calendar']
       today = datetime.datetime.now().date()
       for event in s:
@@ -169,19 +169,20 @@ class MobileAppApiTests(unittest.TestCase):
         self.assertTrue("name" in event)
         self.assertTrue("start" in event)
         d = datetime.datetime.strptime(event['start'], "%Y-%m-%d").date()
-        self.assertTrue((d - today).total_seconds() > 1209600)
+        self.assertTrue((d - today).total_seconds() <= 1209600)
 
   def testCalendarDate(self):
     with server.app.test_request_context():
-      res = json.loads(server.calendar.pull_date())
-      chosen_date = datetime.date(2017, 7, 4)
+      ind = "2017-01-01"
+      chosen_date = datetime.date(2017, 1, 1)
+      res = json.loads(server.calendar3year.pull_date(ind).data.decode('utf8'))
       s = res['calendar']
       for event in s:
         self.assertTrue("end" in event)
         self.assertTrue("name" in event)
         self.assertTrue("start" in event)
         d = datetime.datetime.strptime(event['start'], "%Y-%m-%d").date()
-        self.assertTrue((d - chosen_date).total_seconds() > 1209600)
+        self.assertTrue((d - chosen_date).total_seconds() <= 1209600)
 
   def testAuth(self):
     with server.app.test_request_context(headers=authHeaders):
