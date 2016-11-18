@@ -1,4 +1,4 @@
-from penn import Transit, Directory, Dining, DiningV2, Registrar, Map, Laundry, StudySpaces
+from penn import Transit, Directory, Dining, DiningV2, Registrar, Map, Laundry, StudySpaces, Calendar
 from os import getenv
 
 din = Dining(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
@@ -9,6 +9,7 @@ map_search = Map(getenv("NEM_USERNAME"), getenv("NEM_PASSWORD"))
 transit = Transit(getenv("TRANSIT_USERNAME"), getenv("TRANSIT_PASSWORD"))
 laundry = Laundry()
 studyspaces = StudySpaces()
+calendar = Calendar()
 depts = {
   "AAMW" : "Art & Arch of Med. World",
   "ACCT" : "Accounting",
