@@ -26,11 +26,13 @@ def search_players(sport_id, year):
     list_to_return = [athlete.__dict__ for athlete in list_players]
     return jsonify({"athletes": list_to_return})
 
+
 @app.route('/athletics/<sport_id>/<year>/roster')
 def return_roster(sport_id, year):
     roster = athletes.get_roster(sport_id, year)
     roster_json = [athlete.__dict__ for athlete in roster]
     return jsonify({"athletes": roster_json})
+
 
 @app.route('/athletics/<sport_id>/<year>/schedule')
 def return_schedule(sport_id, year):
