@@ -422,6 +422,8 @@ Retrieves the current weather in Philly via the <a href="http://openweathermap.o
     </tbody>
 </table>
 
+#### <a href="weather.json">Example</a>
+
 ## Calendar
 
 ### 2-Week Calendar from Current Date
@@ -472,7 +474,6 @@ Given a date in <code>YYYY-MM-DD</code>format, returns all events occurring 2 we
     </tbody>
 </table>
 
-#### <a href="weather.json">Example</a>
 ## Transit
 
 ### Routing
