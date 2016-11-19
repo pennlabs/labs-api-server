@@ -5,7 +5,7 @@ import datetime
 import os
 
 
-@app.route('/weather/', methods=['GET'])
+@app.route('/weather', methods=['GET'])
 def retrieve_weather_data():
     '''Retrieves the current weather from the Open Weather Map API.
     Stores data in a cache whenever data is retrieved; cache is updated

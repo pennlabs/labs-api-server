@@ -21,7 +21,7 @@ def pull_calendar(d):
     return jsonify({'calendar': within_range})
 
 
-@app.route('/calendar', methods=['GET'])
+@app.route('/calendar/', methods=['GET'])
 def pull_today():
     """Returns JSON object with all events 2 weeks from the
     current date.

@@ -405,7 +405,57 @@ Retrieves the current weather in Philly via the <a href="http://openweathermap.o
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/weather/</code></td>
+            <td><code>http://api.pennlabs.org/weather</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+## Calendar
+
+### 2-Week Calendar from Current Date
+Returns all events occurring 2 weeks from the current date.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/calendar/</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### 2-Week Calendar from Given Date
+Given a date in <code>YYYY-MM-DD</code>format, returns all events occurring 2 weeks from that date.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/calendar/{date}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
