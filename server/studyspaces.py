@@ -20,7 +20,9 @@ def parse_times(date):
         except KeyError:
             # check for invalid ID's
             return jsonify({'error': "Invalid ID number."})
-        return jsonify({'studyspaces': studyspaces.extract_times(id, date, name)})
+        return jsonify({
+            'studyspaces': studyspaces.extract_times(id, date, name)
+        })
     else:
         m = []
         for element in d:

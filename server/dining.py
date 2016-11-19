@@ -34,8 +34,8 @@ def retrieve_menu_v2(venue_id, date):
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
     td = datetime.timedelta(days=daysTillWeek)
-    return cached_route('dining:v2:menu:%s:%s' %
-                        (venue_id, date), td, get_data)
+    return cached_route('dining:v2:menu:%s:%s' % (venue_id, date), td,
+                        get_data)
 
 
 @app.route('/dining/v2/item/<item_id>', methods=['GET'])
