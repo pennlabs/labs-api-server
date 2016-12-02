@@ -18,3 +18,11 @@ def hall(hall_no):
         return jsonify(laundry.hall_status(int(hall_no)))
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
+
+@app.route('/laundry/usage/<hall_no>', methods=['GET'])
+def usage(hall_no):
+    days = laundry.machine_usage(int(hall_no))
+    try:
+        return jsonify({"days": days})
+    except HTTPError:
+        return jsonify({'error': 'The laundry api is currently unavailable.'})
