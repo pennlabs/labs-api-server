@@ -329,6 +329,29 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     </tbody>
 </table>
 
+### Laundry Usage
+Get information about the usage of laundry machines in a certain hall.
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>http://api.pennlabs.org/laundry/usage/{hall_no}</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ## Study Spaces
 
 ### All Buildings
