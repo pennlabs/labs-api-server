@@ -110,7 +110,7 @@ Return a list of all dining venues
 </table>
 
 ### Weekly Menu
-Return the week's menus for the venue with venue_id
+Return the week's menus for the venue with `venue_id`
 
 <table>
     <tbody>
@@ -134,7 +134,7 @@ Return the week's menus for the venue with venue_id
 </table>
 
 ### Daily Menu
-Return the daily menu for the venue with venue_id
+Return the daily menu for the venue with `venue_id`
 
 <table>
     <tbody>
@@ -207,7 +207,7 @@ Search by name in the Penn Directory
 GET: `https://api.pennlabs.org/directory/search?name=Alex%20Wissmann`
 
 ### Person By ID
-Return the person with person_id
+Return the person with `person_id`
 
 <table>
     <tbody>
