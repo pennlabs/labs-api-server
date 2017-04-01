@@ -497,7 +497,7 @@ Given a date in <code>YYYY-MM-DD</code>format, returns all events occurring 2 we
     </tbody>
 </table>
 
-##Wharton Calendar
+## Wharton Calendar
 
 ### Get Today's Events
 Returns a list of events for today with the start time, end time, title, relevant link, and date.
