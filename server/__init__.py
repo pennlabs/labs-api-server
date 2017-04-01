@@ -21,6 +21,7 @@ import server.nso
 import server.studyspaces
 import server.weather
 import server.calendar3year
+import server.spikeCalendar
 
 if __name__ == '__main__':
     app.run(debug=True)
