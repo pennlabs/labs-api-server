@@ -8,7 +8,7 @@ Intended for internal use at Penn Labs to speed up queries to Open Data.
 
 Setup
 -----
-* Install [redis](http://redis.io/)
+* Install [redis](https://redis.io/)
 * Create new virtualenv
 * Install requirements using `pip install -r requirements.txt`
 * Run mobile API server with `python runserver.py`
@@ -22,7 +22,7 @@ Use a word or phrase to search for a Penn building
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/buildings/search</td>
+            <td><code>https://api.pennlabs.org/buildings/search</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -65,7 +65,7 @@ Return the building corresponding to the given code
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/buildings/{building_code}</code></td>
+            <td><code>https://api.pennlabs.org/buildings/{building_code}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -92,7 +92,7 @@ Return a list of all dining venues
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/dining/venues</code></td>
+            <td><code>https://api.pennlabs.org/dining/venues</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -110,13 +110,13 @@ Return a list of all dining venues
 </table>
 
 ### Weekly Menu
-Return the week's menus for the venue with venue_id
+Return the week's menus for the venue with `venue_id`
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/dining/weekly_menu/{venue_id}</code></td>
+            <td><code>https://api.pennlabs.org/dining/weekly_menu/{venue_id}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -134,13 +134,13 @@ Return the week's menus for the venue with venue_id
 </table>
 
 ### Daily Menu
-Return the daily menu for the venue with venue_id
+Return the daily menu for the venue with `venue_id`
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/dining/daily_menu/{venue_id}</td>
+            <td><code>https://api.pennlabs.org/dining/daily_menu/{venue_id}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -166,7 +166,7 @@ Search by name in the Penn Directory
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/directory/search</td>
+            <td><code>https://api.pennlabs.org/directory/search</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -204,16 +204,16 @@ Search by name in the Penn Directory
 
 #### Example
 
-GET: `http://api.pennlabs.org/directory/search?name=Alex%20Wissmann`
+GET: `https://api.pennlabs.org/directory/search?name=Alex%20Wissmann`
 
 ### Person By ID
-Return the person with person_id
+Return the person with `person_id`
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/directory/person/{person_id}</td>
+            <td><code>https://api.pennlabs.org/directory/person/{person_id}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -239,7 +239,7 @@ Search for courses by Department, Course Number, and Section
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/registrar/search</td>
+            <td><code>https://api.pennlabs.org/registrar/search</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -277,7 +277,7 @@ Search for courses by Department, Course Number, and Section
 
 #### Example
 
-GET: `http://api.pennlabs.org/registrar/search?q=cis-110`
+GET: `https://api.pennlabs.org/registrar/search?q=cis-110`
 
 ## Laundry
 
@@ -288,7 +288,7 @@ Return information on all laundry rooms
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/laundry/halls</td>
+            <td><code>https://api.pennlabs.org/laundry/halls</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -312,7 +312,7 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/laundry/hall/{hall_no}</td>
+            <td><code>https://api.pennlabs.org/laundry/hall/{hall_no}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -335,7 +335,7 @@ Get information about the usage of laundry machines in a certain hall.
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/laundry/usage/{hall_no}</td>
+            <td><code>https://api.pennlabs.org/laundry/usage/{hall_no}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -361,7 +361,7 @@ Lists all the buildings with study rooms along with their corresponding ID's.
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/studyspaces/</code></td>
+            <td><code>https://api.pennlabs.org/studyspaces/</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -385,7 +385,7 @@ Returns all the available rooms on a given date in a specified building. Date is
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/studyspaces/{date}</code></td>
+            <td><code>https://api.pennlabs.org/studyspaces/{date}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -428,7 +428,7 @@ Retrieves the current weather in Philly via the <a href="http://openweathermap.o
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/weather</code></td>
+            <td><code>https://api.pennlabs.org/weather</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -456,7 +456,7 @@ Returns all events occurring 2 weeks from the current date.
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/calendar/</code></td>
+            <td><code>https://api.pennlabs.org/calendar/</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -480,7 +480,7 @@ Given a date in <code>YYYY-MM-DD</code>format, returns all events occurring 2 we
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/calendar/{date}</code></td>
+            <td><code>https://api.pennlabs.org/calendar/{date}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -506,7 +506,7 @@ Finds a route, from all Penn Transit routes, which provides the shortest total w
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/transit/routing</td>
+            <td><code>https://api.pennlabs.org/transit/routing</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -557,7 +557,7 @@ Finds a route, from all Penn Transit routes, which provides the shortest total w
 
 #### Example
 
-GET: `http://api.pennlabs.org/transit/routing?latFrom=39.9533568&lonFrom=-75.2161194&latTo=39.9495731&lonTo=-75.12924031`
+GET: `https://api.pennlabs.org/transit/routing?latFrom=39.9533568&lonFrom=-75.2161194&latTo=39.9495731&lonTo=-75.12924031`
 
 ### Stops
 Get information on all stops
@@ -566,7 +566,7 @@ Get information on all stops
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/transit/stops</td>
+            <td><code>https://api.pennlabs.org/transit/stops</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -590,7 +590,7 @@ Get information on all routes. This has the same information as the stops endpoi
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>http://api.pennlabs.org/transit/routes</td>
+            <td><code>https://api.pennlabs.org/transit/routes</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
