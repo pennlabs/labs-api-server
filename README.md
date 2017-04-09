@@ -497,6 +497,57 @@ Given a date in <code>YYYY-MM-DD</code>format, returns all events occurring 2 we
     </tbody>
 </table>
 
+## Wharton Calendar
+
+### Get Today's Events
+Returns a list of events for today with the start time, end time, title, relevant link, and date.
+
+<table>
+    <tbody>
+        <tr>
+	    <td>URL</td>
+	    <td><code>https://api.pennlabs.org/whartonEvents</td>
+	</tr>
+	<tr>
+	    <td>HTTP Methods</td>
+	    <td>GET</td>
+	</tr>
+	<tr>
+	    <td>Response Formats</td>
+	    <td>JSON</td>
+	</tr>
+	<tr>
+	    <td>Parameters</td>
+	    <td>None</td>
+	</tr>
+    </tbody>
+</table>
+
+### Get Events on Date
+Returns a list of events on a given date with the start time, end time, title, relevant link, and date. Date is given in format YYY-MM-DD.
+
+<table>
+    <tbody>
+        <tr>
+	    <td>URL</td>
+	    <td><code>https://api.pennlabs.org/whartonEvents/{date}</td>
+	</tr>
+	<tr>
+	    <td>HTTP Methods</td>
+	    <td>GET</td>
+	</tr>
+	<tr>
+	    <td>Response Formats</td>
+	    <td>JSON</td>
+	</tr>
+	<tr>
+	    <td>Parameters</td>
+	    <td>None</td>
+	</tr>
+    </tbody>
+</table>
+
+
 ## Transit
 
 ### Routing
