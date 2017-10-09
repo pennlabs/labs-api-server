@@ -12,10 +12,10 @@ def all_halls():
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
-@app.route('/laundry/hall/<hall_no>', methods=['GET'])
-def hall(hall_no):
+@app.route('/laundry/hall/<hall_name>', methods=['GET'])
+def hall(hall_name):
     try:
-        return jsonify(laundry.hall_status(int(hall_no)))
+        return jsonify(laundry.hall_status(hall_name))
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
