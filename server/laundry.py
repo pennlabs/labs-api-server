@@ -32,7 +32,9 @@ def two_halls(hall_id, hall_id2):
 @app.route('/laundry/halls/ids', methods=['GET'])
 def id_to_name():
     try:
-        return jsonify({'result': laundry.hall_id_list})
+        return jsonify({
+            "halls": laundry.hall_id_list
+        })
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
