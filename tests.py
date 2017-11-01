@@ -1,4 +1,5 @@
 import unittest
+import mock
 import server
 import json
 import datetime
@@ -114,22 +115,33 @@ class MobileAppApiTests(unittest.TestCase):
 #     self.assertEquals("20th & South", res['path'][-1]['BusStopName'])
 #     self.assertEquals("PennBUS East", res['route_name'])
 
+    def fakeLaundryGet(url, *args, **kwargs):
+        if "suds.kite.upenn.edu" in url:
+            with open("tests/laundry_snapshot.html", "rb") as f:
+                m = mock.MagicMock(content=f.read())
+            return m
+        else:
+            raise NotImplementedError
+
+    @mock.patch("penn.laundry.requests.get", fakeLaundryGet)
     def testLaundryAllHalls(self):
         with server.app.test_request_context():
             res = json.loads(server.laundry.all_halls().data.decode('utf8'))[
                 'halls']
-            self.assertTrue(len(res) > 50)
-            self.assertEquals('Class of 1925 House', res[0]['name'])
-            for i, hall in enumerate(res):
-                self.assertTrue(hall['dryers_available'] >= 0)
-                self.assertTrue(hall['dryers_in_use'] >= 0)
-                self.assertTrue(hall['washers_available'] >= 0)
-                self.assertTrue(hall['washers_in_use'] >= 0)
+            self.assertTrue(len(res) > 45)
+            self.assertTrue('English House' in res)
+            for hall, info in res.items():
+                for t in ['Washers', 'Dryers']:
+                    self.assertTrue(info[t]['running'] >= 0)
+                    self.assertTrue(info[t]['offline'] >= 0)
+                    self.assertTrue(info[t]['out_of_order'] >= 0)
+                    self.assertTrue(info[t]['open'] >= 0)
 
+    @mock.patch("requests.get", fakeLaundryGet)
     def testLaundryOneHall(self):
         with server.app.test_request_context():
-            res = json.loads(server.laundry.hall(26).data.decode('utf8'))
-            self.assertEquals(res['hall_name'], 'Harrison-24th FL')
+            res = json.loads(server.laundry.hall('26').data.decode('utf8'))
+            self.assertEquals(res['hall_name'], 'Harrison Floor 20')
 
     def testLaundryUsage(self):
         with server.app.test_request_context():
