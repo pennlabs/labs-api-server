@@ -131,7 +131,7 @@ class MobileAppApiTests(unittest.TestCase):
             self.assertTrue(len(res) > 45)
             self.assertTrue('English House' in res)
             for hall, info in res.items():
-                for t in ['Washers', 'Dryers']:
+                for t in ['washers', 'dryers']:
                     self.assertTrue(info[t]['running'] >= 0)
                     self.assertTrue(info[t]['offline'] >= 0)
                     self.assertTrue(info[t]['out_of_order'] >= 0)
@@ -140,7 +140,7 @@ class MobileAppApiTests(unittest.TestCase):
     @mock.patch("requests.get", fakeLaundryGet)
     def testLaundryOneHall(self):
         with server.app.test_request_context():
-            res = json.loads(server.laundry.hall('26').data.decode('utf8'))
+            res = json.loads(server.laundry.hall(26).data.decode('utf8'))
             self.assertEquals(res['hall_name'], 'Harrison Floor 20')
 
     def testLaundryUsage(self):
