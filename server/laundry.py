@@ -16,6 +16,8 @@ def all_halls():
 def hall(hall_id):
     try:
         return jsonify(laundry.hall_status(hall_id))
+    except ValueError:
+        return jsonify({'error': 'Invalid hall id passed to server.'})
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
@@ -25,6 +27,8 @@ def two_halls(hall_id, hall_id2):
     try:
         to_ret = {"halls": [laundry.hall_status(hall_id), laundry.hall_status(hall_id2)]}
         return jsonify(to_ret)
+    except ValueError:
+        return jsonify({'error': 'Invalid hall id passed to server.'})
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
