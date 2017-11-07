@@ -3,7 +3,7 @@ import datetime
 from flask import jsonify
 from server import app, sqldb
 from server.models import LaundrySnapshot
-from sqlalchemy import func
+from sqlalchemy import func, exists
 from .penndata import laundry
 from requests.exceptions import HTTPError
 
@@ -58,6 +58,7 @@ def usage(hall_no):
 
 @app.route('/laundry/graph/<int:hall_no>', methods=['GET'])
 def graph(hall_no):
+    save_data()
     now = datetime.datetime.now()
     # python dow is monday = 0, while sql dow is sunday = 0
     dow = (now.today().weekday() + 1) % 7
@@ -76,13 +77,19 @@ def graph(hall_no):
 
 
 def save_data():
-    # make a dict for hall name -> id
-    ids = {x["hall_name"]: x["id"] for x in laundry.hall_id_list}
-    data = laundry.all_status()
     now = datetime.datetime.now()
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     date = now.date()
     time = round((now - midnight).seconds / 60)
+
+    # check if we already have data for this minute
+    # if we do, skip
+    if sqldb.session.query(exists().where((LaundrySnapshot.date == date) & (LaundrySnapshot.time == time))).scalar():
+        return
+
+    # make a dict for hall name -> id
+    ids = {x["hall_name"]: x["id"] for x in laundry.hall_id_list}
+    data = laundry.all_status()
     for name, room in data.items():
         id = ids[name]
         dryers = room["dryers"]["open"]
