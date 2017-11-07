@@ -63,14 +63,22 @@ def graph(hall_no):
     start = now.date() - datetime.timedelta(days=30)
     # python dow is monday = 0, while sql dow is sunday = 0
     dow = (now.today().weekday() + 1) % 7
+    tmw = (dow + 1) % 7
+    # get the laundry information for today based on the day
+    # of week (if today is tuesday, get all the tuesdays
+    # in the past 30 days), group them by time, and include
+    # the first 3 hours of the next day
     data = sqldb.session.query(
+        LaundrySnapshot.date,
         LaundrySnapshot.time,
         func.sum(LaundrySnapshot.washers).label("all_washers"),
         func.sum(LaundrySnapshot.dryers).label("all_dryers"),
         func.sum(LaundrySnapshot.total_washers).label("all_total_washers"),
         func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
     ).filter((LaundrySnapshot.room == hall_no) &
-             (func.strftime("%w", LaundrySnapshot.date) == str(dow)) &
+             ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
+              ((LaundrySnapshot.time <= 239) &
+               (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
              (LaundrySnapshot.date >= start)) \
      .group_by(LaundrySnapshot.time) \
      .order_by(LaundrySnapshot.time).all()
@@ -82,10 +90,14 @@ def graph(hall_no):
     washer_total = {k: 0 for k in range(27)}
     dryer_total = {k: 0 for k in range(27)}
     for x in data:
-        washer_points[int(x["time"] / 60)] = x["all_washers"]
-        dryer_points[int(x["time"] / 60)] = x["all_dryers"]
-        washer_total[int(x["time"] / 60)] += 1
-        dryer_total[int(x["time"] / 60)] += 1
+        hour = int(x["time"] / 60)
+        # if the value is for tomorrow, add 24 hours
+        if x["date"].weekday() == dow:
+            hour += 24
+        washer_points[hour] = x["all_washers"]
+        dryer_points[hour] = x["all_dryers"]
+        washer_total[hour] += 1
+        dryer_total[hour] += 1
     return jsonify({
         "hall_name": laundry.id_to_hall[hall_no],
         "location": laundry.id_to_location[hall_no],
