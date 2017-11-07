@@ -1,5 +1,6 @@
 from flask import Flask
 from server.models import sqldb
+from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import redis
 
@@ -29,6 +30,11 @@ import server.nso
 import server.studyspaces
 import server.weather
 import server.calendar3year
+
+# scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(server.laundry.save_data, 'interval', minutes=15)
+scheduler.start()
 
 if __name__ == '__main__':
     app.run(debug=True)

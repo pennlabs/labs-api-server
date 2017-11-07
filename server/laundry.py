@@ -60,7 +60,7 @@ def usage(hall_no):
 @app.route('/laundry/graph/<int:hall_no>', methods=['GET'])
 def graph(hall_no):
     now = datetime.datetime.now()
-    start = now - datetime.timedelta(days=30)
+    start = now.date() - datetime.timedelta(days=30)
     # python dow is monday = 0, while sql dow is sunday = 0
     dow = (now.today().weekday() + 1) % 7
     data = sqldb.session.query(
