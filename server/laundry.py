@@ -67,7 +67,7 @@ def graph(hall_no):
     # get the laundry information for today based on the day
     # of week (if today is tuesday, get all the tuesdays
     # in the past 30 days), group them by time, and include
-    # the first 3 hours of the next day
+    # the first 2 hours of the next day
     data = sqldb.session.query(
         LaundrySnapshot.date,
         LaundrySnapshot.time,
@@ -77,11 +77,11 @@ def graph(hall_no):
         func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
     ).filter((LaundrySnapshot.room == hall_no) &
              ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
-              ((LaundrySnapshot.time <= 239) &
+              ((LaundrySnapshot.time <= 180 - 1) &
                (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
              (LaundrySnapshot.date >= start)) \
-     .group_by(LaundrySnapshot.time) \
-     .order_by(LaundrySnapshot.time).all()
+     .group_by(LaundrySnapshot.date, LaundrySnapshot.time) \
+     .order_by(LaundrySnapshot.date, LaundrySnapshot.time).all()
     data = [x._asdict() for x in data]
     all_dryers = [x["all_total_dryers"] for x in data]
     all_washers = [x["all_total_washers"] for x in data]
@@ -94,8 +94,8 @@ def graph(hall_no):
         # if the value is for tomorrow, add 24 hours
         if x["date"].weekday() == dow:
             hour += 24
-        washer_points[hour] = x["all_washers"]
-        dryer_points[hour] = x["all_dryers"]
+        washer_points[hour] += x["all_washers"]
+        dryer_points[hour] += x["all_dryers"]
         washer_total[hour] += 1
         dryer_total[hour] += 1
     return jsonify({
@@ -104,10 +104,10 @@ def graph(hall_no):
         "day_of_week": calendar.day_name[now.today().weekday()],
         "start_date": start.strftime("%m-%d-%y"),
         "end_date": now.strftime("%m-%d-%y"),
-        "number_of_dryers": sum(all_dryers) / len(all_dryers) if len(all_dryers) > 0 else 0,
-        "number_of_washers": sum(all_washers) / len(all_washers) if len(all_washers) > 0 else 0,
-        "washer_data": {x: washer_points[x] / washer_total[x] if washer_total[x] else 0 for x in washer_points},
-        "dryer_data": {x: dryer_points[x] / dryer_total[x] if dryer_total[x] else 0 for x in dryer_points}
+        "number_of_dryers": round(sum(all_dryers) / float(len(all_dryers)), 3) if len(all_dryers) > 0 else 0,
+        "number_of_washers": round(sum(all_washers) / float(len(all_washers)), 3) if len(all_washers) > 0 else 0,
+        "washer_data": {x: round(washer_points[x] / float(washer_total[x]), 3) if washer_total[x] else 0 for x in washer_points},
+        "dryer_data": {x: round(dryer_points[x] / float(dryer_total[x]), 3) if dryer_total[x] else 0 for x in dryer_points}
     })
 
 
