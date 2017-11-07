@@ -1,8 +1,16 @@
 from flask import Flask
+from server.models import sqldb
 import os
 import redis
 
 app = Flask(__name__)
+
+# sql
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+sqldb.init_app(app)
+with app.app_context():
+    sqldb.create_all()
 
 # redis
 db = redis.StrictRedis(host='localhost', port=6379, db=0)

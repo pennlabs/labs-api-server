@@ -1,6 +1,10 @@
+import datetime
+
 from flask import jsonify
-from server import app
-from .penndata import *
+from server import app, sqldb
+from server.models import LaundrySnapshot
+from sqlalchemy import func
+from .penndata import laundry
 from requests.exceptions import HTTPError
 
 
@@ -50,3 +54,49 @@ def usage(hall_no):
         return jsonify({"days": days})
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
+
+
+@app.route('/laundry/graph/<int:hall_no>', methods=['GET'])
+def graph(hall_no):
+    now = datetime.datetime.now()
+    # python dow is monday = 0, while sql dow is sunday = 0
+    dow = (now.today().weekday() + 1) % 7
+    data = sqldb.session.query(
+        LaundrySnapshot.time,
+        func.sum(LaundrySnapshot.washers).label("all_washers"),
+        func.sum(LaundrySnapshot.dryers).label("all_dryers"),
+        func.sum(LaundrySnapshot.total_washers).label("all_total_washers"),
+        func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
+    ).filter(LaundrySnapshot.room == hall_no,
+             func.strftime("%w", LaundrySnapshot.date) == str(dow)) \
+     .group_by(LaundrySnapshot.time) \
+     .order_by(LaundrySnapshot.time).all()
+    data = [x._asdict() for x in data]
+    return jsonify({"result": data})
+
+
+def save_data():
+    # make a dict for hall name -> id
+    ids = {x["hall_name"]: x["id"] for x in laundry.hall_id_list}
+    data = laundry.all_status()
+    now = datetime.datetime.now()
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    date = now.date()
+    time = round((now - midnight).seconds / 60)
+    for name, room in data.items():
+        id = ids[name]
+        dryers = room["dryers"]["open"]
+        washers = room["washers"]["open"]
+        total_dryers = sum([room["dryers"][x] for x in ["offline", "open", "out_of_order", "running"]])
+        total_washers = sum([room["washers"][x] for x in ["offline", "open", "out_of_order", "running"]])
+        item = LaundrySnapshot(
+            date=date,
+            time=time,
+            room=id,
+            washers=washers,
+            dryers=dryers,
+            total_washers=total_washers,
+            total_dryers=total_dryers
+        )
+        sqldb.session.add(item)
+    sqldb.session.commit()
