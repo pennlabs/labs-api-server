@@ -57,6 +57,10 @@ def usage(hall_no):
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
+def safe_division(a, b):
+    return round(a / float(b), 3) if b > 0 else 0
+
+
 @app.route('/laundry/graph/<int:hall_no>', methods=['GET'])
 def graph(hall_no):
     now = datetime.datetime.now()
@@ -104,10 +108,10 @@ def graph(hall_no):
         "day_of_week": calendar.day_name[now.today().weekday()],
         "start_date": start.strftime("%m-%d-%y"),
         "end_date": now.strftime("%m-%d-%y"),
-        "number_of_dryers": round(sum(all_dryers) / float(len(all_dryers)), 3) if len(all_dryers) > 0 else 0,
-        "number_of_washers": round(sum(all_washers) / float(len(all_washers)), 3) if len(all_washers) > 0 else 0,
-        "washer_data": {x: round(washer_points[x] / float(washer_total[x]), 3) if washer_total[x] else 0 for x in washer_points},
-        "dryer_data": {x: round(dryer_points[x] / float(dryer_total[x]), 3) if dryer_total[x] else 0 for x in dryer_points}
+        "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
+        "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
+        "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
+        "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
     })
 
 
