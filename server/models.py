@@ -5,7 +5,7 @@ sqldb = SQLAlchemy()
 
 class LaundrySnapshot(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    date = sqldb.Column(sqldb.Date, nullable=False)
+    date = sqldb.Column(sqldb.Date, nullable=False, index=True)
     time = sqldb.Column(sqldb.Integer, nullable=False)
     room = sqldb.Column(sqldb.Integer, nullable=False)
     washers = sqldb.Column(sqldb.Integer, nullable=False)
