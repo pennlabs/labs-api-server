@@ -58,10 +58,16 @@ def safe_division(a, b):
     return round(a / float(b), 3) if b > 0 else 0
 
 
-@app.route('/laundry/usage/<int:hall_no>', methods=['GET'])
-def usage(hall_no):
+@app.route('/laundry/usage/<int:hall_no>')
+def usage_shortcut(hall_no):
     now = datetime.datetime.now()
-    start = now.date() - datetime.timedelta(days=30)
+    return usage(hall_no, now.day, now.month, now.year)
+
+
+@app.route('/laundry/usage/<int:hall_no>/<int:month>-<int:day>-<int:year>', methods=['GET'])
+def usage(hall_no, day, month, year):
+    now = datetime.date(year, month, day)
+    start = now - datetime.timedelta(days=30)
     # python dow is monday = 0, while sql dow is sunday = 0
     dow = (now.today().weekday() + 1) % 7
     tmw = (dow + 1) % 7
