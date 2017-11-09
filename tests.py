@@ -145,11 +145,14 @@ class MobileAppApiTests(unittest.TestCase):
 
     def testLaundryUsage(self):
         with server.app.test_request_context():
-            res = json.loads(server.laundry.usage(20).data.decode('utf8'))
-            d = ['Low', 'Medium', 'High', 'Very High', 'No Data']
-            for i in res['days']:
-                for hour in res['days'][i]:
-                    self.assertTrue(hour in d)
+            request = server.laundry.usage(20, 1, 1, 2017)
+            res = json.loads(request.data.decode('utf8'))
+            self.assertEquals(res['hall_name'], 'Harrison Floor 08')
+            self.assertEquals(res['location'], 'Harrison')
+            self.assertEquals(res['day_of_week'], 'Sunday')
+            self.assertEquals(res['end_date'], '01-01-2017')
+            self.assertEquals(len(res['washer_data']), 27)
+            self.assertEquals(len(res['dryer_data']), 27)
 
     def testStudyspacesIDs(self):
         with server.app.test_request_context():
