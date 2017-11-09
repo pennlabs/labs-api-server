@@ -65,7 +65,7 @@ def usage(hall_no, day, month, year):
         now = datetime.date(year, month, day)
         start = now - datetime.timedelta(days=30)
         # python dow is monday = 0, while sql dow is sunday = 0
-        dow = (now.today().weekday() + 1) % 7
+        dow = (now.weekday() + 1) % 7
         tmw = (dow + 1) % 7
         # get the laundry information for today based on the day
         # of week (if today is tuesday, get all the tuesdays
@@ -104,7 +104,7 @@ def usage(hall_no, day, month, year):
         return {
             "hall_name": laundry.id_to_hall[hall_no],
             "location": laundry.id_to_location[hall_no],
-            "day_of_week": calendar.day_name[now.today().weekday()],
+            "day_of_week": calendar.day_name[now.weekday()],
             "start_date": start.strftime("%m-%d-%y"),
             "end_date": now.strftime("%m-%d-%y"),
             "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
