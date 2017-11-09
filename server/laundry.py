@@ -6,6 +6,7 @@ from server import app, sqldb
 from server.models import LaundrySnapshot
 from sqlalchemy import func, exists
 from .penndata import laundry
+from .base import cached_route
 from requests.exceptions import HTTPError
 
 
@@ -60,56 +61,60 @@ def usage_shortcut(hall_no):
 
 @app.route('/laundry/usage/<int:hall_no>/<int:month>-<int:day>-<int:year>', methods=['GET'])
 def usage(hall_no, day, month, year):
-    now = datetime.date(year, month, day)
-    start = now - datetime.timedelta(days=30)
-    # python dow is monday = 0, while sql dow is sunday = 0
-    dow = (now.today().weekday() + 1) % 7
-    tmw = (dow + 1) % 7
-    # get the laundry information for today based on the day
-    # of week (if today is tuesday, get all the tuesdays
-    # in the past 30 days), group them by time, and include
-    # the first 2 hours of the next day
-    data = sqldb.session.query(
-        LaundrySnapshot.date,
-        LaundrySnapshot.time,
-        func.sum(LaundrySnapshot.washers).label("all_washers"),
-        func.sum(LaundrySnapshot.dryers).label("all_dryers"),
-        func.sum(LaundrySnapshot.total_washers).label("all_total_washers"),
-        func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
-    ).filter((LaundrySnapshot.room == hall_no) &
-             ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
-              ((LaundrySnapshot.time <= 180 - 1) &
-               (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
-             (LaundrySnapshot.date >= start)) \
-     .group_by(LaundrySnapshot.date, LaundrySnapshot.time) \
-     .order_by(LaundrySnapshot.date, LaundrySnapshot.time).all()
-    data = [x._asdict() for x in data]
-    all_dryers = [x["all_total_dryers"] for x in data]
-    all_washers = [x["all_total_washers"] for x in data]
-    washer_points = {k: 0 for k in range(27)}
-    dryer_points = {k: 0 for k in range(27)}
-    washer_total = {k: 0 for k in range(27)}
-    dryer_total = {k: 0 for k in range(27)}
-    for x in data:
-        hour = int(x["time"] / 60)
-        # if the value is for tomorrow, add 24 hours
-        if x["date"].weekday() == dow:
-            hour += 24
-        washer_points[hour] += x["all_washers"]
-        dryer_points[hour] += x["all_dryers"]
-        washer_total[hour] += 1
-        dryer_total[hour] += 1
-    return jsonify({
-        "hall_name": laundry.id_to_hall[hall_no],
-        "location": laundry.id_to_location[hall_no],
-        "day_of_week": calendar.day_name[now.today().weekday()],
-        "start_date": start.strftime("%m-%d-%y"),
-        "end_date": now.strftime("%m-%d-%y"),
-        "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
-        "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
-        "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
-        "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
-    })
+    def get_data():
+        now = datetime.date(year, month, day)
+        start = now - datetime.timedelta(days=30)
+        # python dow is monday = 0, while sql dow is sunday = 0
+        dow = (now.today().weekday() + 1) % 7
+        tmw = (dow + 1) % 7
+        # get the laundry information for today based on the day
+        # of week (if today is tuesday, get all the tuesdays
+        # in the past 30 days), group them by time, and include
+        # the first 2 hours of the next day
+        data = sqldb.session.query(
+            LaundrySnapshot.date,
+            LaundrySnapshot.time,
+            func.sum(LaundrySnapshot.washers).label("all_washers"),
+            func.sum(LaundrySnapshot.dryers).label("all_dryers"),
+            func.sum(LaundrySnapshot.total_washers).label("all_total_washers"),
+            func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
+        ).filter((LaundrySnapshot.room == hall_no) &
+                 ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
+                  ((LaundrySnapshot.time <= 180 - 1) &
+                   (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
+                 (LaundrySnapshot.date >= start)) \
+         .group_by(LaundrySnapshot.date, LaundrySnapshot.time) \
+         .order_by(LaundrySnapshot.date, LaundrySnapshot.time).all()
+        data = [x._asdict() for x in data]
+        all_dryers = [x["all_total_dryers"] for x in data]
+        all_washers = [x["all_total_washers"] for x in data]
+        washer_points = {k: 0 for k in range(27)}
+        dryer_points = {k: 0 for k in range(27)}
+        washer_total = {k: 0 for k in range(27)}
+        dryer_total = {k: 0 for k in range(27)}
+        for x in data:
+            hour = int(x["time"] / 60)
+            # if the value is for tomorrow, add 24 hours
+            if x["date"].weekday() == dow:
+                hour += 24
+            washer_points[hour] += x["all_washers"]
+            dryer_points[hour] += x["all_dryers"]
+            washer_total[hour] += 1
+            dryer_total[hour] += 1
+        return {
+            "hall_name": laundry.id_to_hall[hall_no],
+            "location": laundry.id_to_location[hall_no],
+            "day_of_week": calendar.day_name[now.today().weekday()],
+            "start_date": start.strftime("%m-%d-%y"),
+            "end_date": now.strftime("%m-%d-%y"),
+            "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
+            "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
+            "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
+            "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
+        }
+
+    td = datetime.timedelta(minutes=15)
+    return cached_route('laundry:usage:%s-%s-%s' % (year, month, day), td, get_data)
 
 
 def save_data():
