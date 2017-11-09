@@ -48,15 +48,6 @@ def id_to_name():
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
-@app.route('/laundry/usage/<int:hall_no>', methods=['GET'])
-def usage(hall_no):
-    days = laundry.machine_usage(hall_no)
-    try:
-        return jsonify({"days": days})
-    except HTTPError:
-        return jsonify({'error': 'The laundry api is currently unavailable.'})
-
-
 def safe_max(a):
     if not a:
         return 0
@@ -67,8 +58,8 @@ def safe_division(a, b):
     return round(a / float(b), 3) if b > 0 else 0
 
 
-@app.route('/laundry/graph/<int:hall_no>', methods=['GET'])
-def graph(hall_no):
+@app.route('/laundry/usage/<int:hall_no>', methods=['GET'])
+def usage(hall_no):
     now = datetime.datetime.now()
     start = now.date() - datetime.timedelta(days=30)
     # python dow is monday = 0, while sql dow is sunday = 0
