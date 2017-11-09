@@ -137,8 +137,8 @@ def save_data():
             id = ids[name]
             dryers = room["dryers"]["open"]
             washers = room["washers"]["open"]
-            total_dryers = sum([room["dryers"][x] for x in ["open", "running"]])
-            total_washers = sum([room["washers"][x] for x in ["open", "running"]])
+            total_dryers = sum([room["dryers"][x] for x in ["open", "running", "offline", "out_of_order"]])
+            total_washers = sum([room["washers"][x] for x in ["open", "running", "offline", "out_of_order"]])
             item = LaundrySnapshot(
                 date=date,
                 time=time,
