@@ -48,12 +48,6 @@ def id_to_name():
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
-def safe_max(a):
-    if not a:
-        return 0
-    return max(a)
-
-
 def safe_division(a, b):
     return round(a / float(b), 3) if b > 0 else 0
 
@@ -111,8 +105,8 @@ def usage(hall_no, day, month, year):
         "day_of_week": calendar.day_name[now.today().weekday()],
         "start_date": start.strftime("%m-%d-%y"),
         "end_date": now.strftime("%m-%d-%y"),
-        "number_of_dryers": safe_max(all_dryers),
-        "number_of_washers": safe_max(all_washers),
+        "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
+        "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
         "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
         "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
     })
