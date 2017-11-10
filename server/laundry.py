@@ -63,11 +63,16 @@ def usage_shortcut(hall_no):
 @app.route('/laundry/usage/<int:hall_no>/<int:month>-<int:day>-<int:year>', methods=['GET'])
 def usage(hall_no, day, month, year):
     def get_data():
+        # turn date info into a date object
+        # find start range by subtracting 30 days
         now = datetime.date(year, month, day)
         start = now - datetime.timedelta(days=30)
+
+        # get the current day of the week for today and tomorrow
         # python dow is monday = 0, while sql dow is sunday = 0
         dow = (now.weekday() + 1) % 7
         tmw = (dow + 1) % 7
+
         # get the laundry information for today based on the day
         # of week (if today is tuesday, get all the tuesdays
         # in the past 30 days), group them by time, and include
@@ -119,6 +124,9 @@ def usage(hall_no, day, month, year):
 
 
 def save_data():
+    """Retrieves current laundry info and saves it into the database."""
+
+    # get the number of minutes since midnight
     now = datetime.datetime.now()
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     date = now.date()
