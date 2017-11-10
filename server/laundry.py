@@ -2,12 +2,13 @@ import datetime
 import calendar
 
 from flask import jsonify
-from server import app, sqldb
-from server.models import LaundrySnapshot
 from sqlalchemy import func, exists
+from requests.exceptions import HTTPError
+
+from . import app, sqldb
+from .models import LaundrySnapshot
 from .penndata import laundry
 from .base import cached_route
-from requests.exceptions import HTTPError
 
 
 @app.route('/laundry/halls', methods=['GET'])
