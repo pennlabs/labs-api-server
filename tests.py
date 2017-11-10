@@ -130,7 +130,7 @@ class MobileAppApiTests(unittest.TestCase):
                 'halls']
             self.assertTrue(len(res) > 45)
             self.assertTrue('English House' in res)
-            for hall, info in res.items():
+            for info in res.values():
                 for t in ['washers', 'dryers']:
                     self.assertTrue(info[t]['running'] >= 0)
                     self.assertTrue(info[t]['offline'] >= 0)
