@@ -305,6 +305,30 @@ Return information on all laundry rooms
     </tbody>
 </table>
 
+### Hall id name location mapping
+Return a list of hall names, and their corresponding ids and locations.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/laundry/halls/ids</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ### Hall by hall_no
 Get information for a specific room by the hall_no. hall_no is given in the All Halls response.
 
