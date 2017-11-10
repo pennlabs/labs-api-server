@@ -150,7 +150,7 @@ class MobileAppApiTests(unittest.TestCase):
             self.assertEquals(res['hall_name'], 'Harrison Floor 08')
             self.assertEquals(res['location'], 'Harrison')
             self.assertEquals(res['day_of_week'], 'Sunday')
-            self.assertEquals(res['end_date'], '01-01-2017')
+            self.assertEquals(res['end_date'], '01-01-17')
             self.assertEquals(len(res['washer_data']), 27)
             self.assertEquals(len(res['dryer_data']), 27)
 
