@@ -145,12 +145,12 @@ class MobileAppApiTests(unittest.TestCase):
 
     def testLaundryUsage(self):
         with server.app.test_request_context():
-            request = server.laundry.usage(20, 1, 1, 2017)
+            request = server.laundry.usage(20, 2017, 1, 1)
             res = json.loads(request.data.decode('utf8'))
             self.assertEquals(res['hall_name'], 'Harrison Floor 08')
             self.assertEquals(res['location'], 'Harrison')
             self.assertEquals(res['day_of_week'], 'Sunday')
-            self.assertEquals(res['end_date'], '01-01-17')
+            self.assertEquals(res['end_date'], '2017-01-01')
             self.assertEquals(len(res['washer_data']), 27)
             self.assertEquals(len(res['dryer_data']), 27)
 

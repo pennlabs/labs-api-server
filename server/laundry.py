@@ -57,11 +57,11 @@ def safe_division(a, b):
 @app.route('/laundry/usage/<int:hall_no>')
 def usage_shortcut(hall_no):
     now = datetime.datetime.now()
-    return usage(hall_no, now.day, now.month, now.year)
+    return usage(hall_no, now.year, now.month, now.day)
 
 
-@app.route('/laundry/usage/<int:hall_no>/<int:month>-<int:day>-<int:year>', methods=['GET'])
-def usage(hall_no, day, month, year):
+@app.route('/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
+def usage(hall_no, year, month, day):
     def get_data():
         # turn date info into a date object
         # find start range by subtracting 30 days
@@ -111,8 +111,8 @@ def usage(hall_no, day, month, year):
             "hall_name": laundry.id_to_hall[hall_no],
             "location": laundry.id_to_location[hall_no],
             "day_of_week": calendar.day_name[now.weekday()],
-            "start_date": start.strftime("%m-%d-%y"),
-            "end_date": now.strftime("%m-%d-%y"),
+            "start_date": start.strftime("%Y-%m-%d"),
+            "end_date": now.strftime("%Y-%m-%d"),
             "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
             "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
             "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
