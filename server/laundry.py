@@ -113,8 +113,8 @@ def usage(hall_no, year, month, day):
             "day_of_week": calendar.day_name[now.weekday()],
             "start_date": start.strftime("%Y-%m-%d"),
             "end_date": now.strftime("%Y-%m-%d"),
-            "number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
-            "number_of_washers": safe_division(sum(all_washers), len(all_washers)),
+            "total_number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
+            "total_number_of_washers": safe_division(sum(all_washers), len(all_washers)),
             "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
             "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
         }
