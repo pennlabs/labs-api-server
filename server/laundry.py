@@ -107,12 +107,15 @@ def usage(hall_no, year, month, day):
             dryer_points[hour] += x["all_dryers"]
             washer_total[hour] += 1
             dryer_total[hour] += 1
+        dates = [x["date"] for x in data]
+        if not dates:
+            dates = [now]
         return {
             "hall_name": laundry.id_to_hall[hall_no],
             "location": laundry.id_to_location[hall_no],
             "day_of_week": calendar.day_name[now.weekday()],
-            "start_date": min([x["date"] for x in data]).strftime("%Y-%m-%d"),
-            "end_date": max([x["date"] for x in data]).strftime("%Y-%m-%d"),
+            "start_date": min(dates).strftime("%Y-%m-%d"),
+            "end_date": max(dates).strftime("%Y-%m-%d"),
             "total_number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
             "total_number_of_washers": safe_division(sum(all_washers), len(all_washers)),
             "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
