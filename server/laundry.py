@@ -120,7 +120,7 @@ def usage(hall_no, year, month, day):
         }
 
     td = datetime.timedelta(minutes=15)
-    return cached_route('laundry:usage:%s-%s-%s' % (year, month, day), td, get_data)
+    return cached_route('laundry:usage:%s:%s-%s-%s' % (hall_no, year, month, day), td, get_data)
 
 
 def save_data():
