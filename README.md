@@ -335,7 +335,7 @@ Get information about the usage of laundry machines in a certain hall.
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>https://api.pennlabs.org/laundry/usage/{hall_no}</td>
+            <td><code>https://api.pennlabs.org/laundry/usage/{hall_no}/{year}-{month}-{day}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
