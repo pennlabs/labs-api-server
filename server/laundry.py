@@ -80,10 +80,10 @@ def usage(hall_no, year, month, day):
         data = sqldb.session.query(
             LaundrySnapshot.date,
             LaundrySnapshot.time,
-            func.sum(LaundrySnapshot.washers).label("all_washers"),
-            func.sum(LaundrySnapshot.dryers).label("all_dryers"),
-            func.sum(LaundrySnapshot.total_washers).label("all_total_washers"),
-            func.sum(LaundrySnapshot.total_dryers).label("all_total_dryers"),
+            func.avg(LaundrySnapshot.washers).label("all_washers"),
+            func.avg(LaundrySnapshot.dryers).label("all_dryers"),
+            func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
+            func.avg(LaundrySnapshot.total_dryers).label("all_total_dryers"),
         ).filter((LaundrySnapshot.room == hall_no) &
                  ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
                   ((LaundrySnapshot.time <= 180 - 1) &
