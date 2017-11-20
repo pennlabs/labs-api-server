@@ -73,38 +73,45 @@ def usage(hall_no, year, month, day):
         dow = (now.weekday() + 1) % 7
         tmw = (dow + 1) % 7
 
+        # some commands are different between mysql and sqlite
+        is_mysql = sqldb.engine.name == "mysql"
+
         # get the laundry information for today based on the day
         # of week (if today is tuesday, get all the tuesdays
         # in the past 30 days), group them by time, and include
         # the first 2 hours of the next day
         data = sqldb.session.query(
             LaundrySnapshot.date,
-            cast(LaundrySnapshot.time / 60, Integer).label("time"),
+            (func.floor(LaundrySnapshot.time / 60).label("time") if is_mysql else
+             cast(LaundrySnapshot.time / 60, Integer).label("time")),
             func.avg(LaundrySnapshot.washers).label("all_washers"),
             func.avg(LaundrySnapshot.dryers).label("all_dryers"),
             func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
             func.avg(LaundrySnapshot.total_dryers).label("all_total_dryers"),
         ).filter((LaundrySnapshot.room == hall_no) &
-                 ((func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
+                 ((func.dayofweek(LaundrySnapshot.date) == dow + 1 if is_mysql else
+                   func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
                   ((LaundrySnapshot.time <= 180 - 1) &
-                   (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
+                   (func.dayofweek(LaundrySnapshot.date) == tmw + 1 if is_mysql else
+                    func.strftime("%w", LaundrySnapshot.date) == str(tmw)
+                    ))) &
                  (LaundrySnapshot.date >= start)) \
          .group_by(LaundrySnapshot.date, "time") \
          .order_by(LaundrySnapshot.date, "time").all()
         data = [x._asdict() for x in data]
-        all_dryers = [x["all_total_dryers"] for x in data]
-        all_washers = [x["all_total_washers"] for x in data]
+        all_dryers = [int(x["all_total_dryers"]) for x in data]
+        all_washers = [int(x["all_total_washers"]) for x in data]
         washer_points = {k: 0 for k in range(27)}
         dryer_points = {k: 0 for k in range(27)}
         washer_total = {k: 0 for k in range(27)}
         dryer_total = {k: 0 for k in range(27)}
         for x in data:
-            hour = x["time"]
+            hour = int(x["time"])
             # if the value is for tomorrow, add 24 hours
-            if x["date"].weekday() == dow:
+            if x["date"].weekday() != now.weekday():
                 hour += 24
-            washer_points[hour] += x["all_washers"]
-            dryer_points[hour] += x["all_dryers"]
+            washer_points[hour] += int(x["all_washers"])
+            dryer_points[hour] += int(x["all_dryers"])
             washer_total[hour] += 1
             dryer_total[hour] += 1
         dates = [x["date"] for x in data]
