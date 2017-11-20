@@ -2,7 +2,7 @@ import datetime
 import calendar
 
 from flask import jsonify
-from sqlalchemy import func, exists
+from sqlalchemy import func, exists, cast, Integer
 from requests.exceptions import HTTPError
 
 from . import app, sqldb
@@ -79,7 +79,7 @@ def usage(hall_no, year, month, day):
         # the first 2 hours of the next day
         data = sqldb.session.query(
             LaundrySnapshot.date,
-            LaundrySnapshot.time,
+            cast(LaundrySnapshot.time / 60, Integer).label("time"),
             func.avg(LaundrySnapshot.washers).label("all_washers"),
             func.avg(LaundrySnapshot.dryers).label("all_dryers"),
             func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
@@ -89,8 +89,8 @@ def usage(hall_no, year, month, day):
                   ((LaundrySnapshot.time <= 180 - 1) &
                    (func.strftime("%w", LaundrySnapshot.date) == str(tmw)))) &
                  (LaundrySnapshot.date >= start)) \
-         .group_by(LaundrySnapshot.date, LaundrySnapshot.time) \
-         .order_by(LaundrySnapshot.date, LaundrySnapshot.time).all()
+         .group_by(LaundrySnapshot.date, "time") \
+         .order_by(LaundrySnapshot.date, "time").all()
         data = [x._asdict() for x in data]
         all_dryers = [x["all_total_dryers"] for x in data]
         all_washers = [x["all_total_washers"] for x in data]
@@ -99,7 +99,7 @@ def usage(hall_no, year, month, day):
         washer_total = {k: 0 for k in range(27)}
         dryer_total = {k: 0 for k in range(27)}
         for x in data:
-            hour = int(x["time"] / 60)
+            hour = x["time"]
             # if the value is for tomorrow, add 24 hours
             if x["date"].weekday() == dow:
                 hour += 24
