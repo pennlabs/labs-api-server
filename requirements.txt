@@ -15,7 +15,7 @@ pbr==3.1.1
 pennathletics==0.0.1
 penncoursereview==0.1.1
 PennSDK==1.6.6
-pytz==2014.7
+pytz==2017.3
 redis==2.10.3
 requests==2.4.3
 six==1.9.0
