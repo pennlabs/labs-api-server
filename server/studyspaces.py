@@ -1,38 +1,29 @@
-from flask import request, jsonify
+import datetime
+
+from flask import jsonify
 from server import app
 from .penndata import studyspaces
 
 
-@app.route('/studyspaces/<date>', methods=['GET'])
-def parse_times(date):
+@app.route('/studyspaces/<int:building>', methods=['GET'])
+def parse_times(building):
     """
-    Returns JSON with available rooms.
+    Returns JSON containing all rooms for a given building.
 
     Usage:
-        /studyspaces/avail/<date> gives all available
-        /studyspaces/avail/<date>?id=<id> gives the avaiable room with <id>
+        /studyspaces/<building> gives all rooms for today
     """
-    d = studyspaces.get_id_dict()
-    if 'id' in request.args:
-        id = request.args['id']
-        try:
-            name = d[int(id)]
-        except KeyError:
-            # check for invalid ID's
-            return jsonify({'error': "Invalid ID number."})
-        return jsonify({
-            'studyspaces': studyspaces.extract_times(id, date, name)
-        })
-    else:
-        m = []
-        for element in d:
-            m += studyspaces.extract_times(element, date, d[element])
-        return jsonify({'studyspaces': m})
+    date = datetime.date.today()
+    return jsonify({
+        "location_id": building,
+        "date": date.strftime("%Y-%m-%d"),
+        "rooms": studyspaces.get_rooms(building, date, date + datetime.timedelta(days=1))
+    })
 
 
 @app.route('/studyspaces/', methods=['GET'])
 def display_id_pairs():
     """
-    Returns JSON containing which ID corresponds to what room.
+    Returns JSON containing a list of buildings with their ids.
     """
-    return jsonify({'studyspaces': studyspaces.get_id_json()})
+    return jsonify({"locations": studyspaces.get_buildings()})
