@@ -11,17 +11,19 @@ def parse_times(building):
     Returns JSON containing all rooms for a given building.
 
     Usage:
-        /studyspaces/<building> gives all rooms for today
+        /studyspaces/<building> gives all rooms for the next 24 hours
+        /studyspaces/<building>?start=2018-25-01T11:00:00 gives all rooms from start to 24 hours later
+        /studyspaces/<building>?start=...&end=... gives all rooms between the two times
     """
-    date = datetime.date.today()
+    date = datetime.datetime.now()
     start = request.args.get('start')
     if start is not None:
-        start = datetime.datetime.strptime(start, "%Y-%m-%d").date()
+        start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
     else:
         start = date
     end = request.args.get('end')
     if end is not None:
-        end = datetime.datetime.strptime(end, "%Y-%m-%d").date()
+        end = datetime.datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
     else:
         end = start + datetime.timedelta(days=1)
     return jsonify({
