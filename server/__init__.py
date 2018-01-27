@@ -1,10 +1,15 @@
-from flask import Flask
-from server.models import sqldb
-from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import redis
 
+from flask import Flask
+from raven.contrib.flask import Sentry
+from server.models import sqldb
+from apscheduler.schedulers.background import BackgroundScheduler
+
 app = Flask(__name__)
+
+# sentry
+sentry = Sentry(app)
 
 # sql
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
