@@ -16,7 +16,7 @@ nose==1.3.7
 pbr==3.1.1
 pennathletics==0.0.1
 penncoursereview==0.1.1
-PennSDK==1.6.6
+PennSDK==1.6.7
 pytz==2017.3
 raven==6.5.0
 redis==2.10.3
