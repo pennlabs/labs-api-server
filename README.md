@@ -9,6 +9,9 @@ Intended for internal use at Penn Labs to speed up queries to Open Data.
 Setup
 -----
 * Install [redis](https://redis.io/)
+* Install mysql
+    * Mac OS X: `brew install mysql` and [these instructions](https://solitum.net/openssl-os-x-el-capitan-and-brew/)
+    * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
 * Create new virtualenv
 * Install requirements using `pip install -r requirements.txt`
 * Run mobile API server with `python runserver.py`
