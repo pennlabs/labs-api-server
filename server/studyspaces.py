@@ -3,6 +3,7 @@ import datetime
 from flask import jsonify, request
 from server import app
 from .penndata import studyspaces
+from .base import cached_route
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
@@ -42,4 +43,7 @@ def display_id_pairs():
     """
     Returns JSON containing a list of buildings with their ids.
     """
-    return jsonify({"locations": studyspaces.get_buildings()})
+    def get_data():
+        return {"locations": studyspaces.get_buildings()}
+
+    return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
