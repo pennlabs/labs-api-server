@@ -5,7 +5,6 @@ click==6.7
 Flask==0.12.2
 Flask-SQLAlchemy==2.3.2
 funcsigs==1.0.2
-futures==3.2.0
 html5lib==0.999
 itsdangerous==0.24
 Jinja2==2.7.3
