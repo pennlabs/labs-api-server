@@ -6,7 +6,7 @@ import datetime
 
 from server.models import sqldb, LaundrySnapshot
 
-## Fake
+# Fake
 authHeaders = [(
     'cookie',
     '_shibsession_64656661756c7468747470733a2f2f706f6f7272696368617264736c69737448c36f6d2f73686962695c6c657468=_ddb1128649n08aa8e7a462de9970df3e'
@@ -198,24 +198,19 @@ class MobileAppApiTests(unittest.TestCase):
             res = json.loads(server.studyspaces.display_id_pairs().data.decode(
                 'utf8'))
             self.assertTrue(len(res) > 0)
-            for i in res['studyspaces']:
+            for i in res['locations']:
                 self.assertTrue(i['id'] > 0)
-                self.assertTrue(i['name'] != '')
-                self.assertTrue(i['url'] != '')
+                self.assertTrue(i['name'])
+                self.assertTrue(i['service'])
 
     def testStudyspaceExtraction(self):
         with server.app.test_request_context():
-            d = datetime.datetime.now() + datetime.timedelta(days=1)
-            next_date = d.strftime("%Y-%m-%d")
             res = json.loads(
-                server.studyspaces.parse_times(next_date).data.decode('utf8'))
+                server.studyspaces.parse_times(2683).data.decode('utf8'))
             self.assertTrue(len(res) > 0)
-            d2 = res['studyspaces']
-            self.assertTrue("building" in d2[0])
-            self.assertTrue("start_time" in d2[0])
-            self.assertTrue("end_time" in d2[0])
-            self.assertTrue("date" in d2[0])
-            self.assertTrue("room_name" in d2[0])
+            self.assertTrue("date" in res)
+            self.assertTrue("location_id" in res)
+            self.assertTrue("rooms" in res)
 
     def testWeather(self):
         with server.app.test_request_context():
@@ -291,6 +286,7 @@ class MobileAppApiTests(unittest.TestCase):
             res = json.loads(
                 server.auth.validate(AUTH_TOKEN).data.decode('utf8'))
             self.assertEquals(res['status'], 'insecure access over http')
+
 
 if __name__ == '__main__':
     unittest.main()
