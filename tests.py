@@ -21,7 +21,7 @@ class MobileAppApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         with server.app.test_request_context():
-            for x in range(0, 24*60, 60):
+            for x in range(0, 24 * 60, 60):
                 item = LaundrySnapshot(
                     date=datetime.date(2017, 1, 1),
                     time=x,
@@ -32,7 +32,7 @@ class MobileAppApiTests(unittest.TestCase):
                     total_dryers=3
                 )
                 sqldb.session.add(item)
-            for x in range(0, 24*60, 60):
+            for x in range(0, 24 * 60, 60):
                 item = LaundrySnapshot(
                     date=datetime.date(2017, 1, 1) - datetime.timedelta(days=7),
                     time=x,

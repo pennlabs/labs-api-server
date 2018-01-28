@@ -3,10 +3,9 @@ from server import app
 import datetime
 import copy
 from functools import reduce
-from time import sleep
-from .base import *
-from .penndata import *
-from .utils import *
+from .base import cached_route, cache_get
+from .penndata import transit
+from .utils import haversine
 import requests
 
 
@@ -215,7 +214,7 @@ def populate_stop_info(stops):
                         stop_dict[stop['title']]['routes'][route['key']] = int(
                             stop['stopOrder'])
         return list(stop_dict.values())
-    except:
+    except KeyError:
         return {"error": "JSON error in building stops"}
 
 

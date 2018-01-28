@@ -25,13 +25,13 @@ def parseDate(s):
 def changeTitle(a):
     index = a.index("event") + 17
     a = subFour(a, index)
-    if a[index+6] == '-':
+    if a[index + 6] == '-':
         a = subFour(a, index + 18)
     return a
 
 
 def subFour(string, index):
-    val = string[index:index+6]
+    val = string[index:index + 6]
     new_val = str((int(val) - 40000 + 240000) % 240000)
     if len(new_val) < 6:
         new_val = "0" + new_val

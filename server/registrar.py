@@ -3,9 +3,8 @@ from server import app
 import string
 import datetime
 import re
-from .base import *
-from .penndata import *
-from .utils import *
+from .base import cached_route
+from .penndata import depts, reg
 
 
 def is_dept(keyword):
