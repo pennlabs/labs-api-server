@@ -9,6 +9,9 @@ Intended for internal use at Penn Labs to speed up queries to Open Data.
 Setup
 -----
 * Install [redis](https://redis.io/)
+* Install mysql
+    * Mac OS X: `brew install mysql` and [these instructions](https://solitum.net/openssl-os-x-el-capitan-and-brew/)
+    * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
 * Create new virtualenv
 * Install requirements using `pip install -r requirements.txt`
 * Run mobile API server with `python runserver.py`
@@ -403,13 +406,13 @@ Get information about the usage of laundry machines in a certain hall. If no dat
 ## Study Spaces
 
 ### All Buildings
-Lists all the buildings with study rooms along with their corresponding ID's.
+Lists all the buildings with study rooms along with their corresponding IDs and services.
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>https://api.pennlabs.org/studyspaces/</code></td>
+            <td><code>https://api.pennlabs.org/studyspaces/locations</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -426,14 +429,14 @@ Lists all the buildings with study rooms along with their corresponding ID's.
     </tbody>
 </table>
 
-### Available Rooms in One Building or All Buildings
-Returns all the available rooms on a given date in a specified building. Date is the format <code>YYYY-MM-DD</code> If <code>id</code> is not specified, API will list all the avaiable rooms in all buildings.
+### Available Rooms in One Building
+Returns all the available rooms on a given date range given a building id. Dates are in the format <code>2018-01-28T14:00:00-0500</code>.
 
 <table>
     <tbody>
         <tr>
             <td>URL</td>
-            <td><code>https://api.pennlabs.org/studyspaces/{date}</code></td>
+            <td><code>https://api.pennlabs.org/studyspaces/availability/{building}</code></td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -456,9 +459,14 @@ Returns all the available rooms on a given date in a specified building. Date is
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>id</code></td>
-                            <td><strong>Optional</strong></td>
-                            <td>Building ID</td>
+                            <td><code>start</code></td>
+                            <td>The current time.</td>
+                            <td>Range Start</td>
+                        </tr>
+                        <tr>
+                            <td><code>end</code></td>
+                            <td>The current time plus 24 hours.</td>
+                            <td>Range End</td>
                         </tr>
                     </tbody>
                 </table>

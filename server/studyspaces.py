@@ -1,38 +1,49 @@
-from flask import request, jsonify
+import datetime
+
+from flask import jsonify, request
 from server import app
 from .penndata import studyspaces
+from .base import cached_route
 
 
-@app.route('/studyspaces/<date>', methods=['GET'])
-def parse_times(date):
+@app.route('/studyspaces/availability/<int:building>', methods=['GET'])
+def parse_times(building):
     """
-    Returns JSON with available rooms.
+    Returns JSON containing all rooms for a given building.
 
     Usage:
-        /studyspaces/avail/<date> gives all available
-        /studyspaces/avail/<date>?id=<id> gives the avaiable room with <id>
+        /studyspaces/availability/<building> gives all rooms for the next 24 hours
+        /studyspaces/availability/<building>?start=2018-25-01T11:00:00-0500 gives all rooms from start to 24 hours later
+        /studyspaces/availability/<building>?start=...&end=... gives all rooms between the two times
     """
-    d = studyspaces.get_id_dict()
-    if 'id' in request.args:
-        id = request.args['id']
-        try:
-            name = d[int(id)]
-        except KeyError:
-            # check for invalid ID's
-            return jsonify({'error': "Invalid ID number."})
-        return jsonify({
-            'studyspaces': studyspaces.extract_times(id, date, name)
-        })
-    else:
-        m = []
-        for element in d:
-            m += studyspaces.extract_times(element, date, d[element])
-        return jsonify({'studyspaces': m})
+    date = datetime.datetime.now()
+    try:
+        start = request.args.get('start')
+        if start is not None:
+            start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M:%S%z")
+        else:
+            start = date
+        end = request.args.get('end')
+        if end is not None:
+            end = datetime.datetime.strptime(end, "%Y-%m-%dT%H:%M:%S%z")
+        else:
+            end = start + datetime.timedelta(days=1)
+    except ValueError:
+        return jsonify({"error": "Incorrect date format!"})
+
+    return jsonify({
+        "location_id": building,
+        "date": start.strftime("%Y-%m-%d"),
+        "rooms": studyspaces.get_rooms(building, start, end)
+    })
 
 
-@app.route('/studyspaces/', methods=['GET'])
+@app.route('/studyspaces/locations', methods=['GET'])
 def display_id_pairs():
     """
-    Returns JSON containing which ID corresponds to what room.
+    Returns JSON containing a list of buildings with their ids.
     """
-    return jsonify({'studyspaces': studyspaces.get_id_json()})
+    def get_data():
+        return {"locations": studyspaces.get_buildings()}
+
+    return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)

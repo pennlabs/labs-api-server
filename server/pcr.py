@@ -1,7 +1,7 @@
 import penncoursereview as pcr
 from collections import defaultdict
 import datetime
-from .base import *
+from .base import cached_route
 from server import app
 
 

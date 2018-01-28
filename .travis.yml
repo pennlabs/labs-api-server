@@ -6,4 +6,8 @@ python:
   - "3.5"
 services:
   - redis-server
-script: nosetests
+install:
+  - pip install flake8 -r requirements.txt
+script:
+  - flake8 --max-line-length=150 --ignore=E402 --exclude=venv .
+  - nosetests

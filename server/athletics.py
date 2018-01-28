@@ -1,5 +1,4 @@
 from flask import jsonify, request
-from .base import *
 from server import app
 from pennathletics import athletes, sportsdata, scraper
 
