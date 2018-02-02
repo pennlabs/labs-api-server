@@ -96,6 +96,7 @@ def book_room():
             return jsonify({"error": "'{}' is a required parameter!".format(field)})
 
     try:
-        studyspaces.book_room(building, room, start, end, **contact)
+        flag = studyspaces.book_room(building, room, start, end, **contact)
+        return jsonify({"success": flag})
     except ValueError as e:
         return jsonify({"error": str(e)})
