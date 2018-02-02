@@ -540,52 +540,52 @@ Books a room given the room information and the user's contact information.
                     <tbody>
                         <tr>
                             <td><code>building</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The building id.</td>
                         </tr>
                         <tr>
                             <td><code>room</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The room id.</td>
                         </tr>
                         <tr>
                             <td><code>start</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>Range Start</td>
                         </tr>
                         <tr>
                             <td><code>end</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>Range End</td>
                         </tr>
                         <tr>
                             <td><code>firstname</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The user's first name.</td>
                         </tr>
                         <tr>
                             <td><code>lastname</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The user's last name.</td>
                         </tr>
                         <tr>
                             <td><code>email</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The user's email.</td>
                         </tr>
                         <tr>
                             <td><code>groupname</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The purpose of the group meeting.</td>
                         </tr>
                         <tr>
                             <td><code>phone</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The user's phone number.</td>
                         </tr>
                         <tr>
                             <td><code>size</code></td>
-                            <td>*Required*</td>
+                            <td><strong>Required</strong></td>
                             <td>The size of the meeting (ex: 2-3).</td>
                         </tr>
                     </tbody>
