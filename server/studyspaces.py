@@ -71,3 +71,31 @@ def display_id_pairs():
         return {"locations": studyspaces.get_buildings()}
 
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
+
+
+@app.route('/studyspaces/book', methods=['POST'])
+def book_room():
+    """
+    Books a room.
+    """
+
+    try:
+        building = int(request.form["building"])
+        room = int(request.form["room"])
+    except KeyError, ValueError:
+        return jsonify({"error": "Please specify a correct building and room id!"})
+
+    start = datetime.datetime.strptime(request.form["start"], "%Y-%m-%dT%H:%M:%S%z")
+    end = datetime.datetime.strptime(request.form["end"], "%Y-%m-%dT%H:%M:%S%z")
+
+    contact = {}
+    for field in ["firstname", "lastname", "email", "groupname", "phone", "size"]:
+        try:
+            contact[field] = request.form[field]
+        except KeyError:
+            return jsonify({"error": "'{}' is a required parameter!".format(field)})
+
+    try:
+        studyspaces.book_room(building, room, start, end, **contact)
+    except ValueError as e:
+        return jsonify({"error": str(e)})
