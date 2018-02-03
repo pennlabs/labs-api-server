@@ -19,7 +19,7 @@ def parse_times(building):
     show_all = request.args.get("all", "false").lower() == "true"
 
     if 'date' in request.args:
-        date = datetime.datetime.strptime(requst.args.get('date'), "%Y-%m-%d")
+        date = datetime.datetime.strptime(request.args.get('date'), "%Y-%m-%d")
         date = date.replace(hour=0, minute=0, second=0, microsecond=0)
         start = date
         end = date + datetime.timedelta(days=1)
