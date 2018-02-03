@@ -83,7 +83,7 @@ def book_room():
         building = int(request.form["building"])
         room = int(request.form["room"])
     except KeyError, ValueError:
-        return jsonify({"error": "Please specify a correct building and room id!"})
+        return jsonify({"results": False, "error": "Please specify a correct building and room id!"})
 
     start = datetime.datetime.strptime(request.form["start"], "%Y-%m-%dT%H:%M:%S%z")
     end = datetime.datetime.strptime(request.form["end"], "%Y-%m-%dT%H:%M:%S%z")
@@ -93,10 +93,10 @@ def book_room():
         try:
             contact[field] = request.form[field]
         except KeyError:
-            return jsonify({"error": "'{}' is a required parameter!".format(field)})
+            return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
 
     try:
         flag = studyspaces.book_room(building, room, start, end, **contact)
-        return jsonify({"success": flag})
+        return jsonify({"results": flag, "error": None})
     except ValueError as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"results": False, "error": str(e)})
