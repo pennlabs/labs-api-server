@@ -483,13 +483,23 @@ Returns all the available rooms on a given date range given a building id. Dates
                     </thead>
                     <tbody>
                         <tr>
+                            <td><code>all</code></td>
+                            <td>false</td>
+                            <td>Show all rooms (including booked rooms) or just available ones.</td>
+                        </tr>
+                        <tr>
+                            <td><code>date</code></td>
+                            <td>None</td>
+                            <td>If this is set, return all available rooms in the specified day.</td>
+                        </tr>
+                        <tr>
                             <td><code>start</code></td>
                             <td>The current time.</td>
                             <td>Range Start</td>
                         </tr>
                         <tr>
                             <td><code>end</code></td>
-                            <td>The current time plus 24 hours.</td>
+                            <td>Midnight of the current day.</td>
                             <td>Range End</td>
                         </tr>
                     </tbody>
