@@ -16,7 +16,9 @@ def parse_times(building):
         /studyspaces/availability/<building>?start=2018-25-01T11:00:00-0500 gives all rooms from start to 24 hours later
         /studyspaces/availability/<building>?start=...&end=... gives all rooms between the two times
     """
-    show_only_available = request.args.get("available", "false").lower() == "true"
+    show_available = request.args.get("available")
+    if show_available is not None:
+        show_available = show_available.lower() == "true"
 
     if 'date' in request.args:
         date = datetime.datetime.strptime(request.args.get('date'), "%Y-%m-%d")
@@ -45,10 +47,10 @@ def parse_times(building):
 
     rooms = studyspaces.get_rooms(building, start, end)
 
-    if show_only_available:
+    if show_available is not None:
         modified_rooms = []
         for room in rooms:
-            room["times"] = [x for x in room["times"] if x["available"]]
+            room["times"] = [x for x in room["times"] if x["available"] == show_available]
             if len(room["times"]) > 0:
                 modified_rooms.append(room)
         rooms = modified_rooms
