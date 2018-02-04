@@ -84,7 +84,7 @@ def book_room():
     try:
         building = int(request.form["building"])
         room = int(request.form["room"])
-    except KeyError, ValueError:
+    except (KeyError, ValueError):
         return jsonify({"results": False, "error": "Please specify a correct building and room id!"})
 
     try:
