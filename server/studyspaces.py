@@ -87,8 +87,13 @@ def book_room():
     except KeyError, ValueError:
         return jsonify({"results": False, "error": "Please specify a correct building and room id!"})
 
-    start = parse(request.form["start"])
-    end = parse(request.form["end"])
+    try:
+        start = parse(request.form["start"])
+        end = parse(request.form["end"])
+    except KeyError:
+        return jsonify({"results": False, "error": "No start and end parameters passed to server!"})
+    except ValueError:
+        return jsonify({"results": False, "error": "Failed to parse start and end dates!"})
 
     contact = {}
     for field in ["firstname", "lastname", "email", "groupname", "phone", "size"]:
