@@ -1,6 +1,8 @@
 import datetime
 
 from flask import jsonify, request
+from dateutil.parser import parse
+
 from server import app
 from .penndata import studyspaces
 from .base import cached_route
@@ -30,14 +32,14 @@ def parse_times(building):
         try:
             start = request.args.get('start')
             if start is not None:
-                start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M:%S%z")
+                start = parse(start)
                 # round down to closest hour
                 start = start.replace(minute=0, second=0, microsecond=0)
             else:
                 start = date
             end = request.args.get('end')
             if end is not None:
-                end = datetime.datetime.strptime(end, "%Y-%m-%dT%H:%M:%S%z")
+                end = parse(end)
             else:
                 end = start + datetime.timedelta(days=1)
                 # stop at midnight today
@@ -85,8 +87,8 @@ def book_room():
     except KeyError, ValueError:
         return jsonify({"results": False, "error": "Please specify a correct building and room id!"})
 
-    start = datetime.datetime.strptime(request.form["start"], "%Y-%m-%dT%H:%M:%S%z")
-    end = datetime.datetime.strptime(request.form["end"], "%Y-%m-%dT%H:%M:%S%z")
+    start = parse(request.form["start"])
+    end = parse(request.form["end"])
 
     contact = {}
     for field in ["firstname", "lastname", "email", "groupname", "phone", "size"]:
