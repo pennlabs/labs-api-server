@@ -3,7 +3,8 @@ import datetime
 from flask import jsonify, request
 from dateutil.parser import parse
 
-from server import app
+from server import app, sqldb
+from .models import StudySpacesBooking
 from .penndata import studyspaces
 from .base import cached_route
 
@@ -104,6 +105,20 @@ def book_room():
 
     try:
         flag = studyspaces.book_room(building, room, start, end, **contact)
+        save_booking(
+            lid=building,
+            rid=room,
+            email=contact["email"],
+            start=start,
+            end=end
+        )
         return jsonify({"results": flag, "error": None})
     except ValueError as e:
         return jsonify({"results": False, "error": str(e)})
+
+
+def save_booking(**info):
+    item = StudySpacesBooking(**info)
+
+    sqldb.session.add(item)
+    sqldb.session.commit()
