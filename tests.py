@@ -4,7 +4,7 @@ import server
 import json
 import datetime
 
-from server.models import sqldb, LaundrySnapshot
+from server.models import sqldb, LaundrySnapshot, StudySpacesBooking
 
 # Fake
 authHeaders = [(
@@ -211,6 +211,27 @@ class MobileAppApiTests(unittest.TestCase):
             self.assertTrue("date" in res)
             self.assertTrue("location_id" in res)
             self.assertTrue("rooms" in res)
+
+    def testStudyspaceBooking(self):
+        with server.app.test_client() as c:
+            with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value=True):
+                resp = c.post("/studyspaces/book", data={
+                    "building": 1,
+                    "room": 1,
+                    "start": "2017-02-08 10:00:00",
+                    "end": "2017-02-08 10:30:00",
+                    "firstname": "Test",
+                    "lastname": "Test",
+                    "email": "test@example.com",
+                    "groupname": "Testing",
+                    "phone": "000-000-0000",
+                    "size": 1
+                })
+            res = json.loads(resp.data.decode("utf8"))
+            self.assertTrue(len(res) > 0)
+            self.assertTrue(res["results"], res)
+
+            self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
 
     def testWeather(self):
         with server.app.test_request_context():
