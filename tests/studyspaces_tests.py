@@ -31,6 +31,7 @@ class StudySpacesApiTests(unittest.TestCase):
 
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:
+            # fake the actual booking
             with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value=True):
                 resp = c.post("/studyspaces/book", data={
                     "building": 1,
@@ -48,4 +49,5 @@ class StudySpacesApiTests(unittest.TestCase):
             self.assertTrue(len(res) > 0)
             self.assertTrue(res["results"], res)
 
+            # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
