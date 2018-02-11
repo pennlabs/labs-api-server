@@ -15,17 +15,6 @@ def retrieve_venues_v2():
     return cached_route('dining:v2:venues', td, get_data)
 
 
-@app.route('/dining/v2/hours/<venue_id>', methods=['GET'])
-def retrieve_hours_v2(venue_id):
-    def get_data():
-        return dinV2.hours(venue_id)['result_data']
-
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
-    return cached_route('dining:v2:hours:%s' % venue_id, td, get_data)
-
-
 @app.route('/dining/v2/menu/<venue_id>/<date>', methods=['GET'])
 def retrieve_menu_v2(venue_id, date):
     def get_data():
@@ -58,6 +47,17 @@ def retrieve_venues():
     daysTillWeek = 6 - now.weekday()
     td = datetime.timedelta(days=daysTillWeek)
     return cached_route('dining:venues', td, get_data)
+
+
+@app.route('/dining/hours/<venue_id>', methods=['GET'])
+def retrieve_hours_v2(venue_id):
+    def get_data():
+        return dinV2.hours(venue_id)['result_data']
+
+    now = datetime.datetime.today()
+    daysTillWeek = 6 - now.weekday()
+    td = datetime.timedelta(days=daysTillWeek)
+    return cached_route('dining:v2:hours:%s' % venue_id, td, get_data)
 
 
 @app.route('/dining/weekly_menu/<venue_id>', methods=['GET'])
