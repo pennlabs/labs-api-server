@@ -112,6 +112,30 @@ Return a list of all dining venues
     </tbody>
 </table>
 
+### Hours
+Return the week's hours for the venue with `venue_id`
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/dining/hours/{venue_id}</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ### Weekly Menu
 Return the week's menus for the venue with `venue_id`
 
