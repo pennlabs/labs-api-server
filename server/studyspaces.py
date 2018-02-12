@@ -109,8 +109,8 @@ def book_room():
             lid=building,
             rid=room,
             email=contact["email"],
-            start=start,
-            end=end
+            start=start.replace(tzinfo=None),
+            end=end.replace(tzinfo=None)
         )
         return jsonify({"results": flag, "error": None})
     except ValueError as e:
