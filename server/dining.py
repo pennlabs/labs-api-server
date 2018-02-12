@@ -50,7 +50,7 @@ def retrieve_venues():
 
 
 @app.route('/dining/hours/<venue_id>', methods=['GET'])
-def retrieve_hours_v2(venue_id):
+def retrieve_hours(venue_id):
     def get_data():
         return dinV2.hours(venue_id)['result_data']
 
