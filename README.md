@@ -483,14 +483,110 @@ Returns all the available rooms on a given date range given a building id. Dates
                     </thead>
                     <tbody>
                         <tr>
+                            <td><code>all</code></td>
+                            <td>false</td>
+                            <td>Show all rooms (including booked rooms) or just available ones.</td>
+                        </tr>
+                        <tr>
+                            <td><code>date</code></td>
+                            <td>None</td>
+                            <td>If this is set, return all available rooms in the specified day.</td>
+                        </tr>
+                        <tr>
                             <td><code>start</code></td>
                             <td>The current time.</td>
                             <td>Range Start</td>
                         </tr>
                         <tr>
                             <td><code>end</code></td>
-                            <td>The current time plus 24 hours.</td>
+                            <td>Midnight of the current day.</td>
                             <td>Range End</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Book Room
+Books a room given the room information and the user's contact information.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/studyspaces/book</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>building</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The building id.</td>
+                        </tr>
+                        <tr>
+                            <td><code>room</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The room id.</td>
+                        </tr>
+                        <tr>
+                            <td><code>start</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>Range Start</td>
+                        </tr>
+                        <tr>
+                            <td><code>end</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>Range End</td>
+                        </tr>
+                        <tr>
+                            <td><code>firstname</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The user's first name.</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastname</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The user's last name.</td>
+                        </tr>
+                        <tr>
+                            <td><code>email</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The user's email.</td>
+                        </tr>
+                        <tr>
+                            <td><code>groupname</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The purpose of the group meeting.</td>
+                        </tr>
+                        <tr>
+                            <td><code>phone</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The user's phone number.</td>
+                        </tr>
+                        <tr>
+                            <td><code>size</code></td>
+                            <td><strong>Required</strong></td>
+                            <td>The size of the meeting (ex: 2-3).</td>
                         </tr>
                     </tbody>
                 </table>
