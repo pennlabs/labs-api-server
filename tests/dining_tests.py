@@ -31,7 +31,7 @@ class DiningApiTests(unittest.TestCase):
 
     def testDiningV2Hours(self):
         with server.app.test_request_context():
-            hours_res = server.dining.retrieve_hours_v2('593')
+            hours_res = server.dining.retrieve_hours('593')
             hours_dict = json.loads(hours_res.data.decode('utf8'))
             self.assertEquals("1920 Commons",
                               hours_dict["cafes"]["593"]["name"])
