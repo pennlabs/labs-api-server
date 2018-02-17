@@ -24,3 +24,15 @@ class StudySpacesBooking(sqldb.Model):
     email = sqldb.Column(sqldb.Text, nullable=False)
     start = sqldb.Column(sqldb.DateTime, nullable=False)
     end = sqldb.Column(sqldb.DateTime, nullable=False)
+
+class User(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    platform = sqldb.Column(sqldb.Text, nullable=False)
+    device_id = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+
+class LaundryPreference(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    room_id = sqldb.Column(sqldb.Integer, nullable=False)
+
