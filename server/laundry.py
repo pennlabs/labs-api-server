@@ -1,12 +1,12 @@
 import datetime
 import calendar
 
-from flask import jsonify
+from flask import jsonify, request
 from sqlalchemy import func, exists, cast, Integer
 from requests.exceptions import HTTPError
 
 from . import app, sqldb
-from .models import LaundrySnapshot
+from .models import LaundrySnapshot, User, LaundryPreference
 from .penndata import laundry
 from .base import cached_route
 
@@ -168,3 +168,56 @@ def save_data():
             )
             sqldb.session.add(item)
         sqldb.session.commit()
+
+@app.route('/laundry/preferences', methods=['POST'])
+def save_preferences():
+    device_id = request.headers.get('X-Device-ID')
+
+    if not device_id:
+        return jsonify({'success': False, 'error': 'No device id passed to server.'})
+
+    user = User.query.filter_by(device_id=device_id).first()
+
+    # check if user exists, create user in db if not
+    if not user:
+        platform = request.form.get('platform')
+
+        if not platform:
+            return jsonify({'success': False, 'error': 'No platform specified.'})
+
+        user = User(platform=platform, device_id=device_id, email=None)
+        sqldb.session.add(user)
+        sqldb.session.commit()
+
+    room_ids = request.form.get('rooms')
+
+    if not room_ids:
+        return jsonify({'success': False, 'error': 'No rooms specified.'})
+
+    # delete old preferences for user
+    LaundryPreference.query.filter_by(user_id = user.id).delete()
+
+    room_ids = [int(x) for x in room_ids.split(",")]
+
+    for room_id in room_ids:
+        laundry_preference = LaundryPreference(user_id=user.id, room_id=room_id)
+        sqldb.session.add(laundry_preference)
+    sqldb.session.commit()
+
+    return jsonify({'success': True, 'error': None})
+
+@app.route('/laundry/preferences', methods=['GET'])
+def get_preferences():
+    device_id = request.headers.get('X-Device-ID')
+
+    if not device_id:
+        return jsonify({'error': 'No device id passed to server.'})
+
+    user = User.query.filter_by(device_id=device_id).first()
+
+    if not user:
+        return jsonify({'rooms': [] })
+
+    preferences = LaundryPreference.query.filter_by(user_id = user.id)
+    room_ids = [x.room_id for x in preferences]
+    return jsonify({'rooms': room_ids })
