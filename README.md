@@ -483,9 +483,9 @@ Returns all the available rooms on a given date range given a building id. Dates
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>all</code></td>
-                            <td>false</td>
-                            <td>Show all rooms (including booked rooms) or just available ones.</td>
+                            <td><code>available</code></td>
+                            <td>None</td>
+                            <td>If this is set to true, show available rooms. If this is set to false, show booked rooms. Otherwise, show all rooms.</td>
                         </tr>
                         <tr>
                             <td><code>date</code></td>
