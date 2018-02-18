@@ -20,7 +20,6 @@ class LaundrySnapshot(sqldb.Model):
 class StudySpacesBooking(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.utcnow)
-    lid = sqldb.Column(sqldb.Integer, nullable=False)
     rid = sqldb.Column(sqldb.Integer, nullable=False)
     email = sqldb.Column(sqldb.Text, nullable=False)
     start = sqldb.Column(sqldb.DateTime, nullable=False)

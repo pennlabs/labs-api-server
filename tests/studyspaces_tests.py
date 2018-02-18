@@ -16,23 +16,21 @@ class StudySpacesApiTests(unittest.TestCase):
                 'utf8'))
             self.assertTrue(len(res) > 0)
             for i in res['locations']:
-                self.assertTrue(i['id'] > 0)
-                self.assertTrue(i['name'])
-                self.assertTrue(i['service'])
+                self.assertTrue(i['lid'] > 0)
+                self.assertTrue('name' in i)
 
     def testStudyspaceExtraction(self):
         with server.app.test_request_context():
             res = json.loads(
                 server.studyspaces.parse_times(2683).data.decode('utf8'))
             self.assertTrue(len(res) > 0)
-            self.assertTrue("date" in res)
-            self.assertTrue("location_id" in res)
-            self.assertTrue("rooms" in res)
+            self.assertTrue("id" in res)
+            self.assertTrue("categories" in res)
 
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:
             # fake the actual booking
-            with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value=True):
+            with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value={"success": "booking placed"}):
                 resp = c.post("/studyspaces/book", data={
                     "building": 1,
                     "room": 1,
@@ -47,7 +45,6 @@ class StudySpacesApiTests(unittest.TestCase):
                 })
             res = json.loads(resp.data.decode("utf8"))
             self.assertTrue(len(res) > 0)
-            self.assertTrue(res["results"], res)
 
             # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
