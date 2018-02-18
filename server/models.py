@@ -39,3 +39,9 @@ class LaundryPreference(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
     room_id = sqldb.Column(sqldb.Integer, nullable=False)
+
+class DiningPreference(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    venue_id = sqldb.Column(sqldb.Integer, nullable=False)

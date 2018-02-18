@@ -1,7 +1,10 @@
-from server import app
+from server import app, sqldb
 import datetime
 from .base import cached_route
 from .penndata import din, dinV2
+from flask import jsonify, request
+from .models import User, DiningPreference
+from sqlalchemy import func
 
 
 @app.route('/dining/v2/venues', methods=['GET'])
@@ -84,3 +87,50 @@ def retrieve_daily_menu(venue_id):
 
     return cached_route('dining:venues:daily:%s' % venue_id, end_time - now,
                         get_data)
+
+@app.route('/dining/preferences', methods=['POST'])
+def save_dining_preference():
+    device_id = request.headers.get('X-Device-ID')
+
+    if not device_id:
+        return jsonify({'success': False, 'error': 'No device id passed to server.'})
+
+    user = User.query.filter_by(device_id=device_id).first()
+
+    # check if user exists, create user in db if not
+    if not user:
+        platform = request.form.get('platform')
+
+        if not platform:
+            return jsonify({'success': False, 'error': 'No platform specified.'})
+
+        user = User(platform=platform, device_id=device_id, email=None)
+        sqldb.session.add(user)
+        sqldb.session.commit()
+
+    venue_id = request.form.get('venue_id')
+
+    if not venue_id:
+        return jsonify({'success': False, 'error': 'No rooms specified.'})
+
+    dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
+    sqldb.session.add(dining_preference)
+    sqldb.session.commit()
+
+    return jsonify({'success': True, 'error': None})
+
+@app.route('/dining/preferences', methods=['GET'])
+def get_dining_preference():
+    device_id = request.headers.get('X-Device-ID')
+
+    if not device_id:
+        return jsonify({'error': 'No device id passed to server.'})
+
+    user = User.query.filter_by(device_id=device_id).first()
+
+    if not user:
+        return jsonify({'venues': []})
+
+    preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)).filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
+    preference_dict = [{"id": x[0], "count": x[1]} for x in preferences]
+    return jsonify(preference_dict)

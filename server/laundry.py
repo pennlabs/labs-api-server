@@ -171,7 +171,7 @@ def save_data():
 
 
 @app.route('/laundry/preferences', methods=['POST'])
-def save_preferences():
+def save_laundry_preferences():
     device_id = request.headers.get('X-Device-ID')
 
     if not device_id:
@@ -209,7 +209,7 @@ def save_preferences():
 
 
 @app.route('/laundry/preferences', methods=['GET'])
-def get_preferences():
+def get_laundry_preferences():
     device_id = request.headers.get('X-Device-ID')
 
     if not device_id:
