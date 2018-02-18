@@ -28,7 +28,7 @@ class StudySpacesBooking(sqldb.Model):
 
 class User(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    created = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     platform = sqldb.Column(sqldb.Text, nullable=False)
     device_id = sqldb.Column(sqldb.Text, nullable=False)
     email = sqldb.Column(sqldb.Text, nullable=True)
@@ -36,6 +36,6 @@ class User(sqldb.Model):
 
 class LaundryPreference(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    created = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
     room_id = sqldb.Column(sqldb.Integer, nullable=False)
