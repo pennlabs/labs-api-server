@@ -169,6 +169,7 @@ def save_data():
             sqldb.session.add(item)
         sqldb.session.commit()
 
+
 @app.route('/laundry/preferences', methods=['POST'])
 def save_preferences():
     device_id = request.headers.get('X-Device-ID')
@@ -195,7 +196,7 @@ def save_preferences():
         return jsonify({'success': False, 'error': 'No rooms specified.'})
 
     # delete old preferences for user
-    LaundryPreference.query.filter_by(user_id = user.id).delete()
+    LaundryPreference.query.filter_by(user_id=user.id).delete()
 
     room_ids = [int(x) for x in room_ids.split(",")]
 
@@ -205,6 +206,7 @@ def save_preferences():
     sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
+
 
 @app.route('/laundry/preferences', methods=['GET'])
 def get_preferences():
@@ -216,8 +218,8 @@ def get_preferences():
     user = User.query.filter_by(device_id=device_id).first()
 
     if not user:
-        return jsonify({'rooms': [] })
+        return jsonify({'rooms': []})
 
-    preferences = LaundryPreference.query.filter_by(user_id = user.id)
+    preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
-    return jsonify({'rooms': room_ids })
+    return jsonify({'rooms': room_ids})
