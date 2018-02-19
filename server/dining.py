@@ -89,7 +89,7 @@ def retrieve_daily_menu(venue_id):
                         get_data)
 
 @app.route('/dining/preferences', methods=['POST'])
-def save_dining_preference():
+def save_dining_preferences():
     device_id = request.headers.get('X-Device-ID')
 
     if not device_id:
@@ -120,7 +120,7 @@ def save_dining_preference():
     return jsonify({'success': True, 'error': None})
 
 @app.route('/dining/preferences', methods=['GET'])
-def get_dining_preference():
+def get_dining_preferences():
     device_id = request.headers.get('X-Device-ID')
 
     if not device_id:
