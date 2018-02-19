@@ -129,8 +129,8 @@ def get_dining_preferences():
     user = User.query.filter_by(device_id=device_id).first()
 
     if not user:
-        return jsonify({'venues': []})
+        return jsonify({'preferences': []})
 
     preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)).filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
-    preference_dict = [{"id": x[0], "count": x[1]} for x in preferences]
-    return jsonify(preference_dict)
+    preference_arr = [{'venue_id': x[0], 'count': x[1]} for x in preferences]
+    return jsonify({'preferences': preference_arr})
