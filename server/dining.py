@@ -88,6 +88,7 @@ def retrieve_daily_menu(venue_id):
     return cached_route('dining:venues:daily:%s' % venue_id, end_time - now,
                         get_data)
 
+
 @app.route('/dining/preferences', methods=['POST'])
 def save_dining_preferences():
     device_id = request.headers.get('X-Device-ID')
@@ -117,6 +118,7 @@ def save_dining_preferences():
 
     return jsonify({'success': True, 'error': None})
 
+
 @app.route('/dining/preferences', methods=['GET'])
 def get_dining_preferences():
     device_id = request.headers.get('X-Device-ID')
@@ -129,6 +131,7 @@ def get_dining_preferences():
     if not user:
         return jsonify({'preferences': []})
 
-    preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)).filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
+    preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)) \
+                               .filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
     preference_arr = [{'venue_id': x[0], 'count': x[1]} for x in preferences]
     return jsonify({'preferences': preference_arr})

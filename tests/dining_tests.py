@@ -60,7 +60,7 @@ class DiningApiTests(unittest.TestCase):
     def testDiningPreferences(self):
         with server.app.test_client() as c:
             resp = json.loads(c.get("/dining/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
-            self.assertEquals(resp["venues"], [])
+            self.assertEquals(resp["preferences"], [])
 
             c.post("/dining/preferences", headers={"X-Device-ID": "testing"}, data={"venue_id": "1", "platform": "Android"})
             c.post("/dining/preferences", headers={"X-Device-ID": "testing"}, data={"venue_id": "1"})
