@@ -104,9 +104,7 @@ def save_dining_preferences():
         if not platform:
             return jsonify({'success': False, 'error': 'No platform specified.'})
 
-        user = User(platform=platform, device_id=device_id, email=None)
-        sqldb.session.add(user)
-        sqldb.session.commit()
+        create_user(platform, device_id, None)
 
     venue_id = request.form.get('venue_id')
 
