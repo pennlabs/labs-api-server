@@ -8,7 +8,7 @@ penn_dir = Directory(getenv("DIR_USERNAME"), getenv("DIR_PASSWORD"))
 map_search = Map(getenv("NEM_USERNAME"), getenv("NEM_PASSWORD"))
 transit = Transit(getenv("TRANSIT_USERNAME"), getenv("TRANSIT_PASSWORD"))
 laundry = Laundry()
-studyspaces = StudySpaces(getenv("LIBCAL_ID"), getenv("LIBCAL_SECRET"))
+studyspaces = StudySpaces()
 calendar = Calendar()
 depts = {
     "AAMW": "Art & Arch of Med. World",
