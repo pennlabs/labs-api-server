@@ -1,5 +1,6 @@
 import datetime
 
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 
 sqldb = SQLAlchemy()
@@ -24,3 +25,45 @@ class StudySpacesBooking(sqldb.Model):
     email = sqldb.Column(sqldb.Text, nullable=False)
     start = sqldb.Column(sqldb.DateTime, nullable=False)
     end = sqldb.Column(sqldb.DateTime, nullable=False)
+
+
+class User(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    platform = sqldb.Column(sqldb.Text, nullable=False)
+    device_id = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+
+    @staticmethod
+    def get_or_create(device_id=None, platform=None, email=None):
+        device_id = device_id or request.headers.get('X-Device-ID')
+        if not device_id:
+            raise ValueError("No device ID passed to the server.")
+        if not platform:
+            if request.user_agent.platform in ["iphone", "ipad"]:
+                platform = "ios"
+            elif request.user_agent.platform == "android":
+                platform = "android"
+            else:
+                platform = "unknown"
+        user = User.query.filter_by(device_id=device_id).first()
+        if user:
+            return user
+        user = User(platform=platform, device_id=device_id, email=email)
+        sqldb.session.add(user)
+        sqldb.session.commit()
+        return user
+
+
+class LaundryPreference(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    room_id = sqldb.Column(sqldb.Integer, nullable=False)
+
+
+class DiningPreference(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    venue_id = sqldb.Column(sqldb.Integer, nullable=False)

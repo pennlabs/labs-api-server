@@ -86,3 +86,13 @@ class LaundryApiTests(unittest.TestCase):
             for x in range(0, 23):
                 self.assertEquals(res['washer_data'][str(x)], 1.5)
                 self.assertEquals(res['dryer_data'][str(x)], 1.5)
+
+    def testLaundryPreferences(self):
+        with server.app.test_client() as c:
+            resp = json.loads(c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
+            self.assertEquals(resp["rooms"], [])
+
+            c.post("/laundry/preferences", headers={"X-Device-ID": "testing"}, data={"rooms": "1,2,3", "platform": "Android"})
+
+            resp = json.loads(c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
+            self.assertEquals(resp["rooms"], [1, 2, 3])

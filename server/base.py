@@ -1,7 +1,8 @@
-from server import db
-from flask import jsonify, make_response
 import json
 import datetime
+
+from server import db
+from flask import jsonify, make_response
 
 
 def cached_route(redis_key, td, func):
