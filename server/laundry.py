@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from . import app, sqldb
 from .models import LaundrySnapshot, User, LaundryPreference
 from .penndata import laundry
-from .base import cached_route, create_user
+from .base import cached_route
 
 
 @app.route('/laundry/halls', methods=['GET'])
@@ -172,21 +172,10 @@ def save_data():
 
 @app.route('/laundry/preferences', methods=['POST'])
 def save_laundry_preferences():
-    device_id = request.headers.get('X-Device-ID')
-
-    if not device_id:
-        return jsonify({'success': False, 'error': 'No device id passed to server.'})
-
-    user = User.query.filter_by(device_id=device_id).first()
-
-    # check if user exists, create user in db if not
-    if not user:
-        platform = request.form.get('platform')
-
-        if not platform:
-            return jsonify({'success': False, 'error': 'No platform specified.'})
-
-        create_user(platform, device_id, None)
+    try:
+        user = User.get_or_create()
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)})
 
     room_ids = request.form.get('rooms')
 
@@ -208,14 +197,9 @@ def save_laundry_preferences():
 
 @app.route('/laundry/preferences', methods=['GET'])
 def get_laundry_preferences():
-    device_id = request.headers.get('X-Device-ID')
-
-    if not device_id:
-        return jsonify({'error': 'No device id passed to server.'})
-
-    user = User.query.filter_by(device_id=device_id).first()
-
-    if not user:
+    try:
+        user = User.get_or_create()
+    except ValueError:
         return jsonify({'rooms': []})
 
     preferences = LaundryPreference.query.filter_by(user_id=user.id)

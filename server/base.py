@@ -1,10 +1,8 @@
 import json
 import datetime
 
-from server import db, sqldb
+from server import db
 from flask import jsonify, make_response
-
-from .models import User
 
 
 def cached_route(redis_key, td, func):
@@ -22,9 +20,3 @@ def cache_get(redis_key, td, func):
         db.set(redis_key, json.dumps(data))
         db.pexpireat(redis_key, datetime.datetime.now() + td)
         return data
-
-
-def create_user(platform, device_id, email):
-    user = User(platform=platform, device_id=device_id, email=email)
-    sqldb.session.add(user)
-    sqldb.session.commit()

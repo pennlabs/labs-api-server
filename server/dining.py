@@ -1,6 +1,6 @@
 from server import app, sqldb
 import datetime
-from .base import cached_route, create_user
+from .base import cached_route
 from .penndata import din, dinV2
 from flask import jsonify, request
 from .models import User, DiningPreference
@@ -91,21 +91,10 @@ def retrieve_daily_menu(venue_id):
 
 @app.route('/dining/preferences', methods=['POST'])
 def save_dining_preferences():
-    device_id = request.headers.get('X-Device-ID')
-
-    if not device_id:
-        return jsonify({'success': False, 'error': 'No device id passed to server.'})
-
-    user = User.query.filter_by(device_id=device_id).first()
-
-    # check if user exists, create user in db if not
-    if not user:
-        platform = request.form.get('platform')
-
-        if not platform:
-            return jsonify({'success': False, 'error': 'No platform specified.'})
-
-        create_user(platform, device_id, None)
+    try:
+        user = User.get_or_create()
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)})
 
     venue_id = request.form.get('venue_id')
 
@@ -121,14 +110,9 @@ def save_dining_preferences():
 
 @app.route('/dining/preferences', methods=['GET'])
 def get_dining_preferences():
-    device_id = request.headers.get('X-Device-ID')
-
-    if not device_id:
-        return jsonify({'error': 'No device id passed to server.'})
-
-    user = User.query.filter_by(device_id=device_id).first()
-
-    if not user:
+    try:
+        user = User.get_or_create()
+    except ValueError:
         return jsonify({'preferences': []})
 
     preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)) \
