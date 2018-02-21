@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from . import app, sqldb
 from .models import LaundrySnapshot, User, LaundryPreference
 from .penndata import laundry
-from .base import cached_route
+from .base import cached_route, create_user
 
 
 @app.route('/laundry/halls', methods=['GET'])

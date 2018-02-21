@@ -1,6 +1,6 @@
 from server import app, sqldb
 import datetime
-from .base import cached_route
+from .base import cached_route, create_user
 from .penndata import din, dinV2
 from flask import jsonify, request
 from .models import User, DiningPreference
