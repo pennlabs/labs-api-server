@@ -48,3 +48,13 @@ class StudySpacesApiTests(unittest.TestCase):
 
             # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
+
+    def testStudyspaceCancelFailure(self):
+        """Booking cancellation should not succeed if it is not in our database."""
+
+        with server.app.test_client() as c:
+            resp = c.post("/studyspaces/cancel", data={
+                "booking_id": "definitely_not_a_valid_booking_id_123"
+            })
+            res = json.loads(resp.data.decode("utf8"))
+            self.assertTrue("error" in res)

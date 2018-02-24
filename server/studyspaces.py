@@ -46,6 +46,13 @@ def cancel_room():
     booking_id = request.form.get("booking_id")
     if not booking_id:
         return jsonify({"error": "No booking id sent to server!"})
+
+    # ensure that the server was the one that booked the room
+    for bid in booking_id.strip().split(","):
+        exists = sqldb.session.query(sqldb.exists().where(StudySpacesBooking.booking_id == bid)).scalar()
+        if not exists:
+            return jsonify({"error": "Cancellation request aborted because of booking '{}'.".format(bid)})
+
     resp = studyspaces.cancel_room(booking_id)
     return jsonify(resp)
 
