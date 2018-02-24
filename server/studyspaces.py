@@ -4,6 +4,7 @@ from flask import jsonify, request
 from dateutil.parser import parse
 
 from server import app, sqldb
+from penn.base import APIError
 from .models import StudySpacesBooking
 from .penndata import studyspaces
 from .base import cached_route
@@ -22,7 +23,10 @@ def parse_times(building):
     start = request.args.get('start')
     end = request.args.get('end')
 
-    rooms = studyspaces.get_rooms(building, start, end)
+    try:
+        rooms = studyspaces.get_rooms(building, start, end)
+    except APIError as e:
+        return jsonify({"error": str(e)})
 
     return jsonify(rooms)
 
