@@ -87,7 +87,8 @@ def book_room():
             rid=room,
             email=contact["email"],
             start=parse(start).replace(tzinfo=None),
-            end=parse(end).replace(tzinfo=None)
+            end=parse(end).replace(tzinfo=None),
+            booking_id=resp.get("booking_id")
         )
     return jsonify(resp)
 
