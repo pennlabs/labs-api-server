@@ -580,6 +580,47 @@ Books a room given the room information and the user's contact information.
     </tbody>
 </table>
 
+### Cancel Room
+Cancels a room given a booking id or a list of booking ids.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/studyspaces/cancel</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>booking_id</code></td>
+                            <td>Required</td>
+                            <td>The booking id of the reservation to cancel.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 ## Weather
 
 ### Current Weather

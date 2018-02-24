@@ -38,6 +38,18 @@ def display_id_pairs():
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
 
 
+@app.route('/studyspaces/cancel', methods=['POST'])
+def cancel_room():
+    """
+    Cancels a booked room.
+    """
+    booking_id = request.form.get("booking_id")
+    if not booking_id:
+        return jsonify({"error": "No booking id sent to server!"})
+    resp = studyspaces.cancel_room(booking_id)
+    return jsonify(resp)
+
+
 @app.route('/studyspaces/book', methods=['POST'])
 def book_room():
     """
