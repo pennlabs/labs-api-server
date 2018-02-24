@@ -10,7 +10,7 @@ def return_options(x):
 def get_homepage():
     with open('homepage_options.json') as json_file:
         data = json.load(json_file)
-    cells = map(return_options, data['cellOptions'])
+    cells = list(map(return_options, data['cellOptions']))
     return jsonify({
         "cells": cells
     })
