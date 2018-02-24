@@ -36,6 +36,7 @@ import server.weather
 import server.calendar3year
 import server.event
 import server.fitness
+import server.homepage
 
 if __name__ == '__main__':
     app.run(debug=True)
