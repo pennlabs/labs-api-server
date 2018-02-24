@@ -86,7 +86,7 @@ def book_room():
             return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
 
     contact["custom"] = {}
-    for arg, field in [("q2533", "phone"), ("q2555", "size")]:
+    for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
         try:
             contact["custom"][arg] = request.form[field]
         except KeyError:
