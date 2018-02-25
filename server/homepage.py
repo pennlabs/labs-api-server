@@ -1,16 +1,30 @@
 from flask import request, jsonify
-from server import app
+from server import app, sqldb
 from os import getenv
+from .models import User, DiningPreference
+from sqlalchemy import func
 import json
-
-def return_options(x):
-    return {"type": x}
 
 @app.route('/homepage', methods=['GET'])
 def get_homepage():
+    # Load options from json file
     with open('homepage_options.json') as json_file:
         data = json.load(json_file)
-    cells = list(map(return_options, data['cellOptions']))
+    # Find user in database
+    try:
+        user = User.get_or_create()
+    except ValueError as e:
+        print(e)
+        return jsonify({'err': ['error']})
+
+    preferences = sqldb.session.query(DiningPreference.venue_id, func.count(DiningPreference.venue_id)) \
+                               .filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
+    preference_arr = [x[0] for x in preferences]
+    # Display information
+    cells = [{"type": x, "info": ""} for x in data['cellOptions']]
+    for x in cells:
+        if x["type"] == 'dining':
+            x["info"] = {'visited_halls': preference_arr}
     return jsonify({
         "cells": cells
     })
@@ -38,4 +52,5 @@ def change_order():
             json.dump(cellOptions, outfile)
         return "Cell order successfully changed."
 
-# TODO error check to ensure that cellOrder is only certain valid types
+# TODO Add an info field to what is returned from get request. For now, info will
+# contain all rooms that a user has ever been in
