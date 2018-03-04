@@ -8,8 +8,8 @@ import json
 @app.route('/homepage', methods=['GET'])
 def get_homepage():
     # Load options from json file
-    with open('homepage_options.json') as json_file:
-        data = json.load(json_file)
+    # with open('homepage_options.json') as json_file:
+    #    data = json.load(json_file)
     # Find user in database
     try:
         user = User.get_or_create()
