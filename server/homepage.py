@@ -46,7 +46,7 @@ def get_dining_preference_cell(user):
 # returns a dining cell
 # TODO: personalize with preferences
 def get_popular_dining_cell(user):
-    venue_ids = [593, 747, 636, 1442]
+    venue_ids = [593, 747, 636]
     info = {"venues": venue_ids}
     cell = HomeCell("dining", info)
     return cell
