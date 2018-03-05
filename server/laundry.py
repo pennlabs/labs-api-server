@@ -185,7 +185,7 @@ def save_laundry_preferences():
     # delete old preferences for user
     LaundryPreference.query.filter_by(user_id=user.id).delete()
 
-    room_ids = [int(x) for x in room_ids.split(",")]
+    room_ids = [int(x.strip()) for x in room_ids.split(",")]
 
     for room_id in room_ids:
         laundry_preference = LaundryPreference(user_id=user.id, room_id=room_id)
