@@ -31,6 +31,9 @@ def get_homepage():
     gsrCell = get_study_spaces_cell().getCell()
     cells.append(gsrCell)
 
+    newsCell = get_news_cell().getCell()
+    cells.append(newsCell)
+
     response = jsonify({"cells": cells})
     response.status_code = 200 # or 400 or whatever
     return response
@@ -65,6 +68,17 @@ def get_laundry_cells(user):
 # returns a study spaces cell
 def get_study_spaces_cell():
     return HomeCell("studyRoomBooking", None)
+
+# returns a news cell
+# TODO: Dynamically fetch news item from database or from website
+def get_news_cell():
+    source = "The Daily Pennsylvanian"
+    title = "Penn's cost of attendance will exceed $70,000 next year — a 3.8 percent increase"
+    date = "2018-03-01T19:12:00-05:00"
+    imageUrl = "http://snworksceo.imgix.net/dpn/66799ad7-5e72-4759-9d4e-33a62308bdce.sized-1000x1000.jpg"
+    articleUrl = "http://www.thedp.com/article/2018/03/university-penn-president-amy-gutmann-wendell-pritchett-budget-board-trustees-tuition-increase-financial-aid"
+    info = {"source": source, "title": title, "date": date, "imageUrl": imageUrl, "articleUrl": articleUrl}
+    return HomeCell("news", info)
 
 # Error check request cell options
 def error_options(options):
