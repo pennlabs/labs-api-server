@@ -73,8 +73,8 @@ def book_room():
         return jsonify({"results": False, "error": "Please specify a correct room id!"})
 
     try:
-        start = request.form["start"]
-        end = request.form["end"]
+        start = parse(request.form["start"])
+        end = parse(request.form["end"])
     except KeyError:
         return jsonify({"results": False, "error": "No start and end parameters passed to server!"})
 
@@ -92,13 +92,13 @@ def book_room():
         except KeyError:
             pass
 
-    resp = studyspaces.book_room(room, start, end, **contact)
+    resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
     if "error" not in resp:
         save_booking(
             rid=room,
             email=contact["email"],
-            start=parse(start).replace(tzinfo=None),
-            end=parse(end).replace(tzinfo=None),
+            start=start.replace(tzinfo=None),
+            end=end.replace(tzinfo=None),
             booking_id=resp.get("booking_id")
         )
     return jsonify(resp)
