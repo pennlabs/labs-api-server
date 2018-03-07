@@ -25,6 +25,19 @@ def parse_times(building):
 
     try:
         rooms = studyspaces.get_rooms(building, start, end)
+
+        # legacy support for old scraping method
+        rooms["location_id"] = rooms["id"]
+        rooms["rooms"] = []
+        for room_list in rooms["categories"]:
+            for room in room_list["rooms"]:
+                room["thumbnail"] = room["image"]
+                del room["image"]
+                room["room_id"] = room["id"]
+                del room["id"]
+                room["gid"] = room_list["cid"]
+                room["lid"] = building
+                rooms["rooms"].append(room)
     except APIError as e:
         return jsonify({"error": str(e)})
 
