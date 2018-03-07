@@ -380,7 +380,7 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     </tbody>
 </table>
 
-### Multiple halls by hall_no
+### Two halls by hall_no
 Get information for two rooms by the hall_nos. hall_no is given in the All Halls response.
 
 <table>
@@ -388,6 +388,30 @@ Get information for two rooms by the hall_nos. hall_no is given in the All Halls
         <tr>
             <td>URL</td>
             <td><code>https://api.pennlabs.org/laundry/hall/{hall_no}/{hall_no_2}</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### Multiple halls by hall_no
+Get information for multiple rooms by the hall_nos. hall_no is given in the All Halls response.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/laundry/rooms/{hall_no},{hall_no_2},{hall_no_3}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
