@@ -809,6 +809,32 @@ Get information on all routes. This has the same information as the stops endpoi
     </tbody>
 </table>
 
+## Fitness
+
+### Get Usage
+Get approximate usage data for locations in various fitness centers.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/fitness/usage</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ## Athletics
 
 Documentation for the athletics endpoints is located at the Labs pennathletics
