@@ -67,3 +67,12 @@ class DiningPreference(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
     venue_id = sqldb.Column(sqldb.Integer, nullable=False)
+
+class Event(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    type = sqldb.Column(sqldb.Text, nullable=False)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    description = sqldb.Column(sqldb.Text, nullable=False)
+    image_url = sqldb.Column(sqldb.Text, nullable=False)
+    start_time = sqldb.Column(sqldb.DateTime, nullable=False)
+    end_time = sqldb.Column(sqldb.DateTime, nullable=False)
