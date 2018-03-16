@@ -99,7 +99,7 @@ def save_dining_preferences():
     venue_id = request.form.get('venue_id')
 
     if not venue_id:
-        return jsonify({'success': False, 'error': 'No rooms specified.'})
+        return jsonify({'success': False, 'error': 'No venue specified.'})
 
     dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
     sqldb.session.add(dining_preference)
