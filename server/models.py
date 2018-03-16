@@ -68,6 +68,7 @@ class DiningPreference(sqldb.Model):
     user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
     venue_id = sqldb.Column(sqldb.Integer, nullable=False)
 
+
 class Event(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     type = sqldb.Column(sqldb.Text, nullable=False)
@@ -76,3 +77,6 @@ class Event(sqldb.Model):
     image_url = sqldb.Column(sqldb.Text, nullable=False)
     start_time = sqldb.Column(sqldb.DateTime, nullable=False)
     end_time = sqldb.Column(sqldb.DateTime, nullable=False)
+    email = sqldb.Column(sqldb.String(255), nullable=False)
+    website = sqldb.Column(sqldb.String(255), nullable=False)
+    facebook = sqldb.Column(sqldb.String(255), nullable=False)
