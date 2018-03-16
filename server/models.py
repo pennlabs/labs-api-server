@@ -78,5 +78,5 @@ class Event(sqldb.Model):
     start_time = sqldb.Column(sqldb.DateTime, nullable=False)
     end_time = sqldb.Column(sqldb.DateTime, nullable=False)
     email = sqldb.Column(sqldb.String(255), nullable=False)
-    website = sqldb.Column(sqldb.String(255), nullable=False)
-    facebook = sqldb.Column(sqldb.String(255), nullable=False)
+    website = sqldb.Column(sqldb.String(255))
+    facebook = sqldb.Column(sqldb.String(255))
