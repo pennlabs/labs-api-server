@@ -92,14 +92,14 @@ def get_event_cell():
     # TODO remove hardcode
     if event:
         info = {
-            'name':'name',
-            'description': 'description',
-            'image_url': 'pic',
-            'start_time': 'starttime',
-            'end_time': 'endtime',
-            'email': 'email',
-            'website': 'website',
-            'facebook': 'facebook'
+            'name': event.name,
+            'description': event.description,
+            'image_url': event.image_url,
+            'start_time': event.start_time,
+            'end_time': event.end_time,
+            'email': event.email,
+            'website': event.website,
+            'facebook': event.facebook
         }
         return HomeCell("event", info)
     else:
