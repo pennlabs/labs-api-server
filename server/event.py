@@ -1,7 +1,11 @@
+import pytz
+
 from flask import jsonify
 
 from . import app
 from .models import Event
+
+eastern = pytz.timezone('US/Eastern')
 
 
 @app.route('/events/<type>', methods=['GET'])
@@ -12,8 +16,8 @@ def get_events(type):
         'name': x.name,
         'description': x.description,
         'image_url': x.image_url,
-        'start_time': x.start_time.isoformat(),
-        'end_time': x.end_time.isoformat(),
+        'start_time': eastern.localize(x.start_time).isoformat(),
+        'end_time': eastern.localize(x.end_time).isoformat(),
         'email': x.email,
         'website': x.website,
         'facebook': x.facebook
