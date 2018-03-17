@@ -15,7 +15,7 @@ def get_homepage():
         user = User.get_or_create()
     except ValueError as e:
         print(e)
-        return jsonify({'err': [e.message]})
+        return jsonify({'err': [str(e)]})
 
     cell = get_popular_dining_cell(user)
 
@@ -34,7 +34,7 @@ def get_homepage():
     newsCell = get_news_cell().getCell()
     cells.append(newsCell)
 
-    if get_event_cell():     
+    if get_event_cell():
         eventCell = get_event_cell().getCell()
         cells.append(eventCell)
 
