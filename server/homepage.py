@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, Event
+from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event
 from sqlalchemy import func
 import json
 
@@ -86,10 +86,7 @@ def get_news_cell():
 # return a event cell
 # TODO Fetch most recent, most popular, etc
 def get_event_cell():
-    info = {"Testing": 'testing'}
     event = Event.query.first()
-    print('event', event)
-    # TODO remove hardcode
     if event:
         info = {
             'name': event.name,
@@ -114,6 +111,17 @@ def error_options(options):
             print('not', option)
             return True
     return False
+
+@app.route('/homepage/order', methods=['GET'])
+def get_order():
+    cell_options = HomeCellOrder.query.all()
+    return jsonify({"cells" : cell_options})
+
+@app.route('/homepage/order', methods=['POST'])
+def change_cell_order():
+    print('changed')
+    return "changed"
+
 
 @app.route('/homepage', methods=['POST'])
 def change_order():
