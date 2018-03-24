@@ -5,7 +5,7 @@ from dateutil.parser import parse
 
 from server import app, sqldb
 from penn.base import APIError
-from .models import StudySpacesBooking
+from .models import StudySpacesBooking, User
 from .penndata import studyspaces
 from .base import cached_route
 
@@ -118,6 +118,14 @@ def book_room():
 
 
 def save_booking(**info):
+    try:
+        user = User.get_or_create()
+    except ValueError:
+        user = None
+
+    if user:
+        info['user'] = user.id
+
     item = StudySpacesBooking(**info)
 
     sqldb.session.add(item)

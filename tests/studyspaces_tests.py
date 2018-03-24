@@ -54,12 +54,15 @@ class StudySpacesApiTests(unittest.TestCase):
                     "groupname": "Testing",
                     "phone": "000-000-0000",
                     "size": 1
-                })
+                }, headers={"X-Device-Id": "test"})
             res = json.loads(resp.data.decode("utf8"))
             self.assertTrue(len(res) > 0)
 
             # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
+
+            # check to make sure user is saved
+            self.assertTrue(sqldb.session.query(StudySpacesBooking).first().user is not None)
 
     def testStudyspaceCancelFailure(self):
         """Booking cancellation should not succeed if it is not in our database."""
