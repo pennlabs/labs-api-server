@@ -16,8 +16,8 @@ def get_events(type):
         'name': x.name,
         'description': x.description,
         'image_url': x.image_url,
-        'start_time': eastern.localize(x.start_time).isoformat(),
-        'end_time': eastern.localize(x.end_time).isoformat(),
+        'start_time': x.start_time.replace(tzinfo=eastern).isoformat(),
+        'end_time': x.end_time.replace(tzinfo=eastern).isoformat(),
         'email': x.email,
         'website': x.website,
         'facebook': x.facebook
