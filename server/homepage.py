@@ -4,6 +4,10 @@ from os import getenv
 from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event
 from sqlalchemy import func
 import json
+import pytz
+
+utc = pytz.timezone('UTC')
+eastern = pytz.timezone('US/Eastern')
 
 @app.route('/homepage', methods=['GET'])
 def get_homepage():
@@ -88,8 +92,8 @@ def get_event_cell():
             'name': event.name,
             'description': event.description,
             'image_url': event.image_url,
-            'start_time': event.start_time,
-            'end_time': event.end_time,
+            'start_time': utc.localize(x.start_time).astimezone(eastern).isoformat(),
+            'end_time': utc.localize(x.end_time).astimezone(eastern).isoformat(),
             'email': event.email,
             'website': event.website,
             'facebook': event.facebook
@@ -121,7 +125,7 @@ def change_cell_order():
     cell_options = request.get_json()['cellOptions']
 
     # delete old homepage order
-    HomeCellOrder.query.all().delete()
+    HomeCellOrder.query.delete()
 
     # add new order
     for cell_option in cell_options:
