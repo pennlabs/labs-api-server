@@ -7,9 +7,6 @@ import json
 
 @app.route('/homepage', methods=['GET'])
 def get_homepage():
-    # Load options from json file
-    # with open('homepage_options.json') as json_file:
-    #    data = json.load(json_file)
     # Find user in database
     try:
         user = User.get_or_create()
@@ -20,7 +17,6 @@ def get_homepage():
     cell = get_popular_dining_cell(user)
 
     # Display information
-    # cells = [{"type": x, "info": ""} for x in data['cellOptions']]
     cells = []
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
@@ -115,12 +111,25 @@ def error_options(options):
 @app.route('/homepage/order', methods=['GET'])
 def get_order():
     cell_options = HomeCellOrder.query.all()
-    return jsonify({"cells" : cell_options})
+    options = [
+        x.cell_type
+     for x in cell_options]
+    return jsonify({'cells': options})
 
 @app.route('/homepage/order', methods=['POST'])
 def change_cell_order():
-    print('changed')
-    return "changed"
+    cell_options = request.get_json()['cellOptions']
+
+    # delete old homepage order
+    HomeCellOrder.query.all().delete()
+
+    # add new order
+    for cell_option in cell_options:
+        print('opt', cell_option)
+        home_order = HomeCellOrder(cell_type=cell_option)
+        sqldb.session.add(home_order)
+    sqldb.session.commit()
+    return jsonify({'success': True})
 
 
 @app.route('/homepage', methods=['POST'])
