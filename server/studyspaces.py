@@ -4,7 +4,8 @@ from flask import jsonify, request
 from dateutil.parser import parse
 
 from server import app, sqldb
-from .models import StudySpacesBooking
+from penn.base import APIError
+from .models import StudySpacesBooking, User
 from .penndata import studyspaces
 from .base import cached_route
 
@@ -16,53 +17,31 @@ def parse_times(building):
 
     Usage:
         /studyspaces/availability/<building> gives all rooms for the next 24 hours
-        /studyspaces/availability/<building>?start=2018-25-01T11:00:00-0500 gives all rooms from start to 24 hours later
-        /studyspaces/availability/<building>?start=...&end=... gives all rooms between the two times
+        /studyspaces/availability/<building>?start=2018-25-01 gives all rooms in the start date
+        /studyspaces/availability/<building>?start=...&end=... gives all rooms between the two days
     """
-    show_available = request.args.get("available")
-    if show_available is not None:
-        show_available = show_available.lower() == "true"
+    start = request.args.get('start')
+    end = request.args.get('end')
 
-    if 'date' in request.args:
-        date = datetime.datetime.strptime(request.args.get('date'), "%Y-%m-%d")
-        date = date.replace(hour=0, minute=0, second=0, microsecond=0)
-        start = date
-        end = date + datetime.timedelta(days=1)
-    else:
-        date = datetime.datetime.now()
-        try:
-            start = request.args.get('start')
-            if start is not None:
-                start = parse(start)
-                # round down to closest hour
-                start = start.replace(minute=0, second=0, microsecond=0)
-            else:
-                start = date
-            end = request.args.get('end')
-            if end is not None:
-                end = parse(end)
-            else:
-                end = start + datetime.timedelta(days=1)
-                # stop at midnight today
-                end = end.replace(hour=0, minute=0, second=0, microsecond=0)
-        except ValueError:
-            return jsonify({"error": "Incorrect date format!"})
+    try:
+        rooms = studyspaces.get_rooms(building, start, end)
 
-    rooms = studyspaces.get_rooms(building, start, end)
+        # legacy support for old scraping method
+        rooms["location_id"] = rooms["id"]
+        rooms["rooms"] = []
+        for room_list in rooms["categories"]:
+            for room in room_list["rooms"]:
+                room["thumbnail"] = room["image"]
+                del room["image"]
+                room["room_id"] = room["id"]
+                del room["id"]
+                room["gid"] = room_list["cid"]
+                room["lid"] = building
+                rooms["rooms"].append(room)
+    except APIError as e:
+        return jsonify({"error": str(e)})
 
-    if show_available is not None:
-        modified_rooms = []
-        for room in rooms:
-            room["times"] = [x for x in room["times"] if x["available"] == show_available]
-            if len(room["times"]) > 0:
-                modified_rooms.append(room)
-        rooms = modified_rooms
-
-    return jsonify({
-        "location_id": building,
-        "date": start.strftime("%Y-%m-%d"),
-        "rooms": rooms
-    })
+    return jsonify(rooms)
 
 
 @app.route('/studyspaces/locations', methods=['GET'])
@@ -76,6 +55,25 @@ def display_id_pairs():
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
 
 
+@app.route('/studyspaces/cancel', methods=['POST'])
+def cancel_room():
+    """
+    Cancels a booked room.
+    """
+    booking_id = request.form.get("booking_id")
+    if not booking_id:
+        return jsonify({"error": "No booking id sent to server!"})
+
+    # ensure that the server was the one that booked the room
+    for bid in booking_id.strip().split(","):
+        exists = sqldb.session.query(sqldb.exists().where(StudySpacesBooking.booking_id == bid)).scalar()
+        if not exists:
+            return jsonify({"error": "Cancellation request aborted because of booking '{}'.".format(bid)})
+
+    resp = studyspaces.cancel_room(booking_id)
+    return jsonify(resp)
+
+
 @app.route('/studyspaces/book', methods=['POST'])
 def book_room():
     """
@@ -83,41 +81,51 @@ def book_room():
     """
 
     try:
-        building = int(request.form["building"])
         room = int(request.form["room"])
     except (KeyError, ValueError):
-        return jsonify({"results": False, "error": "Please specify a correct building and room id!"})
+        return jsonify({"results": False, "error": "Please specify a correct room id!"})
 
     try:
         start = parse(request.form["start"])
         end = parse(request.form["end"])
     except KeyError:
         return jsonify({"results": False, "error": "No start and end parameters passed to server!"})
-    except ValueError:
-        return jsonify({"results": False, "error": "Failed to parse start and end dates!"})
 
     contact = {}
-    for field in ["firstname", "lastname", "email", "groupname", "phone", "size"]:
+    for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
         try:
-            contact[field] = request.form[field]
+            contact[arg] = request.form[field]
         except KeyError:
             return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
 
-    try:
-        flag = studyspaces.book_room(building, room, start, end, **contact)
+    contact["custom"] = {}
+    for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
+        try:
+            contact["custom"][arg] = request.form[field]
+        except KeyError:
+            pass
+
+    resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
+    if "error" not in resp:
         save_booking(
-            lid=building,
             rid=room,
             email=contact["email"],
             start=start.replace(tzinfo=None),
-            end=end.replace(tzinfo=None)
+            end=end.replace(tzinfo=None),
+            booking_id=resp.get("booking_id")
         )
-        return jsonify({"results": flag, "error": None})
-    except ValueError as e:
-        return jsonify({"results": False, "error": str(e)})
+    return jsonify(resp)
 
 
 def save_booking(**info):
+    try:
+        user = User.get_or_create()
+    except ValueError:
+        user = None
+
+    if user:
+        info['user'] = user.id
+
     item = StudySpacesBooking(**info)
 
     sqldb.session.add(item)
