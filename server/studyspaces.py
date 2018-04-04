@@ -123,8 +123,10 @@ def save_booking(**info):
     except ValueError:
         user = None
 
-    if user:
-        info['user'] = user.id
+    if user is None:
+        return
+
+    info['user'] = user.id
 
     item = StudySpacesBooking(**info)
 
