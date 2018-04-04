@@ -20,8 +20,12 @@ def parse_times(building):
         /studyspaces/availability/<building>?start=2018-25-01 gives all rooms in the start date
         /studyspaces/availability/<building>?start=...&end=... gives all rooms between the two days
     """
-    start = request.args.get('start')
-    end = request.args.get('end')
+    if 'date' in request.args:
+        start = request.args.get('date')
+        end = request.args.get('date')
+    else:
+        start = request.args.get('start')
+        end = request.args.get('end')
 
     try:
         rooms = studyspaces.get_rooms(building, start, end)
@@ -37,6 +41,14 @@ def parse_times(building):
                 del room["id"]
                 room["gid"] = room_list["cid"]
                 room["lid"] = building
+                room["times"] = room["availability"]
+                del room["availability"]
+                for time in room["times"]:
+                    time["available"] = True
+                    time["start"] = time["from"]
+                    time["end"] = time["to"]
+                    del time["from"]
+                    del time["to"]
                 rooms["rooms"].append(room)
     except APIError as e:
         return jsonify({"error": str(e)})
