@@ -2,6 +2,7 @@ import os
 import redis
 
 from flask import Flask
+from flask_cors import CORS
 from raven.contrib.flask import Sentry
 from server.models import sqldb
 
@@ -9,6 +10,9 @@ app = Flask(__name__)
 
 # sentry
 sentry = Sentry(app)
+
+# allow cors
+CORS(app)
 
 # sql
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
