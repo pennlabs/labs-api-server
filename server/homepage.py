@@ -26,7 +26,7 @@ def get_homepage():
         x.cell_type
      for x in cell_options]
 
-    
+
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
 
@@ -113,16 +113,6 @@ def get_event_cell():
     else:
         return None
 
-# Error check request cell options
-def error_options(options):
-    with open('homepage_options.json') as json_file:
-        data = json.load(json_file)
-    for option in options:
-        if (option not in data['cellOptions']):
-            print('not', option)
-            return True
-    return False
-
 @app.route('/homepage/order', methods=['GET'])
 def get_order():
     cell_options = HomeCellOrder.query.all()
@@ -145,20 +135,3 @@ def change_cell_order():
         sqldb.session.add(home_order)
     sqldb.session.commit()
     return jsonify({'success': True})
-
-
-@app.route('/homepage', methods=['POST'])
-def change_order():
-    cellOptions = request.get_json()
-    authSecret = getenv('AUTH_SECRET')
-    if (authSecret != request.headers.get('authSecret')):
-        return "Please provide proper auth token with request."
-    elif error_options(cellOptions['cellOptions']):
-        return "Not all cell options are valid."
-    else:
-        with open('homepage_options.json', 'w') as outfile:
-            json.dump(cellOptions, outfile)
-        return "Cell order successfully changed."
-
-# TODO Add an info field to what is returned from get request. For now, info will
-# contain all rooms that a user has ever been in
