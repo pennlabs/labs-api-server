@@ -18,10 +18,15 @@ def get_homepage():
         print(e)
         return jsonify({'err': [str(e)]})
 
-    cell = get_popular_dining_cell(user)
-
     # Display information
     cells = []
+
+    cell_options = HomeCellOrder.query.all()
+    options = [
+        x.cell_type
+     for x in cell_options]
+
+    
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
 
@@ -67,6 +72,12 @@ def get_laundry_cells(user):
         room_ids.append(0)
 
     return [HomeCell("laundry", { "room_id": x }) for x in room_ids]
+
+# returns user's top laundry cell
+def get_top_laundry_cell(user):
+    top_preference = LaundryPreference.query.filter_by(user_id=user.id).one()
+    print('top', top_preference)
+    return [HomeCell("laundry", { "room_id": top_preference.room_id})]
 
 # returns a study spaces cell
 def get_study_spaces_cell():
