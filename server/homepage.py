@@ -26,6 +26,10 @@ def get_homepage():
         x.cell_type
      for x in cell_options]
 
+     if (2 == 2):
+        response = jsonify({"cells": 5})
+        response.status_code = 200 # or 400 or whatever
+        return response
 
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
