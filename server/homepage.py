@@ -21,26 +21,34 @@ def get_homepage():
     # Display information
     cells = []
 
-    # cell_options = HomeCellOrder.query.all()
-    # options = [
-    #     x.cell_type
-    #  for x in cell_options]
+    cell_options = HomeCellOrder.query.all()
+    options = [
+        x.cell_type
+     for x in cell_options]
 
-    diningCell = get_popular_dining_cell(user).getCell()
-    cells.append(diningCell)
+    print('options', options)
 
-    laundryCell = get_top_laundry_cell(user).getCell()
-    cells.append(laundryCell)
-
-    gsrCell = get_study_spaces_cell().getCell()
-    cells.append(gsrCell)
-
-    newsCell = get_news_cell().getCell()
-    cells.append(newsCell)
-
-    if get_event_cell():
-        eventCell = get_event_cell().getCell()
-        cells.append(eventCell)
+    for option in options:
+        if option == 'Laundry':
+            print('yay laundry', option)
+            laundryCell = get_top_laundry_cell(user).getCell()
+            cells.append(laundryCell)
+        elif option == 'Dining':
+            print('yay dining', option)
+            diningCell = get_popular_dining_cell(user).getCell()
+            cells.append(diningCell)
+        elif option == 'News':
+            newsCell = get_news_cell().getCell()
+            cells.append(newsCell)
+        elif option == 'Event':
+            if get_event_cell():
+                eventCell = get_event_cell().getCell()
+                cells.append(eventCell)
+        elif option == 'GSR':
+            gsrCell = get_study_spaces_cell().getCell()
+            cells.append(gsrCell)
+        else:
+            print('other', option)
 
     response = jsonify({"cells": cells})
     response.status_code = 200 # or 400 or whatever
@@ -75,7 +83,10 @@ def get_laundry_cells(user):
 # returns user's top laundry cell
 def get_top_laundry_cell(user):
     top_preference = LaundryPreference.query.filter_by(user_id=user.id).first()
-    return HomeCell("laundry", { "room_id": top_preference.room_id})
+    # If no top choice, select bishop white
+    if top_preference:
+        return HomeCell("laundry", { "room_id": top_preference.room_id})
+    return HomeCell("laundry", { "room_id": 0})
 
 # returns a study spaces cell
 def get_study_spaces_cell():
