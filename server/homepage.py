@@ -101,8 +101,8 @@ def get_event_cell():
             'name': event.name,
             'description': event.description,
             'image_url': event.image_url,
-            'start_time': utc.localize(x.start_time).astimezone(eastern).isoformat(),
-            'end_time': utc.localize(x.end_time).astimezone(eastern).isoformat(),
+            'start_time': utc.localize(event.start_time).astimezone(eastern).isoformat(),
+            'end_time': utc.localize(event.end_time).astimezone(eastern).isoformat(),
             'email': event.email,
             'website': event.website,
             'facebook': event.facebook
