@@ -483,24 +483,14 @@ Returns all the available rooms on a given date range given a building id. Dates
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>available</code></td>
-                            <td>None</td>
-                            <td>If this is set to true, show available rooms. If this is set to false, show booked rooms. Otherwise, show all rooms.</td>
-                        </tr>
-                        <tr>
-                            <td><code>date</code></td>
-                            <td>None</td>
-                            <td>If this is set, return all available rooms in the specified day.</td>
-                        </tr>
-                        <tr>
                             <td><code>start</code></td>
-                            <td>The current time.</td>
-                            <td>Range Start</td>
+                            <td>The current day.</td>
+                            <td>Range Start (YYYY-MM-DD)</td>
                         </tr>
                         <tr>
                             <td><code>end</code></td>
-                            <td>Midnight of the current day.</td>
-                            <td>Range End</td>
+                            <td>The current day.</td>
+                            <td>Range End (YYYY-MM-DD)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -539,11 +529,6 @@ Books a room given the room information and the user's contact information.
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>building</code></td>
-                            <td><strong>Required</strong></td>
-                            <td>The building id.</td>
-                        </tr>
-                        <tr>
                             <td><code>room</code></td>
                             <td><strong>Required</strong></td>
                             <td>The room id.</td>
@@ -580,13 +565,54 @@ Books a room given the room information and the user's contact information.
                         </tr>
                         <tr>
                             <td><code>phone</code></td>
-                            <td><strong>Required</strong></td>
+                            <td>Optional</td>
                             <td>The user's phone number.</td>
                         </tr>
                         <tr>
                             <td><code>size</code></td>
-                            <td><strong>Required</strong></td>
+                            <td>Optional</td>
                             <td>The size of the meeting (ex: 2-3).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Cancel Room
+Cancels a room given a booking id or a list of booking ids.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/studyspaces/cancel</code></td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>booking_id</code></td>
+                            <td>Required</td>
+                            <td>The booking id of the reservation to cancel.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -767,6 +793,32 @@ Get information on all routes. This has the same information as the stops endpoi
         <tr>
             <td>URL</td>
             <td><code>https://api.pennlabs.org/transit/routes</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+## Fitness
+
+### Get Usage
+Get approximate usage data for locations in various fitness centers.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/fitness/usage</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
