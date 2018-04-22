@@ -30,7 +30,7 @@ def get_homepage():
     cells.append(diningCell)
 
     laundryCell = get_top_laundry_cell(user).getCell()
-    cells.append(laundryCells)
+    cells.append(laundryCell)
 
     gsrCell = get_study_spaces_cell().getCell()
     cells.append(gsrCell)
