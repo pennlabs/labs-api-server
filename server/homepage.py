@@ -74,7 +74,7 @@ def get_laundry_cells(user):
 
 # returns user's top laundry cell
 def get_top_laundry_cell(user):
-    top_preference = LaundryPreference.query.filter_by(user_id=user.id).one()
+    top_preference = LaundryPreference.query.filter_by(user_id=user.id).first()
     return HomeCell("laundry", { "room_id": top_preference.room_id})
 
 # returns a study spaces cell
