@@ -29,7 +29,7 @@ def get_homepage():
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
 
-    laundryCells = [x.getCell() for x in get_laundry_cells(user)]
+    laundryCells = get_laundry_cells(user)
     cells.extend(laundryCells)
 
     gsrCell = get_study_spaces_cell().getCell()
