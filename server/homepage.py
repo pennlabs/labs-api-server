@@ -29,8 +29,8 @@ def get_homepage():
     diningCell = get_popular_dining_cell(user).getCell()
     cells.append(diningCell)
 
-    laundryCells = get_laundry_cells(user)
-    cells.extend(laundryCells)
+    laundryCell = get_top_laundry_cell(user).getCell()
+    cells.append(laundryCells)
 
     gsrCell = get_study_spaces_cell().getCell()
     cells.append(gsrCell)
@@ -75,8 +75,7 @@ def get_laundry_cells(user):
 # returns user's top laundry cell
 def get_top_laundry_cell(user):
     top_preference = LaundryPreference.query.filter_by(user_id=user.id).one()
-    print('top', top_preference)
-    return [HomeCell("laundry", { "room_id": top_preference.room_id})]
+    return HomeCell("laundry", { "room_id": top_preference.room_id})
 
 # returns a study spaces cell
 def get_study_spaces_cell():
