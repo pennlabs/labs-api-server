@@ -222,3 +222,127 @@ def get_laundry_preferences():
     preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
     return jsonify({'rooms': room_ids})
+
+################################
+#### Laundry V2 Refactoring ####
+################################
+
+@app.route('V2/laundry/rooms', methods=['GET'])
+def all_halls():
+    try:
+        return jsonify({"results": laundry.all_status()})
+    except HTTPError:
+        return jsonify({'error': 'The laundry api is currently unavailable.'})
+
+
+@app.route('V2/laundry/rooms/<hall_ids>', methods=['GET'])
+def get_rooms(hall_ids):
+    date = datetime.datetime.now()
+    halls = [int(x) for x in hall_ids.split(",")]
+    output = {"rooms": []}
+    for hall in halls:
+        hall_data = laundry.hall_status(hall)
+        hall_data["id"] = hall
+        hall_data["usage_data"] = V2_usage_data(hall, date.year, date.month, date.day)
+        output["rooms"].append(hall_data)
+    return jsonify(output)
+
+
+@app.route('V2/laundry/rooms/ids', methods=['GET'])
+def id_to_name():
+    try:
+        return jsonify({
+            "halls": laundry.hall_id_list
+        })
+    except HTTPError:
+        return jsonify({'error': 'The laundry api is currently unavailable.'})
+
+
+@app.route('V2/laundry/usage/<int:hall_no>')
+def usage_shortcut(hall_no):
+    now = datetime.datetime.now()
+    return V2_usage(hall_no, now.year, now.month, now.day)
+
+
+@app.route('V2/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
+def V2_usage(hall_no, year, month, day):
+    def get_data():
+        return V2_usage_data(hall_no, year, month, day)
+
+    td = datetime.timedelta(minutes=15)
+    return cached_route('laundry:usage:%s:%s-%s-%s' % (hall_no, year, month, day), td, get_data)
+
+def V2_usage_data(hall_no, year, month, day):
+    # turn date info into a date object
+    # find start range by subtracting 30 days
+    now = datetime.date(year, month, day)
+    start = now - datetime.timedelta(days=30)
+
+    # get the current day of the week for today and tomorrow
+    # python dow is monday = 0, while sql dow is sunday = 0
+    dow = (now.weekday() + 1) % 7
+    tmw = (dow + 1) % 7
+
+    # some commands are different between mysql and sqlite
+    is_mysql = sqldb.engine.name == "mysql"
+
+    # get the laundry information for today based on the day
+    # of week (if today is tuesday, get all the tuesdays
+    # in the past 30 days), group them by time, and include
+    # the first 2 hours of the next day
+    data = sqldb.session.query(
+        LaundrySnapshot.date,
+        (func.floor(LaundrySnapshot.time / 60).label("time") if is_mysql else
+         cast(LaundrySnapshot.time / 60, Integer).label("time")),
+        func.avg(LaundrySnapshot.washers).label("all_washers"),
+        func.avg(LaundrySnapshot.dryers).label("all_dryers"),
+        func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
+        func.avg(LaundrySnapshot.total_dryers).label("all_total_dryers"),
+    ).filter((LaundrySnapshot.room == hall_no) &
+             ((func.dayofweek(LaundrySnapshot.date) == dow + 1 if is_mysql else
+               func.strftime("%w", LaundrySnapshot.date) == str(dow)) |
+              ((LaundrySnapshot.time <= 180 - 1) &
+               (func.dayofweek(LaundrySnapshot.date) == tmw + 1 if is_mysql else
+                func.strftime("%w", LaundrySnapshot.date) == str(tmw)
+                ))) &
+             (LaundrySnapshot.date >= start)) \
+     .group_by(LaundrySnapshot.date, "time") \
+     .order_by(LaundrySnapshot.date, "time").all()
+    data = [x._asdict() for x in data]
+    all_dryers = [int(x["all_total_dryers"]) for x in data]
+    all_washers = [int(x["all_total_washers"]) for x in data]
+    washer_points = {k: 0 for k in range(27)}
+    dryer_points = {k: 0 for k in range(27)}
+    washer_total = {k: 0 for k in range(27)}
+    dryer_total = {k: 0 for k in range(27)}
+    for x in data:
+        hour = int(x["time"])
+        # if the value is for tomorrow, add 24 hours
+        if x["date"].weekday() != now.weekday():
+            hour += 24
+        washer_points[hour] += int(x["all_washers"])
+        dryer_points[hour] += int(x["all_dryers"])
+        washer_total[hour] += 1
+        dryer_total[hour] += 1
+    dates = [x["date"] for x in data]
+    if not dates:
+        dates = [now]
+
+    total_number_of_washers = safe_division(sum(all_washers), len(all_washers))
+    total_number_of_dryers = safe_division(sum(all_dryers), len(all_dryers))
+
+    washer_data = {x: (total_number_of_washers - safe_division(washer_points[x], washer_total[x])) for x in washer_points}
+    dryer_data = {x: (total_number_of_dryers - safe_division(dryer_points[x], dryer_total[x])) for x in dryer_points}
+
+    usage_percentage = {x: safe_division((washer_data[x] + dryer_data[x]), total_number_of_dryers + total_number_of_washers) for x in washer_points}
+
+    return {
+        "hall_name": laundry.id_to_hall[hall_no],
+        "location": laundry.id_to_location[hall_no],
+        "day_of_week": calendar.day_name[now.weekday()],
+        "start_date": min(dates).strftime("%Y-%m-%d"),
+        "end_date": max(dates).strftime("%Y-%m-%d"),
+        "total_number_of_dryers": total_number_of_washers,
+        "total_number_of_washers": total_number_of_dryers,
+        "usage": {x: usage_percentage[x]) for x in usage_percentage},
+    }
