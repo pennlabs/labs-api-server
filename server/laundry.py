@@ -239,12 +239,12 @@ def all_halls():
 def get_rooms(hall_ids):
     date = datetime.datetime.now()
     halls = [int(x) for x in hall_ids.split(",")]
-    output = {"rooms": []}
+    output = {"results": []}
     for hall in halls:
         hall_data = laundry.hall_status(hall)
         hall_data["id"] = hall
         hall_data["usage_data"] = V2_usage_data(hall, date.year, date.month, date.day)
-        output["rooms"].append(hall_data)
+        output["results"].append(hall_data)
     return jsonify(output)
 
 
@@ -252,7 +252,7 @@ def get_rooms(hall_ids):
 def id_to_name():
     try:
         return jsonify({
-            "halls": laundry.hall_id_list
+            "results": laundry.hall_id_list
         })
     except HTTPError:
         return jsonify({'error': 'The laundry api is currently unavailable.'})
