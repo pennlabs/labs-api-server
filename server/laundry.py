@@ -227,7 +227,7 @@ def get_laundry_preferences():
 #### Laundry V2 Refactoring ####
 ################################
 
-@app.route('V2/laundry/rooms', methods=['GET'])
+@app.route('v2/laundry/rooms', methods=['GET'])
 def all_halls():
     try:
         return jsonify({"results": laundry.all_status()})
@@ -235,7 +235,7 @@ def all_halls():
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
-@app.route('V2/laundry/rooms/<hall_ids>', methods=['GET'])
+@app.route('v2/laundry/rooms/<hall_ids>', methods=['GET'])
 def get_rooms(hall_ids):
     date = datetime.datetime.now()
     halls = [int(x) for x in hall_ids.split(",")]
@@ -248,7 +248,7 @@ def get_rooms(hall_ids):
     return jsonify(output)
 
 
-@app.route('V2/laundry/rooms/ids', methods=['GET'])
+@app.route('v2/laundry/rooms/ids', methods=['GET'])
 def id_to_name():
     try:
         return jsonify({
@@ -258,13 +258,13 @@ def id_to_name():
         return jsonify({'error': 'The laundry api is currently unavailable.'})
 
 
-@app.route('V2/laundry/usage/<int:hall_no>')
+@app.route('v2/laundry/usage/<int:hall_no>')
 def usage_shortcut(hall_no):
     now = datetime.datetime.now()
     return V2_usage(hall_no, now.year, now.month, now.day)
 
 
-@app.route('V2/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
+@app.route('v2/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
 def V2_usage(hall_no, year, month, day):
     def get_data():
         return V2_usage_data(hall_no, year, month, day)
