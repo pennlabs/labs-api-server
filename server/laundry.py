@@ -228,7 +228,7 @@ def get_laundry_preferences():
 ################################
 
 @app.route('/v2/laundry/rooms', methods=['GET'])
-def all_halls():
+def v2_all_halls():
     try:
         return jsonify({"results": laundry.all_status()})
     except HTTPError:
@@ -236,20 +236,20 @@ def all_halls():
 
 
 @app.route('/v2/laundry/rooms/<hall_ids>', methods=['GET'])
-def get_rooms(hall_ids):
+def v2_get_rooms(hall_ids):
     date = datetime.datetime.now()
     halls = [int(x) for x in hall_ids.split(",")]
     output = {"results": []}
     for hall in halls:
         hall_data = laundry.hall_status(hall)
         hall_data["id"] = hall
-        hall_data["usage_data"] = V2_usage_data(hall, date.year, date.month, date.day)
+        hall_data["usage_data"] = v2_usage_data(hall, date.year, date.month, date.day)
         output["results"].append(hall_data)
     return jsonify(output)
 
 
 @app.route('/v2/laundry/rooms/ids', methods=['GET'])
-def id_to_name():
+def v2_id_to_name():
     try:
         return jsonify({
             "results": laundry.hall_id_list
@@ -259,20 +259,20 @@ def id_to_name():
 
 
 @app.route('/v2/laundry/usage/<int:hall_no>')
-def usage_shortcut(hall_no):
+def v2_usage_shortcut(hall_no):
     now = datetime.datetime.now()
-    return V2_usage(hall_no, now.year, now.month, now.day)
+    return v2_usage(hall_no, now.year, now.month, now.day)
 
 
 @app.route('/v2/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
-def V2_usage(hall_no, year, month, day):
+def v2_usage(hall_no, year, month, day):
     def get_data():
-        return V2_usage_data(hall_no, year, month, day)
+        return v2_usage_data(hall_no, year, month, day)
 
     td = datetime.timedelta(minutes=15)
     return cached_route('laundry:usage:%s:%s-%s-%s' % (hall_no, year, month, day), td, get_data)
 
-def V2_usage_data(hall_no, year, month, day):
+def v2_usage_data(hall_no, year, month, day):
     # turn date info into a date object
     # find start range by subtracting 30 days
     now = datetime.date(year, month, day)
