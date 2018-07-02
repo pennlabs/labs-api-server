@@ -6,7 +6,7 @@
 import os
 import sys
 
-sys.path.append(os.pardir) # noqa
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # noqa
 
 import server
 
