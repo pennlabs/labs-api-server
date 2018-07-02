@@ -859,6 +859,30 @@ Get approximate usage data for locations in various fitness centers.
     </tbody>
 </table>
 
+### Get Schedule
+Get the schedule for the open hours of various fitness centers.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/fitness/schedule</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
 ## Athletics
 
 Documentation for the athletics endpoints is located at the Labs pennathletics

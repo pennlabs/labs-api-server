@@ -9,7 +9,7 @@ map_search = Map(getenv("NEM_USERNAME"), getenv("NEM_PASSWORD"))
 transit = Transit(getenv("TRANSIT_USERNAME"), getenv("TRANSIT_PASSWORD"))
 laundry = Laundry()
 studyspaces = StudySpaces(getenv("LIBCAL_ID"), getenv("LIBCAL_SECRET"))
-fitness = Fitness()
+fitness = Fitness(getenv("FITNESS_TOKEN"))
 calendar = Calendar()
 depts = {
     "AAMW": "Art & Arch of Med. World",
