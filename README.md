@@ -1,7 +1,7 @@
-Penn Mobile Server
-==================
+Labs API Server
+===============
 
-[![Build Status](https://travis-ci.org/pennlabs/penn-mobile-server.svg?branch=master)](https://travis-ci.org/pennlabs/penn-mobile-server)
+[![Build Status](https://travis-ci.org/pennlabs/labs-api-server.svg?branch=master)](https://travis-ci.org/pennlabs/labs-api-server)
 
 Redis-backed caching server for the Open Data APIs.
 Intended for internal use at Penn Labs to speed up queries to Open Data.
@@ -380,7 +380,7 @@ Get information for a specific room by the hall_no. hall_no is given in the All 
     </tbody>
 </table>
 
-### Multiple halls by hall_no
+### Two halls by hall_no
 Get information for two rooms by the hall_nos. hall_no is given in the All Halls response.
 
 <table>
@@ -388,6 +388,30 @@ Get information for two rooms by the hall_nos. hall_no is given in the All Halls
         <tr>
             <td>URL</td>
             <td><code>https://api.pennlabs.org/laundry/hall/{hall_no}/{hall_no_2}</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### Multiple halls by hall_no
+Get information for multiple rooms by the hall_nos. hall_no is given in the All Halls response.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/laundry/rooms/{hall_no},{hall_no_2},{hall_no_3}</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>
@@ -819,6 +843,30 @@ Get approximate usage data for locations in various fitness centers.
         <tr>
             <td>URL</td>
             <td><code>https://api.pennlabs.org/fitness/usage</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>None</td>
+        </tr>
+    </tbody>
+</table>
+
+### Get Schedule
+Get the schedule for the open hours of various fitness centers.
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/fitness/schedule</td>
         </tr>
         <tr>
             <td>HTTP Methods</td>

@@ -37,7 +37,6 @@ class StudySpacesApiTests(unittest.TestCase):
                 self.assertTrue("room_id" in room)
                 self.assertTrue("gid" in room)
                 self.assertTrue("lid" in room)
-                self.assertTrue("availability" in room)
 
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:
