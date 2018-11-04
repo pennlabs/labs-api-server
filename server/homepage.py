@@ -21,34 +21,46 @@ def get_homepage():
     # Display information
     cells = []
 
-    cell_options = HomeCellOrder.query.all()
-    options = [
-        x.cell_type
-     for x in cell_options]
+    ##### Adam's Dynamic Cell Code for changing order remotely #####
 
-    print('options', options)
+    # cell_options = HomeCellOrder.query.all()
+    # options = [
+    #     x.cell_type
+    #  for x in cell_options]
 
-    for option in options:
-        if option == 'Laundry':
-            print('yay laundry', option)
-            laundryCell = get_top_laundry_cell(user).getCell()
-            cells.append(laundryCell)
-        elif option == 'Dining':
-            print('yay dining', option)
-            diningCell = get_popular_dining_cell(user).getCell()
-            cells.append(diningCell)
-        elif option == 'News':
-            newsCell = get_news_cell().getCell()
-            cells.append(newsCell)
-        elif option == 'Event':
-            if get_event_cell():
-                eventCell = get_event_cell().getCell()
-                cells.append(eventCell)
-        elif option == 'GSR':
-            gsrCell = get_study_spaces_cell().getCell()
-            cells.append(gsrCell)
-        else:
-            print('other', option)
+    # print('options', options)
+
+    # for option in options:
+    #     if option == 'Laundry':
+    #         print('yay laundry', option)
+    #         laundryCell = get_top_laundry_cell(user).getCell()
+    #         cells.append(laundryCell)
+    #     elif option == 'Dining':
+    #         print('yay dining', option)
+    #         diningCell = get_popular_dining_cell(user).getCell()
+    #         cells.append(diningCell)
+    #     elif option == 'News':
+    #         newsCell = get_news_cell().getCell()
+    #         cells.append(newsCell)
+    #     elif option == 'Event':
+    #         if get_event_cell():
+    #             eventCell = get_event_cell().getCell()
+    #             cells.append(eventCell)
+    #     elif option == 'GSR':
+    #         gsrCell = get_study_spaces_cell().getCell()
+    #         cells.append(gsrCell)
+    #     else:
+    #         print('other', option)
+
+    laundryCell = get_top_laundry_cell(user).getCell()
+    diningCell = get_popular_dining_cell(user).getCell()
+    newsCell = get_news_cell().getCell()
+    gsrCell = get_study_spaces_cell().getCell()
+
+    cells.append(laundryCell)
+    cells.append(diningCell)
+    cells.append(newsCell)
+    cells.append(gsrCell)
 
     response = jsonify({"cells": cells})
     response.status_code = 200 # or 400 or whatever
