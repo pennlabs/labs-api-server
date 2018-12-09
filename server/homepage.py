@@ -56,11 +56,14 @@ def get_homepage():
     diningCell = get_popular_dining_cell(user).getCell()
     newsCell = get_news_cell().getCell()
     gsrCell = get_study_spaces_cell().getCell()
+    calendarCell = get_university_event_cell().getCell()
 
+    cells.append(calendarCell)
     cells.append(laundryCell)
     cells.append(diningCell)
     cells.append(newsCell)
     cells.append(gsrCell)
+
 
     response = jsonify({"cells": cells})
     response.status_code = 200 # or 400 or whatever
@@ -103,6 +106,10 @@ def get_top_laundry_cell(user):
 # returns a study spaces cell
 def get_study_spaces_cell():
     return HomeCell("studyRoomBooking", None)
+
+# returns a university notification cell
+def get_university_event_cell():
+    return HomeCell("calendar", None)
 
 # returns a news cell
 # TODO: Dynamically fetch news item from database or from website
