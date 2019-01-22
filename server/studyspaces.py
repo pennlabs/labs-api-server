@@ -16,12 +16,13 @@ from .base import cached_route
 def get_wharton_gsrs():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
 
-    if 'GSR_SESSIONID' not in os.environ:
-        if 'sessionid' not in request.args:
-            return jsonify({'error': 'No GSR session id is set!'})
+    if 'sessionid' not in request.args:
         sessionid = request.args.get('sessionid')
     else:
         sessionid = os.environ.get('GSR_SESSIONID')
+
+    if not sessionid:
+        return jsonify({'error': 'No GSR session id is set!'})
 
     resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
         'search_time': request.args.get('search_time') or datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
