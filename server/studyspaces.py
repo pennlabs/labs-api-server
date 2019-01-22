@@ -24,8 +24,15 @@ def get_wharton_gsrs():
     if not sessionid:
         return jsonify({'error': 'No GSR session id is set!'})
 
+    time = request.args.get('date')
+
+    if time:
+        time += " 05:00"
+    else:
+        time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
+
     resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
-        'search_time': request.args.get('date') or datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
+        'search_time': time
     }, cookies={
         'sessionid': sessionid
     })
