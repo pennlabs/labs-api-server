@@ -1,4 +1,6 @@
+import os
 import datetime
+import requests
 
 from flask import jsonify, request
 from dateutil.parser import parse
@@ -8,6 +10,24 @@ from penn.base import APIError
 from .models import StudySpacesBooking, User
 from .penndata import studyspaces
 from .base import cached_route
+
+
+@app.route('/studyspaces/gsr', methods=['GET'])
+def get_wharton_gsrs():
+    """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
+
+    if 'GSR_SESSIONID' not in os.environ:
+        return jsonify({'error': 'No GSR session id set!'})
+
+    resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
+        'search_time': request.args.get('search_time') or datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
+    }, cookies={
+        'sessionid': os.environ.get('GSR_SESSIONID')
+    })
+    if resp.status_code == 200:
+        return jsonify(resp.json())
+    else:
+        return jsonify({'error': 'Remote server returned status code {}.'.format(resp.status_code)})
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
