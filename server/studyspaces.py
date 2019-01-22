@@ -17,12 +17,16 @@ def get_wharton_gsrs():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
 
     if 'GSR_SESSIONID' not in os.environ:
-        return jsonify({'error': 'No GSR session id set!'})
+        if 'sessionid' not in request.args:
+            return jsonify({'error': 'No GSR session id is set!'})
+        sessionid = request.args.get('sessionid')
+    else:
+        sessionid = os.environ.get('GSR_SESSIONID')
 
     resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
         'search_time': request.args.get('search_time') or datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
     }, cookies={
-        'sessionid': os.environ.get('GSR_SESSIONID')
+        'sessionid': sessionid
     })
     if resp.status_code == 200:
         return jsonify(resp.json())
