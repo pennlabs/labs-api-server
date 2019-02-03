@@ -82,6 +82,13 @@ class Event(sqldb.Model):
     website = sqldb.Column(sqldb.String(255))
     facebook = sqldb.Column(sqldb.String(255))
 
+class UniversityEvent(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    type = sqldb.Column(sqldb.Text, nullable=False)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    start = sqldb.Column(sqldb.DateTime, nullable=False)
+    end = sqldb.Column(sqldb.DateTime, nullable=False)
+
 class HomeCellOrder(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     cell_type = sqldb.Column(sqldb.Text, nullable=False)

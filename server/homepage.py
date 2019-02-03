@@ -58,12 +58,12 @@ def get_homepage():
     gsrCell = get_study_spaces_cell().getCell()
     calendarCell = get_university_event_cell().getCell()
 
-    cells.append(calendarCell)
+    if calendarCell is not None:
+        cells.append(calendarCell)
     cells.append(laundryCell)
     cells.append(diningCell)
     cells.append(newsCell)
     cells.append(gsrCell)
-
 
     response = jsonify({"cells": cells})
     response.status_code = 200 # or 400 or whatever
@@ -109,7 +109,17 @@ def get_study_spaces_cell():
 
 # returns a university notification cell
 def get_university_event_cell():
-    return HomeCell("calendar", None)
+    event = UniversityEvent.query.first()
+    if event:
+        return HomeCell("calendar", None)
+        info = {
+            'name': event.name,
+            'start': utc.localize(event.start_time).astimezone(eastern).isoformat(),
+            'end': utc.localize(event.end_time).astimezone(eastern).isoformat(),
+        }
+        return HomeCell("event", info)
+    else:
+        return None
 
 # returns a news cell
 # TODO: Dynamically fetch news item from database or from website
