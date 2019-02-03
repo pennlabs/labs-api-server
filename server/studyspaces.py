@@ -131,7 +131,7 @@ def display_id_pairs():
     Returns JSON containing a list of buildings with their ids.
     """
     def get_data():
-        return {"locations": studyspaces.get_buildings() + [{"lid": -1, "name": "Huntsman Hall", "service": "wharton"}]}
+        return {"locations": studyspaces.get_buildings() + [{"lid": 1, "name": "Huntsman Hall", "service": "wharton"}]}
 
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
 
