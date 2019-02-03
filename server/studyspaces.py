@@ -11,18 +11,52 @@ from .models import StudySpacesBooking, User
 from .penndata import studyspaces
 from .base import cached_route
 
+def get_sessionid():
+    return "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
 
-@app.route('/studyspaces/gsr', methods=['GET'])
+def switch_format(gsr):
+    if "error" in gsr:
+        return gsr
+    rooms = {
+        "cid": 1,
+        "name": "Huntsman Hall",
+        "rooms": []
+    }
+
+    for room in gsr["times"][0]:
+        del room["booked_by_user"]
+        del room["building"]
+        if "reservation_id" in room:
+            del room["reservation_id"]
+        room["lid"] = 1
+        # room["gid"] = null
+        # room["thumbnail"] = null;
+        # room["capacity"] = null
+        # room["description"] = null
+        room["room_id"] = room["id"]
+        del room["id"]
+        room["name"] = "GSR " + room["room_number"]
+        del room["room_number"]
+        time = {
+            "available": room["reserved"],
+            "end": room["end_time"],
+            "start": room["start_time"]
+        }
+        if "times" in room:
+            room["times"] + [time]
+        else:
+            room["times"] = [] + [time]
+        del room["reserved"]
+        del room["end_time"]
+        del room["start_time"]
+        rooms["rooms"].append(room)
+        print(rooms)
+    return {"categories": [rooms]}
+
 def get_wharton_gsrs():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
 
-    sessionid = request.args.get('sessionid')
-
-    if not sessionid:
-        sessionid = os.environ.get('GSR_SESSIONID')
-
-    if not sessionid:
-        return jsonify({'error': 'No GSR session id is set!'})
+    sessionid = get_sessionid()
 
     time = request.args.get('date')
 
@@ -36,10 +70,12 @@ def get_wharton_gsrs():
     }, cookies={
         'sessionid': sessionid
     })
+
     if resp.status_code == 200:
-        return jsonify(resp.json())
+        return resp.json()
+
     else:
-        return jsonify({'error': 'Remote server returned status code {}.'.format(resp.status_code)})
+        return {'error': 'Remote server returned status code {}.'.format(resp.status_code)}
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
@@ -59,32 +95,33 @@ def parse_times(building):
         start = request.args.get('start')
         end = request.args.get('end')
 
-    try:
-        rooms = studyspaces.get_rooms(building, start, end)
-
-        # legacy support for old scraping method
-        rooms["location_id"] = rooms["id"]
-        rooms["rooms"] = []
-        for room_list in rooms["categories"]:
-            for room in room_list["rooms"]:
-                room["thumbnail"] = room["image"]
-                del room["image"]
-                room["room_id"] = room["id"]
-                del room["id"]
-                room["gid"] = room_list["cid"]
-                room["lid"] = building
-                room["times"] = room["availability"]
-                del room["availability"]
-                for time in room["times"]:
-                    time["available"] = True
-                    time["start"] = time["from"]
-                    time["end"] = time["to"]
-                    del time["from"]
-                    del time["to"]
-                rooms["rooms"].append(room)
-    except APIError as e:
-        return jsonify({"error": str(e)})
-
+    if building == 1:
+        rooms = switch_format(get_wharton_gsrs())
+    else:
+        try:
+            rooms = studyspaces.get_rooms(building, start, end)
+            print(rooms);
+            rooms["location_id"] = rooms["id"]
+            rooms["rooms"] = []
+            for room_list in rooms["categories"]:
+                for room in room_list["rooms"]:
+                    room["thumbnail"] = room["image"]
+                    del room["image"]
+                    room["room_id"] = room["id"]
+                    del room["id"]
+                    room["gid"] = room_list["cid"]
+                    room["lid"] = building
+                    room["times"] = room["availability"]
+                    del room["availability"]
+                    for time in room["times"]:
+                        time["available"] = True
+                        time["start"] = time["from"]
+                        time["end"] = time["to"]
+                        del time["from"]
+                        del time["to"]
+                    rooms["rooms"].append(room)
+        except APIError as e:
+            return jsonify({"error": str(e)})
     return jsonify(rooms)
 
 
@@ -94,7 +131,7 @@ def display_id_pairs():
     Returns JSON containing a list of buildings with their ids.
     """
     def get_data():
-        return {"locations": studyspaces.get_buildings()}
+        return {"locations": studyspaces.get_buildings() + [{"lid": -1, "name": "Huntsman Hall", "service": "wharton"}]}
 
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
 
