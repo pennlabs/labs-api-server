@@ -2,6 +2,7 @@ from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
 from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event
+from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 import json
 import pytz
@@ -52,20 +53,18 @@ def get_homepage():
     #     else:
     #         print('other', option)
 
-    laundryCell = get_top_laundry_cell(user).getCell()
-    diningCell = get_popular_dining_cell(user).getCell()
-    newsCell = get_news_cell().getCell()
-    gsrCell = get_study_spaces_cell().getCell()
-    calendarCell = get_university_event_cell().getCell()
+    laundry = get_top_laundry_cell(user)
+    dining = get_popular_dining_cell(user)
+    news = get_news_cell()
+    gsr = get_study_spaces_cell()
+    calendar = get_university_event_cell()
 
-    if calendarCell is not None:
-        cells.append(calendarCell)
-    cells.append(laundryCell)
-    cells.append(diningCell)
-    cells.append(newsCell)
-    cells.append(gsrCell)
+    if calendar is not None:
+        cells.append(calendar)
+    
+    cells.extend([dining, news, gsr, laundry])
 
-    response = jsonify({"cells": cells})
+    response = jsonify({"cells": [x.getCell() for x in cells]})
     response.status_code = 200 # or 400 or whatever
     return response
 
@@ -107,17 +106,16 @@ def get_top_laundry_cell(user):
 def get_study_spaces_cell():
     return HomeCell("studyRoomBooking", None)
 
+def exists_university_event():
+    calendar = pull_todays_calendar()
+    events = calendar["calendar"]
+    return len(events) != 0
+
 # returns a university notification cell
 def get_university_event_cell():
-    event = UniversityEvent.query.first()
-    if event:
-        return HomeCell("calendar", None)
-        info = {
-            'name': event.name,
-            'start': utc.localize(event.start_time).astimezone(eastern).isoformat(),
-            'end': utc.localize(event.end_time).astimezone(eastern).isoformat(),
-        }
-        return HomeCell("event", info)
+    calendar = pull_todays_calendar()
+    if calendar:
+        return HomeCell("calendar", calendar)
     else:
         return None
 
