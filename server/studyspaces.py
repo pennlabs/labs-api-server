@@ -58,6 +58,24 @@ def get_wharton_gsr_reservations():
 
     return jsonify({'reservations': reservations})
 
+@app.route('/studyspaces/gsr/delete/<int:booking_id>', methods=['GET'])
+def get_wharton_gsr_reservations():
+    """
+    Returns JSON containing a list of Wharton GSR reservations.
+    """
+
+    sessionid = request.args.get('sessionid')
+
+    if not sessionid:
+        return jsonify({'error': 'No Session ID provided.'})
+
+    try:
+        result = wharton.delete_booking(sessionid, booking_id)
+    except APIError as e:
+        return jsonify({"error": str(e)})
+
+    return jsonify({'result': result})
+
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
 def parse_times(building):
