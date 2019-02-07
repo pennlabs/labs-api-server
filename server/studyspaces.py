@@ -41,6 +41,22 @@ def get_wharton_gsrs():
     else:
         return jsonify({'error': 'Remote server returned status code {}.'.format(resp.status_code)})
 
+@app.route('/studyspaces/gsr/reservations', methods=['GET'])
+def get_wharton_gsr_reservations():
+    """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
+
+    sessionid = request.args.get('sessionid')
+
+    if not sessionid:
+        return jsonify({'error': 'No sessionID provided.'})
+
+    try:
+        reservations = wharton.get_reservations(sessionid)
+    except APIError as e:
+        return jsonify({"error": str(e)})
+
+    return jsonify({'reservations': reservations})
+
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
 def get_wharton_gsr_reservations():
