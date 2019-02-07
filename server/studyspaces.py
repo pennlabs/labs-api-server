@@ -44,9 +44,7 @@ def get_wharton_gsrs():
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
 def get_wharton_gsr_reservations():
-    """
-    Returns JSON containing a list of Wharton GSR reservations.
-    """
+    """ Returns JSON containing a list of Wharton GSR reservations. """
 
     sessionid = request.args.get('sessionid')
 
