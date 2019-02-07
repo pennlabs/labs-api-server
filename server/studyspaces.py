@@ -77,6 +77,7 @@ def get_wharton_gsr_reservations():
 
     return jsonify({'reservations': reservations})
 
+
 @app.route('/studyspaces/gsr/delete/<int:booking_id>', methods=['GET'])
 def get_wharton_gsr_reservations():
     """
