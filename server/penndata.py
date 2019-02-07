@@ -1,4 +1,4 @@
-from penn import Transit, Directory, Dining, DiningV2, Registrar, Map, Laundry, StudySpaces, Calendar, Fitness
+from penn import Transit, Directory, Dining, DiningV2, Registrar, Map, Laundry, StudySpaces, Calendar, Fitness, Wharton
 from os import getenv
 
 din = Dining(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
@@ -11,6 +11,7 @@ laundry = Laundry()
 studyspaces = StudySpaces(getenv("LIBCAL_ID"), getenv("LIBCAL_SECRET"))
 fitness = Fitness(getenv("FITNESS_TOKEN"))
 calendar = Calendar()
+wharton = Wharton()
 depts = {
     "AAMW": "Art & Arch of Med. World",
     "ACCT": "Accounting",
