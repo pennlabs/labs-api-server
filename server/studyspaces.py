@@ -59,19 +59,20 @@ def get_wharton_gsr_reservations():
     return jsonify({'reservations': reservations})
 
 
-@app.route('/studyspaces/gsr/delete/<int:booking_id>', methods=['GET'])
-def get_wharton_gsr_reservations():
+@app.route('/studyspaces/gsr/delete', methods=['POST'])
+def delete_wharton_gsr_reservations():
     """
-    Returns JSON containing a list of Wharton GSR reservations.
+    Deletes a Wharton GSR reservation
     """
-
-    sessionid = request.args.get('sessionid')
-
+    booking = request.form.get('booking')
+    sessionid = request.form.get('sessionid')
+    if not booking:
+        return jsonify({"error": "No booking sent to server."})
     if not sessionid:
-        return jsonify({'error': 'No Session ID provided.'})
+        return jsonify({"error": "No session id sent to server."})
 
     try:
-        result = wharton.delete_booking(sessionid, booking_id)
+        result = wharton.delete_booking(sessionid, booking)
     except APIError as e:
         return jsonify({"error": str(e)})
 
