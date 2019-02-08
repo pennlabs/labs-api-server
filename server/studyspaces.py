@@ -9,73 +9,16 @@ from server import app, sqldb
 from penn.base import APIError
 from .models import StudySpacesBooking, User
 from .penndata import studyspaces
+from .penndata import wharton
 from .base import cached_route
 
 def get_sessionid():
     return "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
 
-def switch_format(gsr):
-    if "error" in gsr:
-        return gsr
-    rooms = {
-        "cid": 1,
-        "name": "Huntsman Hall",
-        "rooms": []
-    }
-
-    for room in gsr["times"][0]:
-        del room["booked_by_user"]
-        del room["building"]
-        if "reservation_id" in room:
-            del room["reservation_id"]
-        room["lid"] = 1
-        # room["gid"] = null
-        # room["thumbnail"] = null;
-        # room["capacity"] = null
-        # room["description"] = null
-        room["room_id"] = room["id"]
-        del room["id"]
-        room["name"] = "GSR " + room["room_number"]
-        del room["room_number"]
-        time = {
-            "available": room["reserved"],
-            "end": room["end_time"],
-            "start": room["start_time"]
-        }
-        if "times" in room:
-            room["times"] + [time]
-        else:
-            room["times"] = [] + [time]
-        del room["reserved"]
-        del room["end_time"]
-        del room["start_time"]
-        rooms["rooms"].append(room)
-        print(rooms)
-    return {"categories": [rooms]}
-
-def get_wharton_gsrs():
+@app.route('/studyspaces/gsr', methods=['GET'])
+def get_wharton_gsrs_temp_route():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
-
-    sessionid = get_sessionid()
-
-    time = request.args.get('date')
-
-    if time:
-        time += " 05:00"
-    else:
-        time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
-
-    resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
-        'search_time': time
-    }, cookies={
-        'sessionid': sessionid
-    })
-
-    if resp.status_code == 200:
-        return resp.json()
-
-    else:
-        return {'error': 'Remote server returned status code {}.'.format(resp.status_code)}
+    return jsonify(wharton.get_wharton_gsrs(get_sessionid()))
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
@@ -96,11 +39,12 @@ def parse_times(building):
         end = request.args.get('end')
 
     if building == 1:
-        rooms = switch_format(get_wharton_gsrs())
+        sessionid = get_sessionid();
+        print(sessionid)
+        rooms = wharton.get_wharton_gsrs_formatted(sessionid)
     else:
         try:
             rooms = studyspaces.get_rooms(building, start, end)
-            print(rooms);
             rooms["location_id"] = rooms["id"]
             rooms["rooms"] = []
             for room_list in rooms["categories"]:
