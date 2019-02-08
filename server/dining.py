@@ -109,7 +109,7 @@ def save_dining_preferences():
 
 
 @app.route('/dining/preferences/V2', methods=['POST'])
-def save_dining_preferences():
+def save_dining_preferences_v2():
     try:
         user = User.get_or_create()
     except ValueError as e:
