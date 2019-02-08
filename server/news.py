@@ -51,8 +51,8 @@ def fetch_frontpage_article():
 			'title': title,
 			'subtitle': subtitle,
 			'timestamp': timestamp,
-			'imageUrl': imageurl,
-			'articleUrl': link,
+			'image_url': imageurl,
+			'article_url': link,
 		}
 		return article
 	else:
