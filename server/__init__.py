@@ -41,6 +41,7 @@ import server.calendar3year
 import server.event
 # import server.fitness
 import server.homepage
+import server.news
 
 if __name__ == '__main__':
     app.run(debug=True)
