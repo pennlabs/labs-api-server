@@ -91,19 +91,19 @@ def retrieve_daily_menu(venue_id):
 
 @app.route('/dining/preferences', methods=['POST'])
 def save_dining_preferences():
-    try:
-        user = User.get_or_create()
-    except ValueError as e:
-        return jsonify({"success": False, "error": str(e)})
+    # try:
+    #     user = User.get_or_create()
+    # except ValueError as e:
+    #     return jsonify({"success": False, "error": str(e)})
 
-    venue_id = request.form.get('venue_id')
+    # venue_id = request.form.get('venue_id')
 
-    if not venue_id:
-        return jsonify({'success': False, 'error': 'No venue specified.'})
+    # if not venue_id:
+    #     return jsonify({'success': False, 'error': 'No venue specified.'})
 
-    dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
-    sqldb.session.add(dining_preference)
-    sqldb.session.commit()
+    # dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
+    # sqldb.session.add(dining_preference)
+    # sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
 

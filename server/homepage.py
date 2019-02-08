@@ -56,7 +56,7 @@ def get_homepage():
     #         print('other', option)
 
     laundry = get_top_laundry_cell(user)
-    dining = get_popular_dining_cell(user)
+    dining = get_dining_cell(user)
     news = get_news_cell()
     gsr = get_study_spaces_cell()
     calendar = get_university_event_cell()
@@ -85,8 +85,14 @@ def get_dining_preference_cell(user):
 
 # returns a dining cell
 # TODO: personalize with preferences
-def get_popular_dining_cell(user):
-    venue_ids = [593, 747, 636]
+def get_dining_cell(user):
+    preferences = sqldb.session.query(DiningPreference.venue_id).filter_by(user_id=user.id)
+    venue_ids = [x.venue_id for x in preferences]
+    if len(venue_ids) == 0:
+        venue_ids.extend([593, 747, 636])
+    elif len(venue_ids) == 1:
+        venue_ids.extend([593])
+
     info = {"venues": venue_ids}
     return HomeCell("dining", info)
 
