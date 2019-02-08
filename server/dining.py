@@ -128,6 +128,7 @@ def save_dining_preferences_v2():
     for venue_id in venue_ids:
         dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
         sqldb.session.add(dining_preference)
+    sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
 
