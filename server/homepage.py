@@ -88,10 +88,11 @@ def get_dining_preference_cell(user):
 def get_dining_cell(user):
     preferences = sqldb.session.query(DiningPreference.venue_id).filter_by(user_id=user.id)
     venue_ids = [x.venue_id for x in preferences]
+    defaults_ids = [593, 1442, 636]
     if len(venue_ids) == 0:
-        venue_ids.extend([593, 747, 636])
-    elif len(venue_ids) == 1:
-        venue_ids.extend([593])
+        venue_ids = defaults_ids
+    else:
+        venue_ids = list(set(venue_ids.extend(defaults_ids)))[:3]
 
     info = {"venues": venue_ids}
     return HomeCell("dining", info)

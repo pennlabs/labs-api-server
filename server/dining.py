@@ -117,17 +117,18 @@ def save_dining_preferences_v2():
 
     venues = request.form.get('venues')
 
-    if not venues:
+    if venues is not None:
         return jsonify({'success': False, 'error': 'Venue form missing.'})
 
     # delete old preferences for user
     DiningPreference.query.filter_by(user_id=user.id).delete()
 
-    venue_ids = [int(x) for x in venues.split(",")]
+    if venues:
+        venue_ids = [int(x) for x in venues.split(",")]
 
-    for venue_id in venue_ids:
-        dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
-        sqldb.session.add(dining_preference)
+        for venue_id in venue_ids:
+            dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
+            sqldb.session.add(dining_preference)
     sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
