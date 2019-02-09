@@ -117,7 +117,7 @@ def save_dining_preferences_v2():
 
     venues = request.form.get('venues')
 
-    if venues is not None:
+    if venues is None:
         return jsonify({'success': False, 'error': 'Venue form missing.'})
 
     # delete old preferences for user
