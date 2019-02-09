@@ -92,7 +92,8 @@ def get_dining_cell(user):
     if len(venue_ids) == 0:
         venue_ids = defaults_ids
     elif len(venue_ids) == 1:
-        venue_ids = list(set(venue_ids.extend(defaults_ids)))[:3]
+        venue_ids.extend(defaults_ids)
+        venue_ids = list(set(venue_ids))[:3]
 
     info = {"venues": venue_ids}
     return HomeCell("dining", info)
