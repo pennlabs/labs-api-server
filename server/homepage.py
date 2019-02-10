@@ -134,7 +134,7 @@ def get_news_cell():
         return HomeCell("news", article)
     else:
         return None
-    
+
 
 def get_event_cell():
     # return a event cell
