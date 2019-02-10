@@ -75,14 +75,6 @@ def get_homepage():
     response.status_code = 200
     return response
 
-# returns a dining cell containing the users preferences in sorted order
-def get_dining_preference_cell(user):
-    preferences = sqldb.session.query(DiningPreference.venue_id) \
-                               .filter_by(user_id=user.id).group_by(DiningPreference.venue_id) \
-                               .order_by(func.count(DiningPreference.venue_id).desc()).all()
-    venue_ids = [x.venue_id for x in preferences]
-    return HomeCell("dining", info)
-
 # returns a dining cell
 # TODO: personalize with preferences
 def get_dining_cell(user):
