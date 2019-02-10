@@ -22,7 +22,7 @@ def pull_calendar(d):
 
 
 def pull_calendar_response(d):
-    calendar = pull_calendar()
+    calendar = pull_calendar(d)
     return jsonify({'calendar': calendar})
 
 

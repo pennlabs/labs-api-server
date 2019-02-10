@@ -56,16 +56,3 @@ class DiningApiTests(unittest.TestCase):
             menu_dict = json.loads(menu_res.data.decode('utf8'))
             self.assertEquals("1920 Commons",
                               menu_dict["Document"]["location"])
-
-    def testDiningPreferences(self):
-        with server.app.test_client() as c:
-            resp = json.loads(c.get("/dining/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
-            self.assertEquals(resp["preferences"], [])
-
-            c.post("/dining/preferences", headers={"X-Device-ID": "testing"}, data={"venue_id": "1", "platform": "Android"})
-            c.post("/dining/preferences", headers={"X-Device-ID": "testing"}, data={"venue_id": "1"})
-            c.post("/dining/preferences", headers={"X-Device-ID": "testing"}, data={"venue_id": "2"})
-
-            resp = json.loads(c.get("/dining/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
-            preferences = [{'venue_id': 1, 'count': 2}, {'venue_id': 2, 'count': 1}]
-            self.assertEquals(resp["preferences"], preferences)
