@@ -13,12 +13,12 @@ from .penndata import wharton
 from .base import cached_route
 
 def get_sessionid():
-    return "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
+    return os.environ['sessionid'] # "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
 
 @app.route('/studyspaces/gsr', methods=['GET'])
 def get_wharton_gsrs_temp_route():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
-    return jsonify(wharton.get_wharton_gsrs(get_sessionid()))
+    return jsonify(wharton.get_wharton_gsrs(get_sessionid(), request))
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
@@ -39,8 +39,7 @@ def parse_times(building):
         end = request.args.get('end')
 
     if building == 1:
-        sessionid = get_sessionid();
-        print(sessionid)
+        sessionid = get_sessionid()
         rooms = wharton.get_wharton_gsrs_formatted(sessionid)
     else:
         try:
