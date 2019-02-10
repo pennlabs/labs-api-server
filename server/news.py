@@ -15,8 +15,9 @@ def fetch_news_article():
     article = fetch_frontpage_article()
     if article is not None:
         return jsonify({"article": article})
-    else: 
+    else:
         return jsonify({'error': 'Site could not be reached or could not be parsed.'})
+
 
 def fetch_frontpage_article():
     """Returns a list of articles."""

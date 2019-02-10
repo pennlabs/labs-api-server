@@ -11,6 +11,7 @@ import pytz
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
 
+
 @app.route('/homepage', methods=['GET'])
 def get_homepage():
     # Find user in database
@@ -24,7 +25,7 @@ def get_homepage():
     # Display information
     cells = []
 
-    ##### Adam's Dynamic Cell Code for changing order remotely #####
+    # Adam's Dynamic Cell Code for changing order remotely #####
 
     # cell_options = HomeCellOrder.query.all()
     # options = [
@@ -68,16 +69,16 @@ def get_homepage():
 
     if news is not None:
         cells.append(news)
-    
+
     cells.extend([gsr, laundry])
 
     response = jsonify({"cells": [x.getCell() for x in cells]})
     response.status_code = 200
     return response
 
-# returns a dining cell
-# TODO: personalize with preferences
+
 def get_dining_cell(user):
+    # returns a dining cell
     preferences = sqldb.session.query(DiningPreference.venue_id).filter_by(user_id=user.id)
     venue_ids = [x.venue_id for x in preferences]
     defaults_ids = [593, 1442, 636]
@@ -90,8 +91,9 @@ def get_dining_cell(user):
     info = {"venues": venue_ids}
     return HomeCell("dining", info)
 
-# returns a list of laundry cells
+
 def get_laundry_cells(user):
+    # returns a list of laundry cells
     preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
 
@@ -99,40 +101,44 @@ def get_laundry_cells(user):
     if not room_ids:
         room_ids.append(0)
 
-    return [HomeCell("laundry", { "room_id": x }) for x in room_ids]
+    return [HomeCell("laundry", {"room_id": x}) for x in room_ids]
 
-# returns user's top laundry cell
+
 def get_top_laundry_cell(user):
+    # returns user's top laundry cell
     top_preference = LaundryPreference.query.filter_by(user_id=user.id).first()
     # If no top choice, select bishop white
     if top_preference:
-        return HomeCell("laundry", { "room_id": top_preference.room_id})
-    return HomeCell("laundry", { "room_id": 0})
+        return HomeCell("laundry", {"room_id": top_preference.room_id})
+    return HomeCell("laundry", {"room_id": 0})
 
-# returns a study spaces cell
+
 def get_study_spaces_cell():
+    # returns a study spaces cell
     return HomeCell("studyRoomBooking", None)
 
-# returns a university notification cell
+
 def get_university_event_cell():
+    # returns a university notification cell
     calendar = pull_todays_calendar()
     if calendar:
         return HomeCell("calendar", calendar)
     else:
         return None
 
-# returns a news cell
-# TODO: Dynamically fetch news item from database or from website
+
 def get_news_cell():
+    # returns a news cell
     article = fetch_frontpage_article()
     if article:
         return HomeCell("news", article)
     else:
         return None
     
-# return a event cell
-# TODO Fetch most recent, most popular, etc
+
 def get_event_cell():
+    # return a event cell
+    # TODO Fetch most recent, most popular, etc
     event = Event.query.first()
     if event:
         info = {
@@ -149,13 +155,13 @@ def get_event_cell():
     else:
         return None
 
+
 @app.route('/homepage/order', methods=['GET'])
 def get_order():
     cell_options = HomeCellOrder.query.all()
-    options = [
-        x.cell_type
-     for x in cell_options]
+    options = [x.cell_type for x in cell_options]
     return jsonify({'cells': options})
+
 
 @app.route('/homepage/order', methods=['POST'])
 def change_cell_order():

@@ -82,16 +82,11 @@ class Event(sqldb.Model):
     website = sqldb.Column(sqldb.String(255))
     facebook = sqldb.Column(sqldb.String(255))
 
-class UniversityEvent(sqldb.Model):
-    id = sqldb.Column(sqldb.Integer, primary_key=True)
-    type = sqldb.Column(sqldb.Text, nullable=False)
-    name = sqldb.Column(sqldb.Text, nullable=False)
-    start = sqldb.Column(sqldb.DateTime, nullable=False)
-    end = sqldb.Column(sqldb.DateTime, nullable=False)
 
 class HomeCellOrder(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     cell_type = sqldb.Column(sqldb.Text, nullable=False)
+
 
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
@@ -105,7 +100,7 @@ class HomeCell(object):
 
     """
 
-    def __init__(self,myType,myInfo=None):
+    def __init__(self, myType, myInfo=None):
         self.type = myType
         self.info = myInfo
 
