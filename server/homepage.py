@@ -72,7 +72,7 @@ def get_homepage():
     cells.extend([gsr, laundry])
 
     response = jsonify({"cells": [x.getCell() for x in cells]})
-    response.status_code = 200 # or 400 or whatever
+    response.status_code = 200
     return response
 
 # returns a dining cell containing the users preferences in sorted order
@@ -104,7 +104,7 @@ def get_laundry_cells(user):
     room_ids = [x.room_id for x in preferences]
 
     # If the user has no preferences, select Bishop White
-    if len(room_ids) == 0:
+    if not room_ids:
         room_ids.append(0)
 
     return [HomeCell("laundry", { "room_id": x }) for x in room_ids]
@@ -120,11 +120,6 @@ def get_top_laundry_cell(user):
 # returns a study spaces cell
 def get_study_spaces_cell():
     return HomeCell("studyRoomBooking", None)
-
-def exists_university_event():
-    calendar = pull_todays_calendar()
-    events = calendar["calendar"]
-    return len(events) != 0
 
 # returns a university notification cell
 def get_university_event_cell():
