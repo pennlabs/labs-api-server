@@ -18,7 +18,21 @@ def pull_calendar(d):
         time_diff = event_date - d
         if time_diff.total_seconds() > 0 and time_diff.total_seconds() <= 1209600:
             within_range.append(event)
-    return jsonify({'calendar': within_range})
+    return within_range
+
+
+def pull_calendar_response(d):
+    calendar = pull_calendar(d)
+    return jsonify({'calendar': calendar})
+
+
+def pull_todays_calendar():
+    """Returns array of events which are 2 weeks away
+    from today
+    """
+    today = datetime.datetime.now().date()
+    # For testing: d = datetime.datetime.strptime("2019-02-20", "%Y-%m-%d").date()
+    return pull_calendar(today)
 
 
 @app.route('/calendar/', methods=['GET'])
@@ -27,7 +41,7 @@ def pull_today():
     current date.
     """
     today = datetime.datetime.now().date()
-    return pull_calendar(today)
+    return pull_calendar_response(today)
 
 
 @app.route('/calendar/<date>', methods=['GET'])
@@ -36,4 +50,4 @@ def pull_date(date):
     date passed in as an argument.
     """
     d = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-    return pull_calendar(d)
+    return pull_calendar_response(d)

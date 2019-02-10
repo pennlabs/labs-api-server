@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request
+from flask import jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 sqldb = SQLAlchemy()
@@ -81,3 +81,28 @@ class Event(sqldb.Model):
     email = sqldb.Column(sqldb.String(255), nullable=False)
     website = sqldb.Column(sqldb.String(255))
     facebook = sqldb.Column(sqldb.String(255))
+
+
+class HomeCellOrder(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    cell_type = sqldb.Column(sqldb.Text, nullable=False)
+
+
+class HomeCell(object):
+    """A home cell which can be displayed on the home page.
+
+    Usage:
+
+        >>> import HomeCell
+        >>> type = "dining"
+        >>> info = { "venues": [593, 724, 331] }
+        >>> cell = HomeCell(type, info)
+
+    """
+
+    def __init__(self, myType, myInfo=None):
+        self.type = myType
+        self.info = myInfo
+
+    def getCell(self):
+        return {"type": self.type, "info": self.info}

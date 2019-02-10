@@ -96,13 +96,17 @@ def save_dining_preferences():
     except ValueError as e:
         return jsonify({"success": False, "error": str(e)})
 
-    venue_id = request.form.get('venue_id')
+    venues = request.form.get('venues')
 
-    if not venue_id:
-        return jsonify({'success': False, 'error': 'No venue specified.'})
+    # delete old preferences for user
+    DiningPreference.query.filter_by(user_id=user.id).delete()
 
-    dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
-    sqldb.session.add(dining_preference)
+    if venues:
+        venue_ids = [int(x) for x in venues.split(",")]
+
+        for venue_id in venue_ids:
+            dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
+            sqldb.session.add(dining_preference)
     sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})

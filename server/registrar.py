@@ -62,7 +62,7 @@ def get_type_search(search_query):
     def repl(matchobj):
         return matchobj.group(0)[0] + " " + matchobj.group(0)[1]
 
-    search_presplit = re.sub('(\d[a-zA-z]|[a-zA-z]\d)', repl, search_punc)
+    search_presplit = re.sub('(\\d[a-zA-z]|[a-zA-z]\\d)', repl, search_punc)
     split = search_presplit.split()
     found_desc = False
     in_desc = False
