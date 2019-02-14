@@ -8,7 +8,7 @@ from dateutil.parser import parse
 from server import app, sqldb
 from penn.base import APIError
 from .models import StudySpacesBooking, User
-from .penndata import studyspaces
+from .penndata import studyspaces, wharton
 from .base import cached_route
 
 
@@ -40,6 +40,45 @@ def get_wharton_gsrs():
         return jsonify(resp.json())
     else:
         return jsonify({'error': 'Remote server returned status code {}.'.format(resp.status_code)})
+
+
+@app.route('/studyspaces/gsr/reservations', methods=['GET'])
+def get_wharton_gsr_reservations():
+    """
+    Returns JSON containing a list of Wharton GSR reservations.
+    """
+
+    sessionid = request.args.get('sessionid')
+
+    if not sessionid:
+        return jsonify({'error': 'No Session ID provided.'})
+
+    try:
+        reservations = wharton.get_reservations(sessionid)
+    except APIError as e:
+        return jsonify({"error": str(e)})
+
+    return jsonify({'reservations': reservations})
+
+
+@app.route('/studyspaces/gsr/delete', methods=['POST'])
+def delete_wharton_gsr_reservation():
+    """
+    Deletes a Wharton GSR reservation
+    """
+    booking = request.form.get('booking')
+    sessionid = request.form.get('sessionid')
+    if not booking:
+        return jsonify({"error": "No booking sent to server."})
+    if not sessionid:
+        return jsonify({"error": "No session id sent to server."})
+
+    try:
+        result = wharton.delete_booking(sessionid, booking)
+    except APIError as e:
+        return jsonify({"error": str(e)})
+
+    return jsonify({'result': result})
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
