@@ -18,7 +18,8 @@ def get_sessionid():
 @app.route('/studyspaces/gsr', methods=['GET'])
 def get_wharton_gsrs_temp_route():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
-    return jsonify(wharton.get_wharton_gsrs(get_sessionid(), request))
+    date = request.args.get('date')
+    return jsonify(wharton.get_wharton_gsrs(get_sessionid(), date))
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
