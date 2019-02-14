@@ -44,23 +44,6 @@ def get_wharton_gsrs():
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
 def get_wharton_gsr_reservations():
-    """ Returns JSON containing a list of Wharton GSR reservations. """
-
-    sessionid = request.args.get('sessionid')
-
-    if not sessionid:
-        return jsonify({'error': 'No Session ID provided.'})
-
-    try:
-        reservations = wharton.get_reservations(sessionid)
-    except APIError as e:
-        return jsonify({"error": str(e)})
-
-    return jsonify({'reservations': reservations})
-
-
-@app.route('/studyspaces/gsr/reservations', methods=['GET'])
-def get_wharton_gsr_reservations():
     """
     Returns JSON containing a list of Wharton GSR reservations.
     """
@@ -79,7 +62,7 @@ def get_wharton_gsr_reservations():
 
 
 @app.route('/studyspaces/gsr/delete', methods=['POST'])
-def delete_wharton_gsr_reservations():
+def delete_wharton_gsr_reservation():
     """
     Deletes a Wharton GSR reservation
     """
