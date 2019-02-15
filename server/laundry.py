@@ -222,3 +222,8 @@ def get_laundry_preferences():
     preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
     return jsonify({'rooms': room_ids})
+
+
+@app.route('/laundry/status', methods=['GET'])
+def get_laundry_status():
+    return jsonify({'is_working': True, 'error_msg': None})
