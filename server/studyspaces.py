@@ -200,6 +200,106 @@ def book_room():
     return jsonify(resp)
 
 
+@app.route('/studyspaces/reservations', methods=['GET'])
+def get_reservations():
+    """
+    Gets a users reservations.
+    """
+
+    email = request.args.get('email')
+    sessionid = request.args.get('sessionid')
+    if not email and not sessionid:
+        return jsonify({"error": "A session id or email must be sent to server."})
+
+    reservations = []
+    if sessionid:
+        try:
+            gsr_reservations = wharton.get_reservations(sessionid)
+
+            for res in gsr_reservations:
+                res["service"] = "wharton"
+                res["booking_id"] = str(res["booking_id"])
+                res["name"] = res["location"]
+                res["gid"] = 1
+                res["lid"] = 1
+                res["info"] = None
+                del res["location"]
+
+                date = datetime.datetime.strptime(res["date"], "%b %d, %Y")
+                date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
+
+                if res["startTime"] == "midnight":
+                    res["fromDate"] = date_str + "T00:00:00-05:00"
+                else:
+                    start_str = res["startTime"].replace(".", "").upper()
+                    try:
+                        start_time = datetime.datetime.strptime(start_str, "%I:%M %p")
+                    except ValueError:
+                        start_time = datetime.datetime.strptime(start_str, "%I %p")
+                    start_str = datetime.datetime.strftime(start_time, "%H:%M:%S")
+                    res["fromDate"] = "{}T{}-05:00".format(date_str, start_str)
+
+                if res["endTime"] == "midnight":
+                    date += datetime.timedelta(days=1)
+                    date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
+                    res["toDate"] = date_str + "T00:00:00-05:00"
+                else:
+                    end_str = res["endTime"].replace(".", "").upper()
+                    try:
+                        end_time = datetime.datetime.strptime(end_str, "%I:%M %p")
+                    except ValueError:
+                        end_time = datetime.datetime.strptime(end_str, "%I %p")
+                    end_str = datetime.datetime.strftime(end_time, "%H:%M:%S")
+                    res["toDate"] = "{}T{}-05:00".format(date_str, end_str)
+
+                del res["date"]
+                del res["startTime"]
+                del res["endTime"]
+
+            reservations.extend(gsr_reservations)
+
+        except APIError as e:
+            return jsonify({"error": str(e)})
+
+    if email:
+        try:
+            libcal_reservations = studyspaces.get_reservations(email)
+            confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"]
+
+            for res in confirmed_reservations:
+                res["service"] = "libcal"
+                res["booking_id"] = res["bookId"]
+                res["room_id"] = res["eid"]
+                res["gid"] = res["cid"]
+                del res["bookId"]
+                del res["eid"]
+                del res["cid"]
+                del res["status"]
+                del res["email"]
+                del res["firstName"]
+                del res["lastName"]
+
+        except APIError as e:
+            return jsonify({"error": str(e)})
+
+        room_ids = ",".join(list(set([str(x["room_id"]) for x in confirmed_reservations])))
+        if room_ids:
+            rooms = studyspaces.get_room_info(room_ids)
+            for room in rooms:
+                room["thumbnail"] = room["image"]
+                del room["image"]
+                del room["formid"]
+
+            for res in confirmed_reservations:
+                room = [x for x in rooms if x["id"] == res["room_id"]][0]
+                res["name"] = room["name"]
+                res["info"] = room
+                del res["room_id"]
+            reservations.extend(confirmed_reservations)
+
+    return jsonify({'reservations': reservations})
+
+
 def save_booking(**info):
     try:
         user = User.get_or_create()
