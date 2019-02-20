@@ -284,7 +284,6 @@ def get_reservations():
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
-                print(libcal_reservations)
                 confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
                 and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
                 i+=1
