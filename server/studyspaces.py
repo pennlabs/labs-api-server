@@ -211,6 +211,15 @@ def get_reservations():
     if not email and not sessionid:
         return jsonify({"error": "A session id or email must be sent to server."})
 
+    libcal_search_span = request.args.get("libcal_search_span")
+    if libcal_search_span:
+        try:
+            libcal_search_span = int(libcal_search_span)
+        except:
+            return jsonify({"error": "Search span must be an integer"})
+    else:
+        libcal_search_span = 3
+
     reservations = []
     if sessionid:
         try:
@@ -263,9 +272,17 @@ def get_reservations():
 
     if email:
         try:
-            libcal_reservations = studyspaces.get_reservations(email)
-            confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
-            and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= datetime.datetime.now()]
+            now = datetime.datetime.now()
+            dateFormat = "%Y-%m-%d"            
+            i = 0
+            confirmed_reservations = []
+            while len(confirmed_reservations) == 0 and i < libcal_search_span:
+                date = now + datetime.timedelta(days=i)
+                dateStr = datetime.datetime.strftime(date, dateFormat)
+                libcal_reservations = studyspaces.get_reservations(email, dateStr)
+                confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
+                and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
+                i+=1
 
             for res in confirmed_reservations:
                 res["service"] = "libcal"
