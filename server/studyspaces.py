@@ -147,14 +147,18 @@ def cancel_room():
     if not booking_id:
         return jsonify({"error": "No booking id sent to server!"})
 
-    # ensure that the server was the one that booked the room
-    for bid in booking_id.strip().split(","):
-        exists = sqldb.session.query(sqldb.exists().where(StudySpacesBooking.booking_id == bid)).scalar()
-        if not exists:
-            return jsonify({"error": "Cancellation request aborted because of booking '{}'.".format(bid)})
-
-    resp = studyspaces.cancel_room(booking_id)
-    return jsonify(resp)
+    if booking_id.isdigit():
+        sessionid = request.form.get('sessionid')
+        if not sessionid:
+            return jsonify({"error": "No session id sent to server."})
+        try:
+            result = wharton.delete_booking(sessionid, booking_id)
+            return jsonify({'result': [{"booking_id": booking_id, "cancelled": True}]})
+        except APIError as e:
+            return jsonify({"error": str(e)})
+    else:
+        resp = studyspaces.cancel_room(booking_id)
+        return jsonify({'result': resp})
 
 
 @app.route('/studyspaces/book', methods=['POST'])
@@ -280,6 +284,7 @@ def get_reservations():
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
+                print(libcal_reservations)
                 confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
                 and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
                 i+=1
@@ -292,7 +297,7 @@ def get_reservations():
                 del res["bookId"]
                 del res["eid"]
                 del res["cid"]
-                del res["status"]
+                #del res["status"]
                 del res["email"]
                 del res["firstName"]
                 del res["lastName"]
