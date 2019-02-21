@@ -146,7 +146,6 @@ def cancel_room():
     try:
         user = User.get_user()
     except ValueError as err:
-        print(str(err))
         return jsonify({"error": str(err)})
 
     booking_id = request.form.get("booking_id")
@@ -165,23 +164,23 @@ def cancel_room():
         except APIError as e:
             return jsonify({"error": str(e)})
     else:
+        booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
+        if booking:
+            if (booking.user is not None) and (booking.user is not user.id):
+                return jsonify({"error": "Unauthorized: This reservation was booked by someone else.{}, {}".format(booking.user, user.id)})
+            if booking.is_cancelled:
+                return jsonify({"error": "This reservation has already been cancelled."})
         resp = studyspaces.cancel_room(booking_id)
         if "error" not in resp:
-            booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
             if booking:
-                if booking.user is not user.id:
-                    return jsonify({"error": "Unauthorized: This user did not book this reservation."})
-                if booking.is_cancelled:
-                    return jsonify({"error": "This booking has already been cancelled."})
-                else:
-                    booking.is_cancelled = True
-                    sqldb.session.commit()
+                booking.is_cancelled = True
+                sqldb.session.commit()
             else:
                 save_booking(
                     email=user.email,
                     booking_id=booking_id,
                     is_cancelled=True,
-                    user=user
+                    user=user.id
                 )
         return jsonify({'result': resp})
 
@@ -227,6 +226,7 @@ def book_room():
         if user and user.email:
             user.email = contact["email"]
             sqldb.session.commit()
+        user = user.id
     except ValueError:
         user = None
 
@@ -385,11 +385,6 @@ def get_reservations():
 
 
 def save_booking(**info):
-    if info['user']:
-        info['user'] = info['user'].id
-    else:
-        del info['user']
-
     item = StudySpacesBooking(**info)
 
     sqldb.session.add(item)
