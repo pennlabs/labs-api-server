@@ -4,12 +4,30 @@ from flask import request, Response, jsonify
 import hashlib
 import binascii
 
+from .models import User
+
 
 def json_status(json, status_code=None):
     resp = jsonify(json)
     if status_code:
         resp.status_code = status_code
     return resp
+
+
+@app.route('/device/register', methods=['POST'])
+def register_user():
+    secret = "secret_token"
+    auth_secret = request.form.get("auth_secret")
+    if auth_secret is None:
+        return Response(response="Auth secret is not provided", status=400)
+    if not (auth_secret == secret):
+        return Response(response="Auth secret is not correct.", status=400)
+
+    try:
+        User.create_user()
+        return jsonify({'exists': True})
+    except ValueError as err:
+        return Response(response=str(err), status=400) 
 
 
 @app.route('/auth', methods=['GET'])

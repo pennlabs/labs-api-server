@@ -42,20 +42,53 @@ class User(sqldb.Model):
         device_id = device_id or request.headers.get('X-Device-ID')
         if not device_id:
             raise ValueError("No device ID passed to the server.")
-        if not platform:
-            if request.user_agent.platform in ["iphone", "ipad"]:
-                platform = "ios"
-            elif request.user_agent.platform == "android":
-                platform = "android"
-            else:
-                platform = "unknown"
+            
         user = User.query.filter_by(device_id=device_id).first()
         if user:
             return user
+
+        agent = request.headers.get('User-Agent')
+        if any(device in agent.lower() for device in ["iphone", "ipad"]):
+            platform = "ios"
+        elif any(device in agent.lower() for device in ["android"]):
+            platform = "android"
+        else:
+            platform = "unknown"
+
         user = User(platform=platform, device_id=device_id, email=email)
         sqldb.session.add(user)
         sqldb.session.commit()
         return user
+
+    @staticmethod
+    def get_user():
+        device_id = request.headers.get('X-Device-ID')
+        if not device_id:
+            raise ValueError("No device ID passed to the server.")
+        user = User.query.filter_by(device_id=device_id).first()
+        if not user:
+            raise ValueError("Unable to authenticate on the server.")
+        return user
+
+    @staticmethod
+    def create_user():
+        device_id = request.form.get('device_id')
+        if not device_id:
+            raise ValueError("No device ID passed to the server.")
+        user = User.query.filter_by(device_id=device_id).first()
+        if user:
+            return
+
+        agent = request.headers.get('User-Agent')
+        if any(device in agent.lower() for device in ["iphone", "ipad"]):
+            platform = "ios"
+        elif any(device in agent.lower() for device in ["android"]):
+            platform = "android"
+        else:
+            platform = "unknown"
+        user = User(platform=platform, device_id=device_id)
+        sqldb.session.add(user)
+        sqldb.session.commit()
 
 
 class LaundryPreference(sqldb.Model):

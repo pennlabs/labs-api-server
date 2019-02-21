@@ -143,6 +143,12 @@ def cancel_room():
     """
     Cancels a booked room.
     """
+    try:
+        user = User.get_user()
+    except ValueError as err:
+        print(str(err))
+        return jsonify({"error": str(err)})
+
     booking_id = request.form.get("booking_id")
     if not booking_id:
         return jsonify({"error": "No booking id sent to server!"})
@@ -163,6 +169,8 @@ def cancel_room():
         if "error" not in resp:
             booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
             if booking:
+                if booking.user is not user.id:
+                    return jsonify({"error": "Unauthorized: This user did not book this reservation."})
                 if booking.is_cancelled:
                     return jsonify({"error": "This booking has already been cancelled."})
                 else:
@@ -170,8 +178,10 @@ def cancel_room():
                     sqldb.session.commit()
             else:
                 save_booking(
+                    email=user.email,
                     booking_id=booking_id,
-                    is_cancelled=True
+                    is_cancelled=True,
+                    user=user
                 )
         return jsonify({'result': resp})
 
@@ -212,6 +222,14 @@ def book_room():
     except (KeyError, ValueError):
         lid = None
 
+    try:
+        user = User.get_user()
+        if user and user.email:
+            user.email = contact["email"]
+            sqldb.session.commit()
+    except ValueError:
+        user = None
+
     resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
     if resp["results"]:
         save_booking(
@@ -220,7 +238,9 @@ def book_room():
             email=contact["email"],
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
-            booking_id=resp.get("booking_id")
+            booking_id=resp.get("booking_id"),
+            user=user
+
         )
     return jsonify(resp)
 
@@ -319,11 +339,9 @@ def get_reservations():
                 i+=1
 
             # Fetch reservations in database that are not being returned by API
-            db_bookings = StudySpacesBooking.query.filter_by(email=email)\
-                    .filter(not StudySpacesBooking.booking_id.isdigit())\
-                    .filter(StudySpacesBooking.end > now)\
-                    .filter(not StudySpacesBooking.is_cancelled)
-            db_booking_ids = [x.booking_id for x in db_bookings]
+            #db_bookings = StudySpacesBooking.query.filter_by(email=email)#\
+            db_bookings = StudySpacesBooking.query.filter_by(email=email)
+            db_booking_ids = [str(x.booking_id) for x in db_bookings if not str(x.booking_id).isdigit() and x.end > now and not x.is_cancelled]
             reservation_ids = [x["bookId"] for x in confirmed_reservations]
             missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
             if missing_booking_ids:
@@ -367,13 +385,10 @@ def get_reservations():
 
 
 def save_booking(**info):
-    try:
-        user = User.get_or_create()
-    except ValueError:
-        user = None
-
-    if user:
-        info['user'] = user.id
+    if info['user']:
+        info['user'] = info['user'].id
+    else:
+        del info['user']
 
     item = StudySpacesBooking(**info)
 
