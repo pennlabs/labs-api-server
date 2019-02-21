@@ -318,24 +318,19 @@ def get_reservations():
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i+=1
 
+            # Fetch reservations in database that are not being returned by API
             db_bookings = StudySpacesBooking.query.filter_by(email=email)\
                     .filter(StudySpacesBooking.lid is not 1)\
                     .filter(StudySpacesBooking.end > now)\
                     .filter(not StudySpacesBooking.is_cancelled)
             db_booking_ids = [x.booking_id for x in db_bookings]
             reservation_ids = [x["bookId"] for x in confirmed_reservations]
-            missing_bookings_ids = list(set(db_booking_ids) - set(reservation_ids))
-            #if missing_bookings_ids:
-                # missing_bookings = [x for x in db_bookings if x.booking_id in missing_bookings_ids]
-                # for booking in missing_bookings:
-                #     res = {
-                #         "service": "libcal",
-                #         "room_id": booking.rid,
-                #         "lid": booking.lid,
-                #         "gid": booking.lid,
-                #         "fromDate": booking.start,
-                #         "toDate": booking
-                #     }
+            missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
+            if missing_booking_ids:
+                missing_bookings_str = ",".join(missing_booking_ids)
+                missing_reservations = studyspaces.get_reservations_for_booking_ids(missing_bookings_str)
+                confirmed_missing_reservations = [res for res in missing_reservations if res["status"] == "Confirmed"]
+                confirmed_reservations.extend(confirmed_missing_reservations)
 
             for res in confirmed_reservations:
                 res["service"] = "libcal"
