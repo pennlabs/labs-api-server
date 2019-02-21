@@ -22,6 +22,7 @@ class StudySpacesBooking(sqldb.Model):
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=True)
     booking_id = sqldb.Column(sqldb.Text)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.utcnow)
+    lid = sqldb.Column(sqldb.Integer, nullable=True) 
     rid = sqldb.Column(sqldb.Integer, nullable=True)
     email = sqldb.Column(sqldb.Text, nullable=True)
     start = sqldb.Column(sqldb.DateTime, nullable=True)

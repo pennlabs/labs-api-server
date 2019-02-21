@@ -207,9 +207,15 @@ def book_room():
         except KeyError:
             pass
 
+    try:
+        lid = int(request.form["lid"])
+    except (KeyError, ValueError):
+        lid = None
+
     resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
     if resp["results"]:
         save_booking(
+            lid=lid,
             rid=room,
             email=contact["email"],
             start=start.replace(tzinfo=None),
@@ -258,6 +264,8 @@ def get_reservations():
 
                 if res["startTime"] == "midnight":
                     res["fromDate"] = date_str + "T00:00:00-05:00"
+                elif res["startTime"] == "noon":
+                    res["fromDate"] = date_str + "T12:00:00-05:00"
                 else:
                     start_str = res["startTime"].replace(".", "").upper()
                     try:
@@ -271,6 +279,8 @@ def get_reservations():
                     date += datetime.timedelta(days=1)
                     date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
                     res["toDate"] = date_str + "T00:00:00-05:00"
+                elif res["endTime"] == "noon":
+                    res["toDate"] = date_str + "T12:00:00-05:00"
                 else:
                     end_str = res["endTime"].replace(".", "").upper()
                     try:
@@ -308,27 +318,24 @@ def get_reservations():
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i+=1
 
-            try:
-                user = User.get_or_create()
-            except ValueError:
-                user = None
-
-            if user is not None:
-                if user.email is None:
-                    user.email = email
-                    sqldb.session.commit()
-
-                db_bookings = StudySpacesBooking.query.filter_by(user=user.id)\
+            db_bookings = StudySpacesBooking.query.filter_by(email=email)\
+                    .filter(StudySpacesBooking.lid is not 1)\
                     .filter(StudySpacesBooking.end > now)\
                     .filter(not StudySpacesBooking.is_cancelled)
-                db_booking_ids = [x.booking_id for x in db_bookings]
-                reservation_ids = [x["bookId"] for x in confirmed_reservations]
-                missing_bookings = list(set(db_booking_ids) - set(reservation_ids))
-                if missing_bookings:
-                    missing_bookings_arg = ",".join(missing_bookings)
-                    missing_bookings = studyspaces.get_reservations_for_booking_ids(missing_bookings)
-                    confirmed_missing_bookings = [res for res in missing_bookings if res["status"] == "Confirmed"]
-                    confirmed_reservations.extend(confirmed_missing_bookings)
+            db_booking_ids = [x.booking_id for x in db_bookings]
+            reservation_ids = [x["bookId"] for x in confirmed_reservations]
+            missing_bookings_ids = list(set(db_booking_ids) - set(reservation_ids))
+            #if missing_bookings_ids:
+                # missing_bookings = [x for x in db_bookings if x.booking_id in missing_bookings_ids]
+                # for booking in missing_bookings:
+                #     res = {
+                #         "service": "libcal",
+                #         "room_id": booking.rid,
+                #         "lid": booking.lid,
+                #         "gid": booking.lid,
+                #         "fromDate": booking.start,
+                #         "toDate": booking
+                #     }
 
             for res in confirmed_reservations:
                 res["service"] = "libcal"
