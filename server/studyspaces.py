@@ -146,6 +146,8 @@ def cancel_room():
     booking_id = request.form.get("booking_id")
     if not booking_id:
         return jsonify({"error": "No booking id sent to server!"})
+    if "," in booking_id:
+        return jsonify({"error": "Only one booking may be cancelled at a time."})
 
     if booking_id.isdigit():
         sessionid = request.form.get('sessionid')
@@ -158,6 +160,19 @@ def cancel_room():
             return jsonify({"error": str(e)})
     else:
         resp = studyspaces.cancel_room(booking_id)
+        if "error" not in resp:
+            booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
+            if booking:
+                if booking.is_cancelled:
+                    return jsonify({"error": "This booking has already been cancelled."})
+                else:
+                    booking.is_cancelled = True
+                    sqldb.session.commit()
+            else:
+                save_booking(
+                    booking_id=booking_id,
+                    is_cancelled=True
+                )
         return jsonify({'result': resp})
 
 
@@ -193,7 +208,7 @@ def book_room():
             pass
 
     resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-    if "error" not in resp:
+    if resp["results"]:
         save_booking(
             rid=room,
             email=contact["email"],
@@ -276,6 +291,10 @@ def get_reservations():
 
     if email:
         try:
+            def is_not_cancelled_in_db(booking_id):
+                booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
+                return not (booking and booking.is_cancelled)
+
             now = datetime.datetime.now()
             dateFormat = "%Y-%m-%d"            
             i = 0
@@ -286,6 +305,7 @@ def get_reservations():
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
                 confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
                 and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
+                confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i+=1
 
             for res in confirmed_reservations:
@@ -296,7 +316,7 @@ def get_reservations():
                 del res["bookId"]
                 del res["eid"]
                 del res["cid"]
-                #del res["status"]
+                del res["status"]
                 del res["email"]
                 del res["firstName"]
                 del res["lastName"]
@@ -331,6 +351,7 @@ def save_booking(**info):
     if user is None:
         return
 
+    print(user.id)
     info['user'] = user.id
 
     item = StudySpacesBooking(**info)

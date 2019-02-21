@@ -22,10 +22,11 @@ class StudySpacesBooking(sqldb.Model):
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"))
     booking_id = sqldb.Column(sqldb.Text)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.utcnow)
-    rid = sqldb.Column(sqldb.Integer, nullable=False)
-    email = sqldb.Column(sqldb.Text, nullable=False)
-    start = sqldb.Column(sqldb.DateTime, nullable=False)
-    end = sqldb.Column(sqldb.DateTime, nullable=False)
+    rid = sqldb.Column(sqldb.Integer, nullable=True)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+    start = sqldb.Column(sqldb.DateTime, nullable=True)
+    end = sqldb.Column(sqldb.DateTime, nullable=True)
+    is_cancelled = sqldb.Column(sqldb.Boolean, default=False)
 
 
 class User(sqldb.Model):
