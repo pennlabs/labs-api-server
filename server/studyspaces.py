@@ -303,7 +303,6 @@ def get_reservations():
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
-                print(libcal_reservations)
                 confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
                 and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
@@ -319,7 +318,9 @@ def get_reservations():
                     user.email = email
                     sqldb.session.commit()
 
-                db_bookings = StudySpacesBooking.query.filter_by(user=user.id).filter_by(StudySpacesBooking.end > now and not StudySpacesBooking.is_cancelled)
+                db_bookings = StudySpacesBooking.query.filter_by(user=user.id)\
+                    .filter(StudySpacesBooking.end > now)\
+                    .filter(not StudySpacesBooking.is_cancelled)
                 db_booking_ids = [x.booking_id for x in db_bookings]
                 reservation_ids = [x["bookId"] for x in confirmed_reservations]
                 missing_bookings = list(set(db_booking_ids) - set(reservation_ids))
