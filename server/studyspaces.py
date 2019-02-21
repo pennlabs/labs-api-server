@@ -303,10 +303,31 @@ def get_reservations():
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
+                print(libcal_reservations)
                 confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
                 and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i+=1
+
+            try:
+                user = User.get_or_create()
+            except ValueError:
+                user = None
+
+            if user is not None:
+                if user.email is None:
+                    user.email = email
+                    sqldb.session.commit()
+
+                db_bookings = StudySpacesBooking.query.filter_by(user=user.id).filter_by(end > now and not is_cancelled)
+                db_booking_ids = [x.booking_id for x in db_bookings]
+                reservation_ids = [x["bookId"] for x in confirmed_reservations]
+                missing_bookings = list(set(db_booking_ids) - set(reservation_ids))
+                if missing_bookings:
+                    missing_bookings_arg = ",".join(missing_bookings)
+                    missing_bookings = studyspaces.get_reservations_for_booking_ids(missing_bookings)
+                    confirmed_missing_bookings = [res for res in missing_bookings if res["status"] == "Confirmed"]
+                    confirmed_reservations.extend(confirmed_missing_bookings)
 
             for res in confirmed_reservations:
                 res["service"] = "libcal"
