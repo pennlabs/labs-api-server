@@ -320,7 +320,7 @@ def get_reservations():
 
             # Fetch reservations in database that are not being returned by API
             db_bookings = StudySpacesBooking.query.filter_by(email=email)\
-                    .filter(StudySpacesBooking.lid is not 1)\
+                    .filter(not StudySpacesBooking.booking_id.isdigit())\
                     .filter(StudySpacesBooking.end > now)\
                     .filter(not StudySpacesBooking.is_cancelled)
             db_booking_ids = [x.booking_id for x in db_bookings]
