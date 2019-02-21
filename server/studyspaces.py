@@ -319,7 +319,7 @@ def get_reservations():
                     user.email = email
                     sqldb.session.commit()
 
-                db_bookings = StudySpacesBooking.query.filter_by(user=user.id).filter_by(end > now and not is_cancelled)
+                db_bookings = StudySpacesBooking.query.filter_by(user=user.id).filter_by(StudySpacesBooking.end > now and not StudySpacesBooking.is_cancelled)
                 db_booking_ids = [x.booking_id for x in db_bookings]
                 reservation_ids = [x["bookId"] for x in confirmed_reservations]
                 missing_bookings = list(set(db_booking_ids) - set(reservation_ids))
