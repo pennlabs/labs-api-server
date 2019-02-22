@@ -345,13 +345,16 @@ def get_reservations():
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
                 confirmed_reservations = [res for res in libcal_reservations if (res["status"] == "Confirmed"
-                    and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now)]
+                                          and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now)]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i += 1
 
             # Fetch reservations in database that are not being returned by API
             db_bookings = StudySpacesBooking.query.filter_by(email=email)
-            db_booking_ids = [str(x.booking_id) for x in db_bookings if x.end and x.end > now and not str(x.booking_id).isdigit() and not x.is_cancelled]
+            db_booking_ids = [str(x.booking_id) for x in db_bookings if x.end
+                              and x.end > now
+                              and not str(x.booking_id).isdigit()
+                              and not x.is_cancelled]
             reservation_ids = [x["bookId"] for x in confirmed_reservations]
             missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
             if missing_booking_ids:

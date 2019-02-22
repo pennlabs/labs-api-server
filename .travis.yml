@@ -9,5 +9,5 @@ services:
 install:
   - pip install flake8 -r requirements.txt
 script:
-  - flake8 --max-line-length=150 --ignore=E402,F401 --exclude=venv .
+  - flake8 .
   - nosetests
