@@ -22,7 +22,7 @@ class StudySpacesBooking(sqldb.Model):
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=True)
     booking_id = sqldb.Column(sqldb.Text)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.now)
-    lid = sqldb.Column(sqldb.Integer, nullable=True) 
+    lid = sqldb.Column(sqldb.Integer, nullable=True)
     rid = sqldb.Column(sqldb.Integer, nullable=True)
     email = sqldb.Column(sqldb.Text, nullable=True)
     start = sqldb.Column(sqldb.DateTime, nullable=True)
@@ -69,26 +69,6 @@ class User(sqldb.Model):
         if not user:
             raise ValueError("Unable to authenticate on the server.")
         return user
-
-    @staticmethod
-    def create_user():
-        device_id = request.form.get('device_id')
-        if not device_id:
-            raise ValueError("No device ID passed to the server.")
-        user = User.query.filter_by(device_id=device_id).first()
-        if user:
-            return
-
-        agent = request.headers.get('User-Agent')
-        if any(device in agent.lower() for device in ["iphone", "ipad"]):
-            platform = "ios"
-        elif any(device in agent.lower() for device in ["android"]):
-            platform = "android"
-        else:
-            platform = "unknown"
-        user = User(platform=platform, device_id=device_id)
-        sqldb.session.add(user)
-        sqldb.session.commit()
 
 
 class LaundryPreference(sqldb.Model):

@@ -25,10 +25,10 @@ def register_user():
         return Response(response="Auth secret is not correct.", status=400)
 
     try:
-        User.create_user()
+        User.get_or_create()
         return jsonify({'exists': True})
     except ValueError as err:
-        return Response(response=str(err), status=400) 
+        return Response(response=str(err), status=400)
 
 
 @app.route('/auth', methods=['GET'])

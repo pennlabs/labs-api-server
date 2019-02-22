@@ -159,25 +159,25 @@ def cancel_room():
         if (booking.user is not None) and (booking.user != user.id):
             return jsonify({"error": "Unauthorized: This reservation was booked by someone else."})
         if booking.is_cancelled:
-                return jsonify({"error": "This reservation has already been cancelled."})
+            return jsonify({"error": "This reservation has already been cancelled."})
 
     if booking_id.isdigit():
         sessionid = request.form.get('sessionid')
         if not sessionid:
             return jsonify({"error": "No session id sent to server."})
         try:
-            result = wharton.delete_booking(sessionid, booking_id)
+            wharton.delete_booking(sessionid, booking_id)
             if booking:
                 booking.is_cancelled = True
                 sqldb.session.commit()
             else:
                 save_booking(
-                        lid=1,
-                        email=user.email,
-                        booking_id=booking_id,
-                        is_cancelled=True,
-                        user=user.id
-                    )
+                    lid=1,
+                    email=user.email,
+                    booking_id=booking_id,
+                    is_cancelled=True,
+                    user=user.id
+                )
             return jsonify({'result': [{"booking_id": booking_id, "cancelled": True}]})
         except APIError as e:
             return jsonify({"error": str(e)})
@@ -271,7 +271,7 @@ def get_reservations():
     if libcal_search_span:
         try:
             libcal_search_span = int(libcal_search_span)
-        except:
+        except ValueError:
             return jsonify({"error": "Search span must be an integer"})
     else:
         libcal_search_span = 3
@@ -337,20 +337,19 @@ def get_reservations():
                 return not (booking and booking.is_cancelled)
 
             now = datetime.datetime.now()
-            dateFormat = "%Y-%m-%d"            
+            dateFormat = "%Y-%m-%d"
             i = 0
             confirmed_reservations = []
             while len(confirmed_reservations) == 0 and i < libcal_search_span:
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr)
-                confirmed_reservations = [res for res in libcal_reservations if res["status"] == "Confirmed"
-                and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now]
+                confirmed_reservations = [res for res in libcal_reservations if (res["status"] == "Confirmed"
+                    and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now)]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
-                i+=1
+                i += 1
 
             # Fetch reservations in database that are not being returned by API
-            #db_bookings = StudySpacesBooking.query.filter_by(email=email)#\
             db_bookings = StudySpacesBooking.query.filter_by(email=email)
             db_booking_ids = [str(x.booking_id) for x in db_bookings if not str(x.booking_id).isdigit() and x.end > now and not x.is_cancelled]
             reservation_ids = [x["bookId"] for x in confirmed_reservations]
