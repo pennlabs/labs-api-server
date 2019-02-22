@@ -160,6 +160,13 @@ def cancel_room():
             return jsonify({"error": "No session id sent to server."})
         try:
             result = wharton.delete_booking(sessionid, booking_id)
+            save_booking(
+                    lid=1,
+                    email=user.email,
+                    booking_id=booking_id,
+                    is_cancelled=True,
+                    user=user.id
+                )
             return jsonify({'result': [{"booking_id": booking_id, "cancelled": True}]})
         except APIError as e:
             return jsonify({"error": str(e)})
