@@ -1,3 +1,4 @@
+import os
 from server import app, db
 from functools import wraps
 from flask import request, Response, jsonify
@@ -16,7 +17,7 @@ def json_status(json, status_code=None):
 
 @app.route('/device/register', methods=['POST'])
 def register_user():
-    secret = "secret_token"
+    secret = os.environ.get('AUTH_SECRET')
     auth_secret = request.form.get("auth_secret")
     if auth_secret is None:
         return Response(response="Auth secret is not provided", status=400)
