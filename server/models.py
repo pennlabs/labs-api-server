@@ -21,7 +21,7 @@ class StudySpacesBooking(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=True)
     booking_id = sqldb.Column(sqldb.Text)
-    date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.utcnow)
+    date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.now)
     lid = sqldb.Column(sqldb.Integer, nullable=True) 
     rid = sqldb.Column(sqldb.Integer, nullable=True)
     email = sqldb.Column(sqldb.Text, nullable=True)
@@ -42,7 +42,7 @@ class User(sqldb.Model):
         device_id = device_id or request.headers.get('X-Device-ID')
         if not device_id:
             raise ValueError("No device ID passed to the server.")
-            
+
         user = User.query.filter_by(device_id=device_id).first()
         if user:
             return user

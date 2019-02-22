@@ -236,8 +236,8 @@ def book_room():
             lid=lid,
             rid=room,
             email=contact["email"],
-            start=start,#.replace(tzinfo=None),
-            end=end,#.replace(tzinfo=None),
+            start=start.replace(tzinfo=None),
+            end=end.replace(tzinfo=None),
             booking_id=resp.get("booking_id"),
             user=user
         )
