@@ -13,7 +13,8 @@ from .penndata import wharton
 from .base import cached_route
 
 def get_sessionid():
-    return os.environ['sessionid'] # "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
+    #return os.environ['sessionid'] # "l87ugy7ha9fabhxil71zwshbsl9ogl7x"
+    return "dpa7trlicczhjsf1s0bragq4l7ylxjnk"
 
 @app.route('/studyspaces/gsr', methods=['GET'])
 def get_wharton_gsrs_temp_route():
