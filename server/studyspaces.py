@@ -166,7 +166,7 @@ def cancel_room():
     else:
         booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
         if booking:
-            if (booking.user is not None) and (booking.user is not user.id):
+            if (booking.user is not None) and (booking.user != user.id):
                 return jsonify({"error": "Unauthorized: This reservation was booked by someone else.{}, {}".format(booking.user, user.id)})
             if booking.is_cancelled:
                 return jsonify({"error": "This reservation has already been cancelled."})
