@@ -154,29 +154,34 @@ def cancel_room():
     if "," in booking_id:
         return jsonify({"error": "Only one booking may be cancelled at a time."})
 
+    booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
+    if booking:
+        if (booking.user is not None) and (booking.user != user.id):
+            return jsonify({"error": "Unauthorized: This reservation was booked by someone else."})
+        if booking.is_cancelled:
+                return jsonify({"error": "This reservation has already been cancelled."})
+
     if booking_id.isdigit():
         sessionid = request.form.get('sessionid')
         if not sessionid:
             return jsonify({"error": "No session id sent to server."})
         try:
             result = wharton.delete_booking(sessionid, booking_id)
-            save_booking(
-                    lid=1,
-                    email=user.email,
-                    booking_id=booking_id,
-                    is_cancelled=True,
-                    user=user.id
-                )
+            if booking:
+                booking.is_cancelled = True
+                sqldb.session.commit()
+            else:
+                save_booking(
+                        lid=1,
+                        email=user.email,
+                        booking_id=booking_id,
+                        is_cancelled=True,
+                        user=user.id
+                    )
             return jsonify({'result': [{"booking_id": booking_id, "cancelled": True}]})
         except APIError as e:
             return jsonify({"error": str(e)})
     else:
-        booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
-        if booking:
-            if (booking.user is not None) and (booking.user != user.id):
-                return jsonify({"error": "Unauthorized: This reservation was booked by someone else.{}, {}".format(booking.user, user.id)})
-            if booking.is_cancelled:
-                return jsonify({"error": "This reservation has already been cancelled."})
         resp = studyspaces.cancel_room(booking_id)
         if "error" not in resp:
             if booking:
