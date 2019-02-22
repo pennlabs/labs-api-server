@@ -24,8 +24,9 @@ def register_user():
     if not (auth_secret == secret):
         return Response(response="Auth secret is not correct.", status=400)
 
+    device_id = request.form.get('device_id')
     try:
-        User.get_or_create()
+        User.get_or_create(device_id=device_id)
         return jsonify({'exists': True})
     except ValueError as err:
         return Response(response=str(err), status=400)
