@@ -351,7 +351,7 @@ def get_reservations():
 
             # Fetch reservations in database that are not being returned by API
             db_bookings = StudySpacesBooking.query.filter_by(email=email)
-            db_booking_ids = [str(x.booking_id) for x in db_bookings if not str(x.booking_id).isdigit() and x.end > now and not x.is_cancelled]
+            db_booking_ids = [str(x.booking_id) for x in db_bookings if x.end and x.end > now and not str(x.booking_id).isdigit() and not x.is_cancelled]
             reservation_ids = [x["bookId"] for x in confirmed_reservations]
             missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
             if missing_booking_ids:
