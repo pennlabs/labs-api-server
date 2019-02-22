@@ -1,18 +1,11 @@
 import os
 from server import app, db
 from functools import wraps
-from flask import request, Response, jsonify
+from flask import request, jsonify
 import hashlib
 import binascii
 
 from .models import User
-
-
-def json_status(json, status_code=None):
-    resp = jsonify(json)
-    if status_code:
-        resp.status_code = status_code
-    return resp
 
 
 @app.route('/device/register', methods=['POST'])
@@ -20,16 +13,16 @@ def register_user():
     secret = os.environ.get('AUTH_SECRET')
     auth_secret = request.form.get("auth_secret")
     if auth_secret is None:
-        return Response(response="Auth secret is not provided", status=400)
+        return jsonify({"error": "Auth secret is not provided."}), 400
     if not (auth_secret == secret):
-        return Response(response="Auth secret is not correct.", status=400)
+        return jsonify({"error": "Auth secret is not correct."}), 400
 
     device_id = request.form.get('device_id')
     try:
         User.get_or_create(device_id=device_id)
         return jsonify({'exists': True})
     except ValueError as err:
-        return Response(response=str(err), status=400)
+        return jsonify({"error": str(err)}), 400
 
 
 @app.route('/auth', methods=['GET'])
@@ -48,18 +41,18 @@ def auth():
         db.set('authToken:%s' % authToken, 1)
         return authToken
     else:
-        return Response(response="no shibboleth cookie", status=400)
+        return jsonify({"error": "no shibboleth cookie"}), 400
 
 
 @app.route('/validate/<string:token>', methods=['GET'])
 def validate(token):
     debug = app.debug or app.testing
     if not request.base_url.startswith('https') and not debug:
-        return json_status({"status": "insecure access over http"}, 401)
+        return jsonify({"status": "insecure access over http"}), 401
     if db.exists('authToken:%s' % token):
-        return json_status({"status": "valid"})
+        return jsonify({"status": "valid"})
     else:
-        return json_status({"status": "invalid"}, 401)
+        return jsonify({"status": "invalid"}), 401
 
 
 def auth_decorator(f):
@@ -68,6 +61,6 @@ def auth_decorator(f):
         if db.exists('authToken:%s' % request.args['authToken']):
             return f(*args, **kwds)
         else:
-            return Response(status=401)
+            return jsonify({"error": "invalid auth token"}), 401
 
     return wrapper
