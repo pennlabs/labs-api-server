@@ -14,7 +14,7 @@ def register_user():
     auth_secret = request.form.get("auth_secret")
     if auth_secret is None:
         return jsonify({"error": "Auth secret is not provided."}), 400
-    if not (auth_secret == secret):
+    if not auth_secret == secret:
         return jsonify({"error": "Auth secret is not correct."}), 400
 
     device_id = request.form.get('device_id')

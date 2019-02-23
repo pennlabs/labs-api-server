@@ -10,4 +10,4 @@ install:
   - pip install flake8 -r requirements.txt
 script:
   - flake8 .
-  - nosetests
+  - nosetests --processes=-1
