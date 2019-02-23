@@ -243,7 +243,7 @@ def book_room():
         user = None
 
     resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-    if resp["results"]:
+    if "results" in resp:
         save_booking(
             lid=lid,
             rid=room,
