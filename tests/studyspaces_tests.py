@@ -60,9 +60,6 @@ class StudySpacesApiTests(unittest.TestCase):
             # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
 
-            # check to make sure user is saved
-            self.assertTrue(sqldb.session.query(StudySpacesBooking).first().user is not None)
-
     def testStudyspaceCancelFailure(self):
         """Booking cancellation should not succeed if it is not in our database."""
 

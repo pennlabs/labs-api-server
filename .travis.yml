@@ -10,4 +10,4 @@ install:
   - pip install flake8 -r requirements.txt
 script:
   - flake8 .
-  - nosetests --processes=-1 --process-timeout=300
+  - nosetests --processes=-1 --process-timeout=600
