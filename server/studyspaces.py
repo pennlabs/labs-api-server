@@ -159,7 +159,7 @@ def cancel_room():
             return jsonify({"error": "This reservation has already been cancelled."})
 
     if booking_id.isdigit():
-        sessionid = request.form.get('sessionid')
+        sessionid = get_wharton_sessionid()
         if not sessionid:
             return jsonify({"error": "No session id sent to server."})
         try:
@@ -249,7 +249,7 @@ def book_room():
         resp = wharton.book_reservation(sessionid, room, start, end)
         resp["results"] = resp["success"]
         room_booked = resp["success"]
-        booking_id = ""  # TODO
+        booking_id = None
     else:
         resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
         room_booked = "results" in resp
@@ -284,7 +284,7 @@ def get_reservations():
         try:
             libcal_search_span = int(libcal_search_span)
         except ValueError:
-            return jsonify({"error": "Search span must be an integer"})
+            return jsonify({"error": "Search span must be an integer."})
     else:
         libcal_search_span = 3
 
