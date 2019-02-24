@@ -5,21 +5,36 @@ import requests
 from flask import jsonify, request
 from dateutil.parser import parse
 
-from server import app, sqldb
+from server import app, db, sqldb
 from penn.base import APIError
 from .models import StudySpacesBooking, User
 from .penndata import studyspaces, wharton
 from .base import cached_route
 
 
+def get_wharton_sessionid(public=False):
+    """ Try to get a GSR session id. """
+    sessionid = request.args.get('sessionid')
+    cache_key = 'studyspaces:gsr:sessionid'
+
+    if sessionid:
+        db.set(cache_key, sessionid, ex=604800)
+        return sessionid
+
+    if public:
+        if db.exists(cache_key):
+            return db.get(cache_key).decode('utf8')
+
+        return os.environ.get('GSR_SESSIONID')
+
+    return None
+
+
 @app.route('/studyspaces/gsr', methods=['GET'])
 def get_wharton_gsrs():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
 
-    sessionid = request.args.get('sessionid')
-
-    if not sessionid:
-        sessionid = os.environ.get('GSR_SESSIONID')
+    sessionid = get_wharton_sessionid(public=True)
 
     if not sessionid:
         return jsonify({'error': 'No GSR session id is set!'})
@@ -48,7 +63,7 @@ def get_wharton_gsr_reservations():
     Returns JSON containing a list of Wharton GSR reservations.
     """
 
-    sessionid = request.args.get('sessionid')
+    sessionid = get_wharton_sessionid()
 
     if not sessionid:
         return jsonify({'error': 'No Session ID provided.'})
@@ -67,7 +82,7 @@ def delete_wharton_gsr_reservation():
     Deletes a Wharton GSR reservation
     """
     booking = request.form.get('booking')
-    sessionid = request.form.get('sessionid')
+    sessionid = get_wharton_sessionid()
     if not booking:
         return jsonify({"error": "No booking sent to server."})
     if not sessionid:
