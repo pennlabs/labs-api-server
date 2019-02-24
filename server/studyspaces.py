@@ -1,6 +1,7 @@
 import os
 import datetime
 import requests
+import uuid
 
 from flask import jsonify, request
 from dateutil.parser import parse
@@ -95,7 +96,8 @@ def parse_times(building):
 
     if building == 1:
         sessionid = get_wharton_sessionid(public=True)
-        rooms = wharton.get_wharton_gsrs_formatted(sessionid)
+        rooms = wharton.get_wharton_gsrs(sessionid, date=start)
+        rooms = wharton.switch_format(rooms)
     else:
         try:
             rooms = studyspaces.get_rooms(building, start, end)
@@ -232,21 +234,36 @@ def book_room():
     try:
         user = User.get_user()
         if user and user.email:
-            user.email = contact["email"]
-            sqldb.session.commit()
+            if "email" in contact:
+                user.email = contact["email"]
+                sqldb.session.commit()
+            else:
+                contact["email"] = user.email
         user = user.id
     except ValueError:
         user = None
 
-    resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-    if "results" in resp:
+    if lid == 1:
+        sessionid = get_wharton_sessionid()
+        if not sessionid:
+            return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"})
+        resp = wharton.book_reservation(sessionid, room, start, end)
+        resp["results"] = resp["success"]
+        room_booked = resp["success"]
+        booking_id = str(uuid.uuid4())
+    else:
+        resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
+        room_booked = "results" in resp
+        booking_id = resp.get("booking_id")
+
+    if room_booked:
         save_booking(
             lid=lid,
             rid=room,
             email=contact["email"],
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
-            booking_id=resp.get("booking_id"),
+            booking_id=booking_id,
             user=user
         )
     return jsonify(resp)
