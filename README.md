@@ -604,6 +604,55 @@ Books a room given the room information and the user's contact information.
     </tbody>
 </table>
 
+### Get Reservations
+Returns all the reservations for a given email and/or Wharton Session ID. 
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/studyspaces/reservations</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>GET</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                            <th>Example Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                          <td><tt>email</tt></td>
+                          <td><strong>Optional</strong></td>
+                          <td>The email associated with the libcal reservation(s)</td>
+                          <td>johndoe@seas.upenn.edu</tt></td>
+                      </tr>
+                      <tr>
+                          <td><tt>sessionid</tt></td>
+                          <td><strong>Optional</strong></td>
+                          <td>A valid sessionid for the Wharton student</td>
+                          <td>l87ugy7ha9fabhxil71zwshbsl6ogl7x</td>
+                      </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 ### Cancel Room
 Cancels a room given a booking id or a list of booking ids.
 
