@@ -981,7 +981,7 @@ library SDK repository [README](https://github.com/pennlabs/pennathletics/blob/m
 
 ## Authentication
 
-### Registering a user
+### Register a user
 Register a UUID on the server and create a user account
 
 <table>
