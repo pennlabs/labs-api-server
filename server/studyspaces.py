@@ -18,7 +18,6 @@ def get_wharton_sessionid(public=False):
     cache_key = 'studyspaces:gsr:sessionid'
 
     if sessionid:
-        db.set(cache_key, sessionid, ex=604800)
         return sessionid
 
     if public:
@@ -30,11 +29,21 @@ def get_wharton_sessionid(public=False):
     return None
 
 
+def save_wharton_sessionid():
+    sessionid = request.args.get('sessionid')
+    cache_key = 'studyspaces:gsr:sessionid'
+
+    if sessionid:
+        db.set(cache_key, sessionid, ex=604800)
+
+
 @app.route('/studyspaces/gsr', methods=['GET'])
 def get_wharton_gsrs_temp_route():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
     date = request.args.get('date')
-    return jsonify(wharton.get_wharton_gsrs(get_wharton_sessionid(public=True), date))
+    data = wharton.get_wharton_gsrs(get_wharton_sessionid(public=True), date)
+    save_wharton_sessionid()
+    return jsonify(data)
 
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
@@ -52,6 +61,8 @@ def get_wharton_gsr_reservations():
         reservations = wharton.get_reservations(sessionid)
     except APIError as e:
         return jsonify({"error": str(e)})
+
+    save_wharton_sessionid()
 
     return jsonify({'reservations': reservations})
 
@@ -72,6 +83,8 @@ def delete_wharton_gsr_reservation():
         result = wharton.delete_booking(sessionid, booking)
     except APIError as e:
         return jsonify({"error": str(e)})
+
+    save_wharton_sessionid()
 
     return jsonify({'result': result})
 
@@ -97,6 +110,7 @@ def parse_times(building):
         sessionid = get_wharton_sessionid(public=True)
         rooms = wharton.get_wharton_gsrs(sessionid, date=start)
         rooms = wharton.switch_format(rooms)
+        save_wharton_sessionid()
     else:
         try:
             rooms = studyspaces.get_rooms(building, start, end)
@@ -164,6 +178,7 @@ def cancel_room():
             return jsonify({"error": "No session id sent to server."})
         try:
             wharton.delete_booking(sessionid, booking_id)
+            save_wharton_sessionid()
             if booking:
                 booking.is_cancelled = True
                 sqldb.session.commit()
@@ -247,6 +262,7 @@ def book_room():
         if not sessionid:
             return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"})
         resp = wharton.book_reservation(sessionid, room, start, end)
+        save_wharton_sessionid()
         resp["results"] = resp["success"]
         room_booked = resp["success"]
         booking_id = None
