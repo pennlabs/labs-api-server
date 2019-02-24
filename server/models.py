@@ -19,13 +19,15 @@ class LaundrySnapshot(sqldb.Model):
 
 class StudySpacesBooking(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"))
+    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=True)
     booking_id = sqldb.Column(sqldb.Text)
-    date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.utcnow)
-    rid = sqldb.Column(sqldb.Integer, nullable=False)
-    email = sqldb.Column(sqldb.Text, nullable=False)
-    start = sqldb.Column(sqldb.DateTime, nullable=False)
-    end = sqldb.Column(sqldb.DateTime, nullable=False)
+    date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.now)
+    lid = sqldb.Column(sqldb.Integer, nullable=True)
+    rid = sqldb.Column(sqldb.Integer, nullable=True)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+    start = sqldb.Column(sqldb.DateTime, nullable=True)
+    end = sqldb.Column(sqldb.DateTime, nullable=True)
+    is_cancelled = sqldb.Column(sqldb.Boolean, default=False)
 
 
 class User(sqldb.Model):
@@ -40,19 +42,32 @@ class User(sqldb.Model):
         device_id = device_id or request.headers.get('X-Device-ID')
         if not device_id:
             raise ValueError("No device ID passed to the server.")
-        if not platform:
-            if request.user_agent.platform in ["iphone", "ipad"]:
-                platform = "ios"
-            elif request.user_agent.platform == "android":
-                platform = "android"
-            else:
-                platform = "unknown"
+
         user = User.query.filter_by(device_id=device_id).first()
         if user:
             return user
+
+        agent = request.headers.get('User-Agent')
+        if any(device in agent.lower() for device in ["iphone", "ipad"]):
+            platform = "ios"
+        elif any(device in agent.lower() for device in ["android"]):
+            platform = "android"
+        else:
+            platform = "unknown"
+
         user = User(platform=platform, device_id=device_id, email=email)
         sqldb.session.add(user)
         sqldb.session.commit()
+        return user
+
+    @staticmethod
+    def get_user():
+        device_id = request.headers.get('X-Device-ID')
+        if not device_id:
+            raise ValueError("No device ID passed to the server.")
+        user = User.query.filter_by(device_id=device_id).first()
+        if not user:
+            raise ValueError("Unable to authenticate on the server.")
         return user
 
 

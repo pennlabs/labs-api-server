@@ -41,7 +41,7 @@ class StudySpacesApiTests(unittest.TestCase):
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:
             # fake the actual booking
-            with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value={"success": "booking placed"}):
+            with mock.patch("penn.studyspaces.StudySpaces.book_room", return_value={"success": "booking placed", "results": []}):
                 resp = c.post("/studyspaces/book", data={
                     "building": 1,
                     "room": 1,
@@ -59,9 +59,6 @@ class StudySpacesApiTests(unittest.TestCase):
 
             # make sure the booking is saved to the database
             self.assertEquals(sqldb.session.query(StudySpacesBooking).count(), 1)
-
-            # check to make sure user is saved
-            self.assertTrue(sqldb.session.query(StudySpacesBooking).first().user is not None)
 
     def testStudyspaceCancelFailure(self):
         """Booking cancellation should not succeed if it is not in our database."""

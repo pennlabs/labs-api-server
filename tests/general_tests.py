@@ -37,13 +37,6 @@ class MobileAppApiTests(unittest.TestCase):
             for val in course_data["courses"]:
                 self.assertEquals("CIS", val["course_department"])
 
-    def testBuildingSearch(self):
-        with server.app.test_request_context("/?q=Towne"):
-            res = server.buildings.building_search()
-            building_data = json.loads(res.data.decode('utf8'))
-            self.assertEquals(building_data["result_data"][0]["title"],
-                              "Towne")
-
     def testTransitStopInventory(self):
         with server.app.test_request_context():
             res = json.loads(server.transit.transit_stops().data.decode(
