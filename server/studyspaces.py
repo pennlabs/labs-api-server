@@ -1,7 +1,6 @@
 import os
 import datetime
 import requests
-import uuid
 
 from flask import jsonify, request
 from dateutil.parser import parse
@@ -250,7 +249,7 @@ def book_room():
         resp = wharton.book_reservation(sessionid, room, start, end)
         resp["results"] = resp["success"]
         room_booked = resp["success"]
-        booking_id = str(uuid.uuid4())
+        booking_id = ""  # TODO
     else:
         resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
         room_booked = "results" in resp
