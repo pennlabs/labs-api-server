@@ -1,11 +1,9 @@
-import datetime
 import requests
 
 from server import app
 from bs4 import BeautifulSoup
 
 from flask import jsonify
-from requests.exceptions import HTTPError
 
 BASE_URL = "https://www.thedp.com/"
 

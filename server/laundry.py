@@ -99,14 +99,13 @@ def usage_data(hall_no, year, month, day):
         func.avg(LaundrySnapshot.dryers).label("all_dryers"),
         func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
         func.avg(LaundrySnapshot.total_dryers).label("all_total_dryers"),
-    ).filter((LaundrySnapshot.room == hall_no)
+    ).filter(((LaundrySnapshot.room == hall_no)
              & ((func.dayofweek(LaundrySnapshot.date) == dow + 1 if is_mysql else
-               func.strftime("%w", LaundrySnapshot.date) == str(dow))
+                 func.strftime("%w", LaundrySnapshot.date) == str(dow))
              | ((LaundrySnapshot.time <= 180 - 1)
-             & (func.dayofweek(LaundrySnapshot.date) == tmw + 1 if is_mysql else
-                func.strftime("%w", LaundrySnapshot.date) == str(tmw)
-                )))
-             & (LaundrySnapshot.date >= start)) \
+                 & (func.dayofweek(LaundrySnapshot.date) == tmw + 1 if is_mysql else
+                    func.strftime("%w", LaundrySnapshot.date) == str(tmw))))
+             & (LaundrySnapshot.date >= start))) \
      .group_by(LaundrySnapshot.date, "time") \
      .order_by(LaundrySnapshot.date, "time").all()
     data = [x._asdict() for x in data]
@@ -222,3 +221,8 @@ def get_laundry_preferences():
     preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
     return jsonify({'rooms': room_ids})
+
+
+@app.route('/laundry/status', methods=['GET'])
+def get_laundry_status():
+    return jsonify({'is_working': True, 'error_msg': None})

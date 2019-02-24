@@ -12,6 +12,7 @@ studyspaces = StudySpaces(getenv("LIBCAL_ID"), getenv("LIBCAL_SECRET"))
 wharton = Wharton()
 fitness = Fitness(getenv("FITNESS_TOKEN"))
 calendar = Calendar()
+wharton = Wharton()
 depts = {
     "AAMW": "Art & Arch of Med. World",
     "ACCT": "Accounting",
