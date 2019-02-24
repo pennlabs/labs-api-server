@@ -644,7 +644,7 @@ Returns all the reservations for a given email and/or Wharton Session ID.
                           <td><tt>sessionid</tt></td>
                           <td><strong>Optional</strong></td>
                           <td>A valid sessionid for the Wharton student</td>
-                          <td>l87ugy7ha9fabhxil71zwshbsl6ogl7x</td>
+                          <td>abcdefghijklimnopqrstuvwxyz12345</td>
                       </tr>
                     </tbody>
                 </table>
