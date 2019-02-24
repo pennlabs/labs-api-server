@@ -42,7 +42,7 @@ class MobileAppApiTests(unittest.TestCase):
             res = server.buildings.building_search()
             building_data = json.loads(res.data.decode('utf8'))
             self.assertEquals(building_data["result_data"][0]["title"],
-                              "Towne")
+                              "Harnwell")
 
     def testTransitStopInventory(self):
         with server.app.test_request_context():
