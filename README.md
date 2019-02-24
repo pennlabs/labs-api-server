@@ -540,6 +540,27 @@ Books a room given the room information and the user's contact information.
             <td>Response Formats</td>
             <td>JSON</td>
         </tr>
+       <tr>
+            <td>Headers</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>X-Device-ID</code></td>
+                            <td>Optional</td>
+                            <td>The UUID of the user booking the room.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr>
             <td>Parameters</td>
             <td>
@@ -669,6 +690,27 @@ Cancels a room given a booking id or a list of booking ids.
         <tr>
             <td>Response Formats</td>
             <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Headers</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Default</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>X-Device-ID</code></td>
+                            <td>Required</td>
+                            <td>A valid UUID on the server. If room booked with API, must match the UUID that was used.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
         </tr>
         <tr>
             <td>Parameters</td>
@@ -938,6 +980,52 @@ Documentation for the athletics endpoints is located at the Labs pennathletics
 library SDK repository [README](https://github.com/pennlabs/pennathletics/blob/master/README.md#sports)
 
 ## Authentication
+
+### Registering a user
+Register a UUID on the server and create a user account
+
+<table>
+    <tbody>
+        <tr>
+            <td>URL</td>
+            <td><code>https://api.pennlabs.org/device/register</td>
+        </tr>
+        <tr>
+            <td>HTTP Methods</td>
+            <td>POST</td>
+        </tr>
+        <tr>
+            <td>Response Formats</td>
+            <td>JSON</td>
+        </tr>
+        <tr>
+            <td>Parameters</td>
+            <td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                          <td>auth_secret</td>
+                          <td><strong>Required</strong></td>
+                          <td>The secret key to register a user</td>
+                      </tr>
+                       <tr>
+                          <td>device_id</td>
+                          <td><strong>Required</strong></td>
+                          <td>The UUID associated with the user's device</td>
+                      </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 ### Validate token
 Validate whether token is valid. **Note**: You must access this endpoint over TLS/SSL (https).
