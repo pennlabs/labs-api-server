@@ -74,7 +74,7 @@ def delete_wharton_gsr_reservation():
     Deletes a Wharton GSR reservation
     """
     booking = request.form.get('booking')
-    sessionid = get_wharton_sessionid()
+    sessionid = request.form.get('sessionid')
     if not booking:
         return jsonify({"error": "No booking sent to server."})
     if not sessionid:
@@ -175,7 +175,7 @@ def cancel_room():
             return jsonify({"error": "This reservation has already been cancelled."}), 400
 
     if booking_id.isdigit():
-        sessionid = get_wharton_sessionid()
+        sessionid = request.form.get("sessionid")
         if not sessionid:
             return jsonify({"error": "No session id sent to server."}), 400
         try:
@@ -219,7 +219,13 @@ def book_room():
     try:
         room = int(request.form["room"])
     except (KeyError, ValueError):
-        return jsonify({"results": False, "error": "Please specify a correct room id!"})
+        return jsonify({"results": False, "error": "Please specify a correct room id!"}), 400
+
+    try:
+        start = parse(request.form["start"])
+        end = parse(request.form["end"])
+    except KeyError:
+        return jsonify({"results": False, "error": "No start and end parameters passed to server!"}), 400
 
     try:
         lid = int(request.form["lid"])
@@ -227,22 +233,17 @@ def book_room():
         lid = None
 
     if lid == 1:
-        sessionid = get_wharton_sessionid()
+        sessionid = request.form["sessionid"]
         if not sessionid:
-            return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"})
+            return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
         resp = wharton.book_reservation(sessionid, room, start, end)
         resp["results"] = resp["success"]
         room_booked = resp["success"]
+        del resp["success"]
         if room_booked:
             save_wharton_sessionid()
         booking_id = None
     else: 
-        try:
-            start = parse(request.form["start"])
-            end = parse(request.form["end"])
-        except KeyError:
-            return jsonify({"results": False, "error": "No start and end parameters passed to server!"})
-
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
             try:
@@ -272,7 +273,7 @@ def book_room():
         user = user.id
     except ValueError:
         user = None
-        
+
     if room_booked:
         save_booking(
             lid=lid,
