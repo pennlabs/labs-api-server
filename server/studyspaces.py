@@ -46,7 +46,7 @@ def get_wharton_gsrs_temp_route():
         save_wharton_sessionid()
         return jsonify(data)
     except APIError as error:
-        return jsonify({'error': error), 400
+        return jsonify({'error': error}), 400
 
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
