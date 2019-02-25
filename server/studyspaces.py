@@ -45,8 +45,8 @@ def get_wharton_gsrs_temp_route():
         data = wharton.get_wharton_gsrs(get_wharton_sessionid(public=True), date)
         save_wharton_sessionid()
         return jsonify(data)
-    except APIError as e:
-        return jsonify({'error': "Invalid sessionid."}), 400
+    except APIError as error:
+        return jsonify({'error': error), 400
 
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
@@ -243,7 +243,7 @@ def book_room():
         if room_booked:
             save_wharton_sessionid()
         booking_id = None
-    else: 
+    else:
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
             try:
