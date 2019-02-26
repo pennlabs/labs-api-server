@@ -112,7 +112,7 @@ def parse_times(building):
             rooms = wharton.switch_format(rooms)
             save_wharton_sessionid()
         except APIError as e:
-            return jsonify({'error': "Invalid sessionid."}), 400
+            return jsonify({"error": str(e)}), 400
     else:
         try:
             rooms = studyspaces.get_rooms(building, start, end)
