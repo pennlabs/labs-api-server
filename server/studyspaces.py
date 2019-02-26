@@ -18,7 +18,6 @@ def get_wharton_sessionid(public=False):
     cache_key = 'studyspaces:gsr:sessionid'
 
     if sessionid:
-        db.set(cache_key, sessionid, ex=604800)
         return sessionid
 
     if public:
@@ -30,31 +29,24 @@ def get_wharton_sessionid(public=False):
     return None
 
 
+def save_wharton_sessionid():
+    sessionid = request.args.get('sessionid')
+    cache_key = 'studyspaces:gsr:sessionid'
+
+    if sessionid:
+        db.set(cache_key, sessionid, ex=604800)
+
+
 @app.route('/studyspaces/gsr', methods=['GET'])
-def get_wharton_gsrs():
+def get_wharton_gsrs_temp_route():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
-
-    sessionid = get_wharton_sessionid(public=True)
-
-    if not sessionid:
-        return jsonify({'error': 'No GSR session id is set!'})
-
-    time = request.args.get('date')
-
-    if time:
-        time += " 05:00"
-    else:
-        time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%S")
-
-    resp = requests.get('https://apps.wharton.upenn.edu/gsr/api/app/grid_view/', params={
-        'search_time': time
-    }, cookies={
-        'sessionid': sessionid
-    })
-    if resp.status_code == 200:
-        return jsonify(resp.json())
-    else:
-        return jsonify({'error': 'Remote server returned status code {}.'.format(resp.status_code)})
+    date = request.args.get('date')
+    try:
+        data = wharton.get_wharton_gsrs(get_wharton_sessionid(public=True), date)
+        save_wharton_sessionid()
+        return jsonify(data)
+    except APIError as error:
+        return jsonify({'error': error}), 400
 
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
@@ -70,10 +62,10 @@ def get_wharton_gsr_reservations():
 
     try:
         reservations = wharton.get_reservations(sessionid)
+        save_wharton_sessionid()
+        return jsonify({'reservations': reservations})
     except APIError as e:
-        return jsonify({"error": str(e)})
-
-    return jsonify({'reservations': reservations})
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/studyspaces/gsr/delete', methods=['POST'])
@@ -82,7 +74,7 @@ def delete_wharton_gsr_reservation():
     Deletes a Wharton GSR reservation
     """
     booking = request.form.get('booking')
-    sessionid = get_wharton_sessionid()
+    sessionid = request.form.get('sessionid')
     if not booking:
         return jsonify({"error": "No booking sent to server."})
     if not sessionid:
@@ -90,10 +82,10 @@ def delete_wharton_gsr_reservation():
 
     try:
         result = wharton.delete_booking(sessionid, booking)
+        save_wharton_sessionid()
+        return jsonify({'result': result})
     except APIError as e:
-        return jsonify({"error": str(e)})
-
-    return jsonify({'result': result})
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
@@ -113,32 +105,38 @@ def parse_times(building):
         start = request.args.get('start')
         end = request.args.get('end')
 
-    try:
-        rooms = studyspaces.get_rooms(building, start, end)
-
-        # legacy support for old scraping method
-        rooms["location_id"] = rooms["id"]
-        rooms["rooms"] = []
-        for room_list in rooms["categories"]:
-            for room in room_list["rooms"]:
-                room["thumbnail"] = room["image"]
-                del room["image"]
-                room["room_id"] = room["id"]
-                del room["id"]
-                room["gid"] = room_list["cid"]
-                room["lid"] = building
-                room["times"] = room["availability"]
-                del room["availability"]
-                for time in room["times"]:
-                    time["available"] = True
-                    time["start"] = time["from"]
-                    time["end"] = time["to"]
-                    del time["from"]
-                    del time["to"]
-                rooms["rooms"].append(room)
-    except APIError as e:
-        return jsonify({"error": str(e)})
-
+    if building == 1:
+        sessionid = get_wharton_sessionid(public=True)
+        try:
+            rooms = wharton.get_wharton_gsrs(sessionid, date=start)
+            rooms = wharton.switch_format(rooms)
+            save_wharton_sessionid()
+        except APIError as e:
+            return jsonify({"error": str(e)}), 400
+    else:
+        try:
+            rooms = studyspaces.get_rooms(building, start, end)
+            rooms["location_id"] = rooms["id"]
+            rooms["rooms"] = []
+            for room_list in rooms["categories"]:
+                for room in room_list["rooms"]:
+                    room["thumbnail"] = room["image"]
+                    del room["image"]
+                    room["room_id"] = room["id"]
+                    del room["id"]
+                    room["gid"] = room_list["cid"]
+                    room["lid"] = building
+                    room["times"] = room["availability"]
+                    del room["availability"]
+                    for time in room["times"]:
+                        time["available"] = True
+                        time["start"] = time["from"]
+                        time["end"] = time["to"]
+                        del time["from"]
+                        del time["to"]
+                    rooms["rooms"].append(room)
+        except APIError as e:
+            return jsonify({"error": str(e)}), 400
     return jsonify(rooms)
 
 
@@ -148,7 +146,7 @@ def display_id_pairs():
     Returns JSON containing a list of buildings with their ids.
     """
     def get_data():
-        return {"locations": studyspaces.get_buildings()}
+        return {"locations": studyspaces.get_buildings() + [{"lid": 1, "name": "Huntsman Hall", "service": "wharton"}]}
 
     return cached_route('studyspaces:locations', datetime.timedelta(days=1), get_data)
 
@@ -172,16 +170,17 @@ def cancel_room():
     booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
     if booking:
         if (booking.user is not None) and (booking.user != user.id):
-            return jsonify({"error": "Unauthorized: This reservation was booked by someone else."})
+            return jsonify({"error": "Unauthorized: This reservation was booked by someone else."}), 400
         if booking.is_cancelled:
-            return jsonify({"error": "This reservation has already been cancelled."})
+            return jsonify({"error": "This reservation has already been cancelled."}), 400
 
     if booking_id.isdigit():
-        sessionid = request.form.get('sessionid')
+        sessionid = request.form.get("sessionid")
         if not sessionid:
-            return jsonify({"error": "No session id sent to server."})
+            return jsonify({"error": "No session id sent to server."}), 400
         try:
             wharton.delete_booking(sessionid, booking_id)
+            save_wharton_sessionid()
             if booking:
                 booking.is_cancelled = True
                 sqldb.session.commit()
@@ -195,7 +194,7 @@ def cancel_room():
                 )
             return jsonify({'result': [{"booking_id": booking_id, "cancelled": True}]})
         except APIError as e:
-            return jsonify({"error": str(e)})
+            return jsonify({"error": str(e)}), 400
     else:
         resp = studyspaces.cancel_room(booking_id)
         if "error" not in resp:
@@ -217,55 +216,72 @@ def book_room():
     """
     Books a room.
     """
-
     try:
         room = int(request.form["room"])
     except (KeyError, ValueError):
-        return jsonify({"results": False, "error": "Please specify a correct room id!"})
+        return jsonify({"results": False, "error": "Please specify a correct room id!"}), 400
 
     try:
         start = parse(request.form["start"])
         end = parse(request.form["end"])
     except KeyError:
-        return jsonify({"results": False, "error": "No start and end parameters passed to server!"})
-
-    contact = {}
-    for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
-        try:
-            contact[arg] = request.form[field]
-        except KeyError:
-            return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
-
-    contact["custom"] = {}
-    for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
-        try:
-            contact["custom"][arg] = request.form[field]
-        except KeyError:
-            pass
+        return jsonify({"results": False, "error": "No start and end parameters passed to server!"}), 400
 
     try:
         lid = int(request.form["lid"])
     except (KeyError, ValueError):
         lid = None
 
+    if lid == 1:
+        sessionid = request.form["sessionid"]
+        if not sessionid:
+            return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
+        resp = wharton.book_reservation(sessionid, room, start, end)
+        resp["results"] = resp["success"]
+        room_booked = resp["success"]
+        del resp["success"]
+        if room_booked:
+            save_wharton_sessionid()
+        booking_id = None
+    else:
+        contact = {}
+        for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
+            try:
+                contact[arg] = request.form[field]
+            except KeyError:
+                return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
+
+        contact["custom"] = {}
+        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
+            try:
+                contact["custom"][arg] = request.form[field]
+            except KeyError:
+                pass
+
+        resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
+        room_booked = "results" in resp
+        booking_id = resp.get("booking_id")
+
     try:
         user = User.get_user()
         if user and user.email:
-            user.email = contact["email"]
-            sqldb.session.commit()
+            if "email" in contact:
+                user.email = contact["email"]
+                sqldb.session.commit()
+            else:
+                contact["email"] = user.email
         user = user.id
     except ValueError:
         user = None
 
-    resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-    if "results" in resp:
+    if room_booked:
         save_booking(
             lid=lid,
             rid=room,
             email=contact["email"],
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
-            booking_id=resp.get("booking_id"),
+            booking_id=booking_id,
             user=user
         )
     return jsonify(resp)
@@ -280,14 +296,14 @@ def get_reservations():
     email = request.args.get('email')
     sessionid = request.args.get('sessionid')
     if not email and not sessionid:
-        return jsonify({"error": "A session id or email must be sent to server."})
+        return jsonify({"error": "A session id or email must be sent to server."}), 400
 
     libcal_search_span = request.args.get("libcal_search_span")
     if libcal_search_span:
         try:
             libcal_search_span = int(libcal_search_span)
         except ValueError:
-            return jsonify({"error": "Search span must be an integer"})
+            return jsonify({"error": "Search span must be an integer."}), 400
     else:
         libcal_search_span = 3
 
@@ -343,7 +359,7 @@ def get_reservations():
             reservations.extend(gsr_reservations)
 
         except APIError as e:
-            return jsonify({"error": str(e)})
+            return jsonify({"error": str(e)}), 400
 
     if email:
         try:
@@ -392,7 +408,7 @@ def get_reservations():
                 del res["lastName"]
 
         except APIError as e:
-            return jsonify({"error": str(e)})
+            return jsonify({"error": str(e)}), 400
 
         room_ids = ",".join(list(set([str(x["room_id"]) for x in confirmed_reservations])))
         if room_ids:
