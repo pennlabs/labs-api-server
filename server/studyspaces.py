@@ -245,7 +245,7 @@ def book_room():
         del resp["success"]
         if room_booked:
             save_wharton_sessionid()
-            booking_id = "0"
+            booking_id = None
     else:
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
