@@ -233,6 +233,8 @@ def book_room():
     except (KeyError, ValueError):
         lid = None
 
+    email = None
+
     if lid == 1:
         sessionid = request.form["sessionid"]
         if not sessionid:
@@ -253,6 +255,7 @@ def book_room():
             except KeyError:
                 return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
 
+        email = contact.get("email")
         contact["custom"] = {}
         for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
             try:
@@ -264,9 +267,6 @@ def book_room():
         room_booked = "results" in resp
         booking_id = resp.get("booking_id")
 
-    email = None
-    if contact:
-        email = contact.get("email")
     try:
         user = User.get_user()
         user_id = user.id
