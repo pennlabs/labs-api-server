@@ -5,6 +5,66 @@ from flask_sqlalchemy import SQLAlchemy
 
 sqldb = SQLAlchemy()
 
+from sqlalchemy import types
+from sqlalchemy.dialects.mysql.base import MSBinary
+import uuid
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+class Account(sqldb.Model):
+    id = sqldb.Column(sqldb.Text, primary_key=True, default=generate_uuid)
+    first = sqldb.Column(sqldb.Text, nullable=False)
+    last = sqldb.Column(sqldb.Text, nullable=False)
+    pennkey = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+    image_url = sqldb.Column(sqldb.Text, nullable=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
+class School(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    code = sqldb.Column(sqldb.Text, nullable=False)
+
+
+class Major(sqldb.Model):
+    code = sqldb.Column(sqldb.Text, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    school_code = sqldb.Column(sqldb.Text, sqldb.ForeignKey("school.code"), nullable=False)
+
+
+class SchoolMajorAccount(sqldb.Model):
+    account_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("account.id"), primary_key=True)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
+    major = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
+
+
+class Course(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False) 
+    code = sqldb.Column(sqldb.Text, nullable=False)
+    section = sqldb.Column(sqldb.Text, nullable=False)
+    term = sqldb.Column(sqldb.Text, nullable=False)
+    weekdays = sqldb.Column(sqldb.Text, nullable=False)
+    start = sqldb.Column(sqldb.Text, nullable=False)
+    end = sqldb.Column(sqldb.Text, nullable=False)
+    building = sqldb.Column(sqldb.Text, nullable=True)
+    building_code = sqldb.Column(sqldb.Integer, nullable=True)
+    room = sqldb.Column(sqldb.Text, nullable=True)
+
+
+class CourseProfessor(sqldb.Model):
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    name = sqldb.Column(sqldb.Text, primary_key=True) 
+
+
+class CourseAccount(sqldb.Model):
+    account_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("account.id"), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+
 
 class LaundrySnapshot(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
