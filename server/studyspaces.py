@@ -182,6 +182,7 @@ def cancel_room():
             wharton.delete_booking(sessionid, booking_id)
             save_wharton_sessionid()
             if booking:
+                booking.booking_id = booking_id
                 booking.is_cancelled = True
                 sqldb.session.commit()
             else:
@@ -237,13 +238,13 @@ def book_room():
         if not sessionid:
             return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
         resp = wharton.book_reservation(sessionid, room, start, end)
-        print(resp)
         resp["results"] = resp["success"]
         room_booked = resp["success"]
         del resp["success"]
+        booking_id = None
         if room_booked:
             save_wharton_sessionid()
-        booking_id = None
+            booking_id = "0"
     else:
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
@@ -274,7 +275,6 @@ def book_room():
             sqldb.session.commit()
     except ValueError:
         user_id = None
-        
 
     if room_booked:
         save_booking(
