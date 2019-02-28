@@ -264,14 +264,14 @@ def book_room():
         booking_id = resp.get("booking_id")
 
     email = None
+    if contact:
+        email = contact.get("email")
     try:
         user = User.get_user()
         user_id = user.id
-        if contact:
-            email = contact.get("email")
-            if user.email != email:
-                user.email = email
-                sqldb.session.commit()
+        if user.email != email:
+            user.email = email
+            sqldb.session.commit()
     except ValueError:
         user_id = None
         
