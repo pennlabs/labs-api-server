@@ -216,7 +216,9 @@ def add_courses(account, json_array):
 			identifier = "{}{}{}".format(course.term, course.code, course.section)
 			professors = course_professors.get(identifier)
 			if professors:
-				add_professors(course.id, professors)
+				for professor in professors:
+					cp = CourseProfessor(course_id=course.id, name=professor)
+					sqldb.session.add(cp)
 		courses_in_db.extend(courses_not_in_db)
 
 	if courses_in_db:
@@ -224,10 +226,3 @@ def add_courses(account, json_array):
 			ca = CourseAccount(account_id=account.id, course_id=course.id)
 			sqldb.session.add(ca)
 		sqldb.session.commit()
-
-
-def add_professors(course_id, professors):
-	for professor in professors:
-		cp = CourseProfessor(course_id=course_id, name=professor)
-		sqldb.session.add(cp)
-	sqldb.session.commit()
