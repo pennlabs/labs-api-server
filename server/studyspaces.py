@@ -243,7 +243,6 @@ def book_room():
         resp["results"] = resp["success"]
         room_booked = resp["success"]
         del resp["success"]
-        booking_id = None
         if room_booked:
             save_wharton_sessionid()
             booking_id = "0"
@@ -264,7 +263,7 @@ def book_room():
                 pass
 
         resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-        room_booked = "results" in resp
+        room_booked = resp.get("results")
         booking_id = resp.get("booking_id")
 
     try:
