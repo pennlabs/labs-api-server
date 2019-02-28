@@ -1,13 +1,10 @@
 import datetime
+import uuid
 
 from flask import jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 sqldb = SQLAlchemy()
-
-from sqlalchemy import types
-from sqlalchemy.dialects.mysql.base import MSBinary
-import uuid
 
 
 def generate_uuid():
@@ -18,7 +15,7 @@ class Account(sqldb.Model):
     id = sqldb.Column(sqldb.Text, primary_key=True, default=generate_uuid)
     first = sqldb.Column(sqldb.Text, nullable=False)
     last = sqldb.Column(sqldb.Text, nullable=False)
-    pennkey = sqldb.Column(sqldb.Text, nullable=False)
+    pennkey = sqldb.Column(sqldb.Text, nullable=False, unique=True)
     email = sqldb.Column(sqldb.Text, nullable=True)
     image_url = sqldb.Column(sqldb.Text, nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
@@ -30,21 +27,28 @@ class School(sqldb.Model):
     code = sqldb.Column(sqldb.Text, nullable=False)
 
 
+class Degree(sqldb.Model):
+    code = sqldb.Column(sqldb.Text, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    school_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("school.id"), nullable=False)
+
+
 class Major(sqldb.Model):
     code = sqldb.Column(sqldb.Text, primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
-    school_code = sqldb.Column(sqldb.Text, sqldb.ForeignKey("school.code"), nullable=False)
+    degree_code = sqldb.Column(sqldb.Text, sqldb.ForeignKey("degree.code"), nullable=False)
 
 
 class SchoolMajorAccount(sqldb.Model):
     account_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("account.id"), primary_key=True)
     school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
     major = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
+    expected_grad = sqldb.Column(sqldb.Text, nullable=False)
 
 
 class Course(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    name = sqldb.Column(sqldb.Text, nullable=False) 
+    name = sqldb.Column(sqldb.Text, nullable=False)
     code = sqldb.Column(sqldb.Text, nullable=False)
     section = sqldb.Column(sqldb.Text, nullable=False)
     term = sqldb.Column(sqldb.Text, nullable=False)
@@ -52,11 +56,11 @@ class Course(sqldb.Model):
     start = sqldb.Column(sqldb.Text, nullable=False)
     end = sqldb.Column(sqldb.Text, nullable=False)
     building = sqldb.Column(sqldb.Text, nullable=True)
-    building_code = sqldb.Column(sqldb.Integer, nullable=True)
+    building_id = sqldb.Column(sqldb.Integer, nullable=True)
     room = sqldb.Column(sqldb.Text, nullable=True)
 
 
-class CourseProfessor(sqldb.Model):
+class CourseInstructor(sqldb.Model):
     course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
     name = sqldb.Column(sqldb.Text, primary_key=True) 
 
