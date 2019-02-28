@@ -6,6 +6,56 @@ from server import app, db, sqldb
 from .models import Account, School, Major, SchoolMajorAccount, Course, CourseAccount, CourseProfessor
 
 
+"""
+POST JSON Encoding
+{
+	"first": "Josh",
+	"last": "Doman",
+	"image_url": null,
+	"pennkey": "joshdo",
+	"degrees": [
+		{
+			"school_name": "Engineering & Applied Science",
+			"school_code": "EAS",
+			"majors": [
+				{
+					"major_name": "Applied Science - Computer Science",
+					"major_code": "ASCS"
+				}
+			]
+		}, {
+			"school_name": "Wharton Undergraduate",
+			"school_code": "WH",
+			"majors": [
+				{
+					"major_name": "Wharton Ung Program - Undeclared",
+					"major_code": "WUNG"
+				}
+			]
+		}
+	],
+	"courses": [
+		{
+			"term": "2019A",
+			"name": "Advanced Corp Finance",
+			"code": "FNCE-203",
+			"section": "001",
+			"building": "JMHH",
+			"room": "370",
+			"building_code": 81,
+			"weekdays": "MW",
+			"start": "10:30 AM",
+			"end": "12:00PM",
+			"professors": [
+				"Christian Opp",
+				"Kevin Kaiser"
+			]
+		}
+	]
+}
+"""
+
+
 @app.route('/account/register', methods=['POST'])
 def register_account():
     """ Temporary endpoint to allow non-authenticated users to access the list of GSRs. """
