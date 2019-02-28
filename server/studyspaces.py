@@ -269,7 +269,7 @@ def book_room():
     try:
         user = User.get_user()
         user_id = user.id
-        if user.email != email:
+        if email and user.email != email:
             user.email = email
             sqldb.session.commit()
     except ValueError:
