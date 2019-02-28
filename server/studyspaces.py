@@ -237,6 +237,7 @@ def book_room():
         if not sessionid:
             return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
         resp = wharton.book_reservation(sessionid, room, start, end)
+        print(resp)
         resp["results"] = resp["success"]
         room_booked = resp["success"]
         del resp["success"]
@@ -262,27 +263,28 @@ def book_room():
         room_booked = "results" in resp
         booking_id = resp.get("booking_id")
 
+    email = None
     try:
         user = User.get_user()
-        if user and user.email:
-            if "email" in contact:
-                user.email = contact["email"]
+        user_id = user.id
+        if contact:
+            email = contact.get("email")
+            if user.email != email:
+                user.email = email
                 sqldb.session.commit()
-            else:
-                contact["email"] = user.email
-        user = user.id
     except ValueError:
-        user = None
+        user_id = None
+        
 
     if room_booked:
         save_booking(
             lid=lid,
             rid=room,
-            email=contact["email"],
+            email=email,
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
             booking_id=booking_id,
-            user=user
+            user=user_id
         )
     return jsonify(resp)
 
