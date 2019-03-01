@@ -303,7 +303,7 @@ def get_affiliation(email):
 
 
 @app.route('/studyspaces/reservations', methods=['GET'])
-def get_reservations():
+def get_reservations_endpoint():
     """
     Gets a users reservations.
     """
@@ -322,6 +322,11 @@ def get_reservations():
     else:
         libcal_search_span = 3
 
+    reservations = get_reservations(email, sessionid, libcal_search_span)
+    return jsonify({'reservations': reservations})
+
+
+def get_reservations(email, sessionid, libcal_search_span):
     reservations = []
     if sessionid:
         try:
@@ -440,7 +445,7 @@ def get_reservations():
                 del res["room_id"]
             reservations.extend(confirmed_reservations)
 
-    return jsonify({'reservations': reservations})
+    return reservations
 
 
 def save_booking(**info):

@@ -5,6 +5,7 @@ from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCel
 from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 from .news import fetch_frontpage_article
+from .studyspaces import get_reservations
 import json
 import pytz
 
@@ -55,6 +56,12 @@ def get_homepage():
     #         cells.append(gsrCell)
     #     else:
     #         print('other', option)
+
+    sessionid = request.args.get("sessionid")
+    if sessionid:
+        reservations_cell = get_reservations_cell(user, sessionid)
+        if reservations_cell:
+            cells.append(reservations_cell)
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
@@ -152,6 +159,16 @@ def get_event_cell():
             'facebook': event.facebook
         }
         return HomeCell("event", info)
+    else:
+        return None
+
+
+def get_reservations_cell(user, sessionid):
+    # returns a cell with the user's reservations
+    # returns None if user has no reservations
+    reservations = get_reservations(user.email, sessionid, 1)
+    if reservations:
+        return HomeCell("reservations", reservations)
     else:
         return None
 
