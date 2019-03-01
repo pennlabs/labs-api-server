@@ -256,7 +256,8 @@ def book_room():
 
         email = contact.get("email")
         contact["custom"] = {}
-        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
+        contact["custom"]["q3699"] = get_affiliation(email)
+        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size"), ("q3699", "affiliation")]:
             try:
                 contact["custom"][arg] = request.form[field]
             except KeyError:
@@ -288,6 +289,17 @@ def book_room():
             user=user_id
         )
     return jsonify(resp)
+
+
+def get_affiliation(email):
+    if "wharton" in email:
+        return "Wharton"
+    elif "seas" in email:
+        return "SEAS"
+    elif "sas" in email:
+        return "SAS"
+    else:
+        return "Other"
 
 
 @app.route('/studyspaces/reservations', methods=['GET'])
