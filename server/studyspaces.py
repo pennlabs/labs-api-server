@@ -345,9 +345,9 @@ def get_reservations(email, sessionid, libcal_search_span):
                 date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
 
                 if res["startTime"] == "midnight":
-                    res["fromDate"] = date_str + "T00:00:00-05:00"
+                    res["fromDate"] = date_str + "T00:00:00-04:00"
                 elif res["startTime"] == "noon":
-                    res["fromDate"] = date_str + "T12:00:00-05:00"
+                    res["fromDate"] = date_str + "T12:00:00-04:00"
                 else:
                     start_str = res["startTime"].replace(".", "").upper()
                     try:
@@ -355,14 +355,14 @@ def get_reservations(email, sessionid, libcal_search_span):
                     except ValueError:
                         start_time = datetime.datetime.strptime(start_str, "%I %p")
                     start_str = datetime.datetime.strftime(start_time, "%H:%M:%S")
-                    res["fromDate"] = "{}T{}-05:00".format(date_str, start_str)
+                    res["fromDate"] = "{}T{}-04:00".format(date_str, start_str)
 
                 if res["endTime"] == "midnight":
                     date += datetime.timedelta(days=1)
                     date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
-                    res["toDate"] = date_str + "T00:00:00-05:00"
+                    res["toDate"] = date_str + "T00:00:00-04:00"
                 elif res["endTime"] == "noon":
-                    res["toDate"] = date_str + "T12:00:00-05:00"
+                    res["toDate"] = date_str + "T12:00:00-04:00"
                 else:
                     end_str = res["endTime"].replace(".", "").upper()
                     try:
@@ -370,7 +370,7 @@ def get_reservations(email, sessionid, libcal_search_span):
                     except ValueError:
                         end_time = datetime.datetime.strptime(end_str, "%I %p")
                     end_str = datetime.datetime.strftime(end_time, "%H:%M:%S")
-                    res["toDate"] = "{}T{}-05:00".format(date_str, end_str)
+                    res["toDate"] = "{}T{}-04:00".format(date_str, end_str)
 
                 del res["date"]
                 del res["startTime"]
