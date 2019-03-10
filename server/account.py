@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 from flask import jsonify, request
 
@@ -53,8 +54,10 @@ Example: JSON Encoding
 			},
 			"room": "370",
 			"weekdays": "MW",
-			"start": "10:30 AM",
-			"end": "12:00 PM",
+			"start_date": "2019-01-16",
+			"end_date": "2019-05-01",
+			"start_time": "10:30 AM",
+			"end_time": "12:00 PM",
 			"instructors": [
 				"Christian Opp",
 				"Kevin Kaiser"
@@ -263,13 +266,23 @@ def add_courses(account, json_array):
 		building = json.get("building")
 		room = json.get("room")
 		weekdays = json.get("weekdays")
-		start = json.get("start")
-		end = json.get("end")
+		start_date_str = json.get("start_date")
+		end_date_str = json.get("end_date")
+		start_time = json.get("start_time")
+		end_time = json.get("end_time")
 		instructors = json.get("instructors")
 
 		if (term is None) or (name is None) or (code is None) or (section is None) or (weekdays is None) \
-			or (start is None) or (end is None) or (instructors is None):
+			or (start_date_str is None) or (end_date_str is None) or (start_time is None) or (end_time is None) \
+			or (instructors is None):
 			raise KeyError("Course parameter is missing")
+
+		start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+		end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+
+		if (start_date is None) or (end_date is None):
+			raise KeyError("Date is not a valid format.")
+
 
 		building_code = None
 		building_id = None
@@ -289,7 +302,8 @@ def add_courses(account, json_array):
 			identifier = "{}{}{}".format(term, code, section)
 			course_instructors[identifier] = instructors
 			course = Course(term=term, name=name, code=code, section=section, building=building_code, room=room, 
-				weekdays=weekdays, start=start, end=end, building_id=building_id)
+				weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time, 
+				end_time=end_time, building_id=building_id)
 			courses_not_in_db.append(course)
 
 	if courses_not_in_db:
@@ -355,8 +369,10 @@ def get_courses(account):
 				"building": building,
 				"room": course.room,
 				"weekdays": course.weekdays,
-				"start": course.start,
-				"end": course.end,
+				"start_date": course.start_date,
+				"end_date": course.end_date,
+				"start_time": course.start_time,
+				"end_time": course.end_time,
 				"instructors": course_instructor_dict.get(identifier)
 			})
 
