@@ -61,7 +61,6 @@ def retrieve_venues():
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
     td = datetime.timedelta(days=daysTillWeek)
-    db.delete('dining:venues')
     return cached_route('dining:venues', td, get_data)
 
 
