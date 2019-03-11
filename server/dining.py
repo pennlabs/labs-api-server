@@ -1,4 +1,4 @@
-from server import app, sqldb, db
+from server import app, sqldb
 import datetime
 from .base import cached_route
 from .penndata import din, dinV2
