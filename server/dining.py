@@ -71,7 +71,7 @@ def retrieve_venues():
         return json
 
     now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
+    daysTillWeek = 0 #6 - now.weekday()
     td = datetime.timedelta(days=daysTillWeek)
     return cached_route('dining:venues', td, get_data)
 
