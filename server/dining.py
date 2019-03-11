@@ -1,4 +1,4 @@
-from server import app, sqldb
+from server import app, sqldb, db
 import datetime
 from .base import cached_route
 from .penndata import din, dinV2
@@ -10,19 +10,7 @@ from sqlalchemy import func
 @app.route('/dining/v2/venues', methods=['GET'])
 def retrieve_venues_v2():
     def get_data():
-        json = dinV2.venues()['result_data']
-        venues = json["document"]["venue"]
-        for venue in venues:
-            days = venue["dateHours"]
-            for day in days:
-                meals = day["meal"]
-                new_meals = []
-                for meal in meals:
-                    meal_type = meal["type"]
-                    if "Light" not in meal_type:
-                        new_meals.append(meal)
-                day["meal"] = new_meals
-        return json
+        return dinV2.venues()['result_data']
 
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
@@ -73,6 +61,7 @@ def retrieve_venues():
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
     td = datetime.timedelta(days=daysTillWeek)
+    db.delete('dining:venues')
     return cached_route('dining:venues', td, get_data)
 
 
