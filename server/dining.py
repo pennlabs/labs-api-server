@@ -10,7 +10,19 @@ from sqlalchemy import func
 @app.route('/dining/v2/venues', methods=['GET'])
 def retrieve_venues_v2():
     def get_data():
-        return dinV2.venues()['result_data']
+        json = dinV2.venues()['result_data']
+        venues = json["document"]["venue"]
+        for venue in venues:
+            days = venue["dateHours"]
+            for day in days:
+                meals = day["meal"]
+                new_meals = []
+                for meal in meals:
+                    meal_type = meal["type"]
+                    if "Light" not in meal_type:
+                        new_meals.append(meal)
+                day["meal"] = new_meals
+        return json
 
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
@@ -44,7 +56,19 @@ def retrieve_item_v2(item_id):
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     def get_data():
-        return din.venues()['result_data']
+        json = din.venues()['result_data']
+        venues = json["document"]["venue"]
+        for venue in venues:
+            days = venue["dateHours"]
+            for day in days:
+                meals = day["meal"]
+                new_meals = []
+                for meal in meals:
+                    meal_type = meal["type"]
+                    if "Light" not in meal_type:
+                        new_meals.append(meal)
+                day["meal"] = new_meals
+        return json
 
     now = datetime.datetime.today()
     daysTillWeek = 6 - now.weekday()
