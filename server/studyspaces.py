@@ -46,7 +46,7 @@ def get_wharton_gsrs_temp_route():
         save_wharton_sessionid()
         return jsonify(data)
     except APIError as error:
-        return jsonify({'error': error}), 400
+        return jsonify({'error': str(error)}), 400
 
 
 @app.route('/studyspaces/gsr/reservations', methods=['GET'])
@@ -182,6 +182,7 @@ def cancel_room():
             wharton.delete_booking(sessionid, booking_id)
             save_wharton_sessionid()
             if booking:
+                booking.booking_id = booking_id
                 booking.is_cancelled = True
                 sqldb.session.commit()
             else:
@@ -232,6 +233,8 @@ def book_room():
     except (KeyError, ValueError):
         lid = None
 
+    email = None
+
     if lid == 1:
         sessionid = request.form["sessionid"]
         if not sessionid:
@@ -242,7 +245,7 @@ def book_room():
         del resp["success"]
         if room_booked:
             save_wharton_sessionid()
-        booking_id = None
+            booking_id = None
     else:
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
@@ -251,44 +254,56 @@ def book_room():
             except KeyError:
                 return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
 
+        email = contact.get("email")
         contact["custom"] = {}
-        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size")]:
+        contact["custom"]["q3699"] = get_affiliation(email)
+        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size"), ("q3699", "affiliation")]:
             try:
                 contact["custom"][arg] = request.form[field]
             except KeyError:
                 pass
 
         resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-        room_booked = "results" in resp
+        room_booked = resp.get("results")
         booking_id = resp.get("booking_id")
 
     try:
         user = User.get_user()
-        if user and user.email:
-            if "email" in contact:
-                user.email = contact["email"]
-                sqldb.session.commit()
-            else:
-                contact["email"] = user.email
-        user = user.id
+        user_id = user.id
+        if email and user.email != email:
+            user.email = email
+            sqldb.session.commit()
+        else:
+            email = user.email
     except ValueError:
-        user = None
+        user_id = None
 
     if room_booked:
         save_booking(
             lid=lid,
             rid=room,
-            email=contact["email"],
+            email=email,
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
             booking_id=booking_id,
-            user=user
+            user=user_id
         )
     return jsonify(resp)
 
 
+def get_affiliation(email):
+    if "wharton" in email:
+        return "Wharton"
+    elif "seas" in email:
+        return "SEAS"
+    elif "sas" in email:
+        return "SAS"
+    else:
+        return "Other"
+
+
 @app.route('/studyspaces/reservations', methods=['GET'])
-def get_reservations():
+def get_reservations_endpoint():
     """
     Gets a users reservations.
     """
@@ -307,10 +322,16 @@ def get_reservations():
     else:
         libcal_search_span = 3
 
+    reservations = get_reservations(email, sessionid, libcal_search_span)
+    return jsonify({'reservations': reservations})
+
+
+def get_reservations(email, sessionid, libcal_search_span):
     reservations = []
     if sessionid:
         try:
             gsr_reservations = wharton.get_reservations(sessionid)
+            timezone = wharton.get_dst_gmt_timezone()
 
             for res in gsr_reservations:
                 res["service"] = "wharton"
@@ -325,9 +346,9 @@ def get_reservations():
                 date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
 
                 if res["startTime"] == "midnight":
-                    res["fromDate"] = date_str + "T00:00:00-05:00"
+                    res["fromDate"] = date_str + "T00:00:00-{}".format(timezone)
                 elif res["startTime"] == "noon":
-                    res["fromDate"] = date_str + "T12:00:00-05:00"
+                    res["fromDate"] = date_str + "T12:00:00-{}".format(timezone)
                 else:
                     start_str = res["startTime"].replace(".", "").upper()
                     try:
@@ -335,14 +356,14 @@ def get_reservations():
                     except ValueError:
                         start_time = datetime.datetime.strptime(start_str, "%I %p")
                     start_str = datetime.datetime.strftime(start_time, "%H:%M:%S")
-                    res["fromDate"] = "{}T{}-05:00".format(date_str, start_str)
+                    res["fromDate"] = "{}T{}-{}".format(date_str, start_str, timezone)
 
                 if res["endTime"] == "midnight":
                     date += datetime.timedelta(days=1)
                     date_str = datetime.datetime.strftime(date, "%Y-%m-%d")
-                    res["toDate"] = date_str + "T00:00:00-05:00"
+                    res["toDate"] = date_str + "T00:00:00-{}".format(timezone)
                 elif res["endTime"] == "noon":
-                    res["toDate"] = date_str + "T12:00:00-05:00"
+                    res["toDate"] = date_str + "T12:00:00-{}".format(timezone)
                 else:
                     end_str = res["endTime"].replace(".", "").upper()
                     try:
@@ -350,7 +371,7 @@ def get_reservations():
                     except ValueError:
                         end_time = datetime.datetime.strptime(end_str, "%I %p")
                     end_str = datetime.datetime.strftime(end_time, "%H:%M:%S")
-                    res["toDate"] = "{}T{}-05:00".format(date_str, end_str)
+                    res["toDate"] = "{}T{}-{}".format(date_str, end_str, timezone)
 
                 del res["date"]
                 del res["startTime"]
@@ -425,7 +446,7 @@ def get_reservations():
                 del res["room_id"]
             reservations.extend(confirmed_reservations)
 
-    return jsonify({'reservations': reservations})
+    return reservations
 
 
 def save_booking(**info):
