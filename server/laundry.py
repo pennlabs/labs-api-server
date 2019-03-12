@@ -225,4 +225,4 @@ def get_laundry_preferences():
 
 @app.route('/laundry/status', methods=['GET'])
 def get_laundry_status():
-    return jsonify({'is_working': True, 'error_msg': None})
+    return jsonify({'is_working': False, 'error_msg': None})
