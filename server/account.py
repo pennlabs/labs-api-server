@@ -173,7 +173,7 @@ def get_potential_email(json):
 	email = None
 	if degrees:
 		for degree in degrees:
-			code = degree.get("division_code")
+			code = degree.get("school_code")
 			if code:	
 				if "WH" in code:
 					return "{}@wharton.upenn.edu".format(pennkey)
