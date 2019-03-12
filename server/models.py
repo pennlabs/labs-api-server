@@ -40,7 +40,7 @@ class School(sqldb.Model):
 class Degree(sqldb.Model):
     code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
-    school_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("school.id"), nullable=False)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), nullable=False)
 
 
 class Major(sqldb.Model):
