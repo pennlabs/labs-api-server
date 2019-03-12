@@ -12,7 +12,7 @@ def generate_uuid():
 
 
 class Account(sqldb.Model):
-    id = sqldb.Column(sqldb.Text, primary_key=True, default=generate_uuid)
+    id = sqldb.Column(sqldb.VARCHAR(60), primary_key=True, default=generate_uuid)
     first = sqldb.Column(sqldb.Text, nullable=False)
     last = sqldb.Column(sqldb.Text, nullable=False)
     pennkey = sqldb.Column(sqldb.Text, nullable=False, unique=True)

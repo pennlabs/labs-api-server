@@ -21,7 +21,7 @@ Example: JSON Encoding
 			"school_code": "EAS",
 			"degree_name":"Bachelor of Science in Economics",
 			"degree_code":"BS",
-			"expected_grad": "2020A",
+			"expected_grad_term": "2020A",
 			"majors": [
 				{
 					"major_name": "Applied Science - Computer Science",
@@ -33,7 +33,7 @@ Example: JSON Encoding
 			"school_code": "WH",
 			"degree_name":"Bachelor of Applied Science",
 			"degree_code":"BAS",
-			"expected_grad": "2020A",
+			"expected_grad_term": "2020A",
 			"majors": [
 				{
 					"major_name": "Wharton Ung Program - Undeclared",
