@@ -219,7 +219,7 @@ def add_schools_and_majors(account, json_array):
 
 		degree = Degree.query.filter_by(code=degree_code).first()
 		if degree is None:
-			degree = Degree(name=school_name, code=school_code, school_id=school.id)
+			degree = Degree(name=degree_name, code=degree_code, school_id=school.id)
 			sqldb.session.add(degree)
 			sqldb.session.commit()
 
