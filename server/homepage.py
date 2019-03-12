@@ -63,18 +63,16 @@ def get_homepage():
     #     else:
     #         print('other', option)
 
-<<<<<<< HEAD
     if account:
         courses = get_courses_cell(account)
         if courses is not None:
             cells.append(courses)
-=======
+
     sessionid = request.args.get("sessionid")
     if sessionid:
         reservations_cell = get_reservations_cell(user, sessionid)
         if reservations_cell:
             cells.append(reservations_cell)
->>>>>>> master
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
