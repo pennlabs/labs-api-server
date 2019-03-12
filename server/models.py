@@ -12,7 +12,7 @@ def generate_uuid():
 
 
 class Account(sqldb.Model):
-    id = sqldb.Column(sqldb.VARCHAR(60), primary_key=True, default=generate_uuid)
+    id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
     first = sqldb.Column(sqldb.Text, nullable=False)
     last = sqldb.Column(sqldb.Text, nullable=False)
     pennkey = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
@@ -38,19 +38,19 @@ class School(sqldb.Model):
 
 
 class Degree(sqldb.Model):
-    code = sqldb.Column(sqldb.Text, primary_key=True)
+    code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
     school_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("school.id"), nullable=False)
 
 
 class Major(sqldb.Model):
-    code = sqldb.Column(sqldb.Text, primary_key=True)
+    code = sqldb.Column(ssqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
     degree_code = sqldb.Column(sqldb.Text, sqldb.ForeignKey("degree.code"), nullable=False)
 
 
 class SchoolMajorAccount(sqldb.Model):
-    account_id = sqldb.Column(sqldb.Text, sqldb.ForeignKey("account.id"), primary_key=True)
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
     school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
     major = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
     expected_grad = sqldb.Column(sqldb.Text, nullable=False)
@@ -73,7 +73,7 @@ class Course(sqldb.Model):
 
 class CourseInstructor(sqldb.Model):
     course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
-    name = sqldb.Column(sqldb.Text, primary_key=True) 
+    name = sqldb.Column(sqldb.VARCHAR(255), primary_key=True) 
 
 
 class CourseAccount(sqldb.Model):
