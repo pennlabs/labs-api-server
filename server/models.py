@@ -52,7 +52,7 @@ class Major(sqldb.Model):
 class SchoolMajorAccount(sqldb.Model):
     account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
     school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
-    major = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
+    major = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
     expected_grad = sqldb.Column(sqldb.Text, nullable=False)
 
 
