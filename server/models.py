@@ -59,6 +59,7 @@ class SchoolMajorAccount(sqldb.Model):
 class Course(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
+    dept = sqldb.Column(sqldb.Text, nullable=False)
     code = sqldb.Column(sqldb.Text, nullable=False)
     section = sqldb.Column(sqldb.Text, nullable=False)
     term = sqldb.Column(sqldb.Text, nullable=False)

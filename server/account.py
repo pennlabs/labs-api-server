@@ -46,7 +46,8 @@ Example: JSON Encoding
 		{
 			"term": "2019A",
 			"name": "Advanced Corp Finance",
-			"code": "FNCE-203",
+			"dept": "FNCE"
+			"code": "203",
 			"section": "001",
 			"building": "JMHH",
 			"room": "370",
@@ -258,6 +259,7 @@ def add_courses(account, json_array):
 	for json in json_array:
 		term = json.get("term")
 		name = json.get("name")
+		dept = json.get("dept")
 		code = json.get("code")
 		section = json.get("section")
 		building = json.get("building")
@@ -269,7 +271,7 @@ def add_courses(account, json_array):
 		end_time = json.get("end_time")
 		instructors = json.get("instructors")
 
-		if (term is None) or (name is None) or (code is None) or (section is None) or (weekdays is None) \
+		if (term is None) or (name is None) or (dept is None) or (code is None) or (section is None) or (weekdays is None) \
 			or (start_date_str is None) or (end_date_str is None) or (start_time is None) or (end_time is None) \
 			or (instructors is None):
 			raise KeyError("Course parameter is missing")
@@ -286,7 +288,7 @@ def add_courses(account, json_array):
 		if course is None:
 			identifier = "{}{}{}".format(term, code, section)
 			course_instructors[identifier] = instructors
-			course = Course(term=term, name=name, code=code, section=section, building=building, room=room, 
+			course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room, 
 				weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time, 
 				end_time=end_time)
 			courses_not_in_db.append(course)
@@ -356,6 +358,7 @@ def get_courses(account, day=None, weekday=None):
 		json.append({
 				"term": course.term,
 				"name": course.name,
+				"dept": course.dept,
 				"code": course.code,
 				"section": course.section,
 				"building": course.building,
