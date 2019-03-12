@@ -44,7 +44,7 @@ class Degree(sqldb.Model):
 
 
 class Major(sqldb.Model):
-    code = sqldb.Column(ssqldb.VARCHAR(255), primary_key=True)
+    code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
     degree_code = sqldb.Column(sqldb.Text, sqldb.ForeignKey("degree.code"), nullable=False)
 
