@@ -20,6 +20,16 @@ class Account(sqldb.Model):
     image_url = sqldb.Column(sqldb.Text, nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
+    @staticmethod
+    def get_account():
+        account_id = request.headers.get('X-Account-ID')
+        if not account_id:
+            raise ValueError("No device ID passed to the server.")
+        account = Account.query.filter_by(id=account_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
 
 class School(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
@@ -58,7 +68,6 @@ class Course(sqldb.Model):
     start_time = sqldb.Column(sqldb.Text, nullable=False)
     end_time = sqldb.Column(sqldb.Text, nullable=False)
     building = sqldb.Column(sqldb.Text, nullable=True)
-    building_id = sqldb.Column(sqldb.Integer, nullable=True)
     room = sqldb.Column(sqldb.Text, nullable=True)
 
 

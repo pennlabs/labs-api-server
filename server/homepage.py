@@ -1,10 +1,11 @@
 from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event
+from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event, Account
 from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 from .news import fetch_frontpage_article
+from .account import get_todays_courses
 import json
 import pytz
 
@@ -21,6 +22,11 @@ def get_homepage():
         response = jsonify({'err': [str(e)]})
         response.status_code = 400
         return response
+
+    try: 
+        account = Account.get_account()
+    except ValueError:
+        account = None
 
     # Display information
     cells = []
@@ -55,6 +61,11 @@ def get_homepage():
     #         cells.append(gsrCell)
     #     else:
     #         print('other', option)
+
+    if account:
+        courses = get_courses_cell(account)
+        if courses is not None:
+            cells.append(courses)
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
@@ -152,6 +163,14 @@ def get_event_cell():
             'facebook': event.facebook
         }
         return HomeCell("event", info)
+    else:
+        return None
+
+def get_courses_cell(account):
+    # return a cell containing today's courses
+    courses_json = get_todays_courses(account)
+    if courses_json:
+        return HomeCell("courses", courses_json)
     else:
         return None
 

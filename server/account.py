@@ -48,10 +48,7 @@ Example: JSON Encoding
 			"name": "Advanced Corp Finance",
 			"code": "FNCE-203",
 			"section": "001",
-			"building": {
-				"code": "JMHH",
-				"id": 81
-			},
+			"building": "JMHH",
 			"room": "370",
 			"weekdays": "MW",
 			"start_date": "2019-01-16",
@@ -199,7 +196,7 @@ def add_schools_and_majors(account, json_array):
 		degree_name = json.get("degree_name")
 		degree_code = json.get("degree_code")
 		majors = json.get("majors")
-		expected_grad = json.get("expected_grad")
+		expected_grad = json.get("expected_grad_term")
 
 		if school_name is None:
 			raise KeyError("school_name is missing")
@@ -212,7 +209,7 @@ def add_schools_and_majors(account, json_array):
 		if majors is None:
 			raise KeyError("majors is missing")
 		if expected_grad is None:
-			raise KeyError("expected_grad is missing")
+			raise KeyError("expected_grad_term is missing")
 
 		school = School.query.filter_by(name=school_name, code=school_code).first()
 		if school is None:
@@ -283,27 +280,15 @@ def add_courses(account, json_array):
 		if (start_date is None) or (end_date is None):
 			raise KeyError("Date is not a valid format.")
 
-
-		building_code = None
-		building_id = None
-		if building:
-			building_code = building.get("code")
-			building_id_str = building.get("id")
-			if building_id_str:
-				try:
-					building_id = int(building_id_str)
-				except ValueError:
-					raise KeyError("Building code is not an int.")
-
 		course = Course.query.filter_by(code=code, section=section, term=term).first()
 		if course:
 			courses_in_db.append(course)
 		if course is None:
 			identifier = "{}{}{}".format(term, code, section)
 			course_instructors[identifier] = instructors
-			course = Course(term=term, name=name, code=code, section=section, building=building_code, room=room, 
+			course = Course(term=term, name=name, code=code, section=section, building=building, room=room, 
 				weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time, 
-				end_time=end_time, building_id=building_id)
+				end_time=end_time)
 			courses_not_in_db.append(course)
 
 	if courses_not_in_db:
@@ -335,9 +320,22 @@ def add_courses(account, json_array):
 		sqldb.session.commit()
 
 
-def get_courses(account):
-	course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
+def get_courses(account, day=None, weekday=None):
+	if day and weekday:
+		course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
+		.filter(CourseAccount.account_id==account.id) \
+		.filter(Course.end_date >= day) \
+		.filter(Course.start_date <= day) \
+		.filter(Course.weekdays.contains(weekday))
+	elif day:
+		course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
+		.filter(CourseAccount.account_id==account.id) \
+		.filter(Course.end_date >= day) \
+		.filter(Course.start_date <= day)
+	else:
+		course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
 		.filter(CourseAccount.account_id==account.id)
+
 	courses = [course for (ca, course) in course_query]
 	course_ids = [course.id for course in courses]
 	instructor_query = sqldb.session.query(Course, CourseInstructor).join(CourseInstructor) \
@@ -355,25 +353,33 @@ def get_courses(account):
 	json = []
 	for course in courses:
 		identifier = "{}{}{}".format(course.term, course.code, course.section)
-		building = None
-		if course.building or course.building_id:
-			building = {
-				"code": course.building,
-				"id": course.building_id
-			}
 		json.append({
 				"term": course.term,
 				"name": course.name,
 				"code": course.code,
 				"section": course.section,
-				"building": building,
+				"building": course.building,
 				"room": course.room,
 				"weekdays": course.weekdays,
-				"start_date": course.start_date,
-				"end_date": course.end_date,
+				"start_date": course.start_date.strftime("%Y-%m-%d"),
+				"end_date": course.end_date.strftime("%Y-%m-%d"),
 				"start_time": course.start_time,
 				"end_time": course.end_time,
 				"instructors": course_instructor_dict.get(identifier)
 			})
 
-	return json	
+	return json
+
+
+def get_current_term_courses(account):
+	now = datetime.datetime.now()
+	now_str= datetime.datetime.strftime("%Y-%m-%d")
+	return get_courses(account, now_str)
+
+
+def get_todays_courses(account):
+	now = datetime.datetime.now()
+	today= now.strftime("%Y-%m-%d")
+	weekday_array = [None, "M", "T", "W", "R", "F", None]
+	weekday = weekday_array[int(now.strftime("%w"))]
+	return get_courses(account, today, weekday)
