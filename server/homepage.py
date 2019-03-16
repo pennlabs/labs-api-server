@@ -24,7 +24,7 @@ def get_homepage():
         response.status_code = 400
         return response
 
-    try: 
+    try:
         account = Account.get_account()
     except ValueError:
         account = None
@@ -172,6 +172,7 @@ def get_event_cell():
         return HomeCell("event", info)
     else:
         return None
+
 
 def get_courses_cell(account):
     # return a cell containing today's courses
