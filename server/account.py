@@ -273,10 +273,9 @@ def add_courses(account, json_array):
         end_time = json.get("end_time")
         instructors = json.get("instructors")
 
-        if (term is None) or (name is None) or (dept is None) or (code is None) or (section is None) or (weekdays is None) \
-            or (start_date_str is None) or (end_date_str is None) or (start_time is None) or (end_time is None) \
-            or (instructors is None):
-                raise KeyError("Course parameter is missing")
+        parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
+        if any(x is None for x in parameters):
+            raise KeyError("Course parameter is missing")
 
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
@@ -338,7 +337,7 @@ def get_courses(account, day=None, weekday=None):
             .filter(Course.start_date <= day)
     else:
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-            .filter(CourseAccount.account_id==account.id)
+            .filter(CourseAccount.account_id == account.id)
 
     courses = [course for (ca, course) in course_query]
     course_ids = [course.id for course in courses]
