@@ -383,6 +383,6 @@ def get_current_term_courses(account):
 def get_todays_courses(account):
 	now = datetime.datetime.now()
 	today= now.strftime("%Y-%m-%d")
-	weekday_array = [None, "M", "T", "W", "R", "F", None]
+	weekday_array = ["", "M", "T", "W", "R", "F", ""]
 	weekday = weekday_array[int(now.strftime("%w"))]
 	return get_courses(account, today, weekday)
