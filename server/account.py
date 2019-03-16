@@ -80,6 +80,7 @@ def register_account_endpoint():
     		except IntegrityError:
     			sqldb.session.rollback()
     			account = update_account(account)
+    			sqldb.session.commit()
 
     		degrees = json.get("degrees")
     		if degrees:
@@ -157,10 +158,11 @@ def get_account(json):
 def update_account(updated_account):
 	# Update an account (guaranteed to exist because pennkey already in database and pennkey unique)
 	account = Account.query.filter_by(pennkey=updated_account.pennkey).first()
-	account.first = updated_account.first
-	account.last = updated_account.last
-	account.email = updated_account.email
-	account.image_url = updated_account.image_url
+	if account:
+		account.first = updated_account.first
+		account.last = updated_account.last
+		account.email = updated_account.email
+		account.image_url = updated_account.image_url
 	return account
 
 
