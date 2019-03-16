@@ -74,7 +74,7 @@ class Course(sqldb.Model):
 
 class CourseInstructor(sqldb.Model):
     course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
-    name = sqldb.Column(sqldb.VARCHAR(255), primary_key=True) 
+    name = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class CourseAccount(sqldb.Model):

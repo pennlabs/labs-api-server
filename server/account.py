@@ -176,7 +176,7 @@ def get_potential_email(json):
     if degrees:
         for degree in degrees:
             code = degree.get("school_code")
-            if code:    
+            if code:
                 if "WH" in code:
                     return "{}@wharton.upenn.edu".format(pennkey)
                 elif "SAS" in code:
@@ -189,7 +189,7 @@ def get_potential_email(json):
 
 
 def add_schools_and_majors(account, json_array):
-    # Remove degrees in DB and replace with new ones (if any) 
+    # Remove degrees in DB and replace with new ones (if any)
     SchoolMajorAccount.query.filter_by(account_id=account.id).delete()
 
     account_schools = []
@@ -276,7 +276,7 @@ def add_courses(account, json_array):
         if (term is None) or (name is None) or (dept is None) or (code is None) or (section is None) or (weekdays is None) \
             or (start_date_str is None) or (end_date_str is None) or (start_time is None) or (end_time is None) \
             or (instructors is None):
-            raise KeyError("Course parameter is missing")
+                raise KeyError("Course parameter is missing")
 
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
@@ -290,9 +290,9 @@ def add_courses(account, json_array):
         if course is None:
             identifier = "{}{}{}".format(term, code, section)
             course_instructors[identifier] = instructors
-            course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room, 
-                weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time, 
-                end_time=end_time)
+            course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
+                            weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
+                            end_time=end_time)
             courses_not_in_db.append(course)
 
     if courses_not_in_db:
@@ -313,8 +313,8 @@ def add_courses(account, json_array):
         for term in terms:
             # Delete all courses associated with this account for this term
             query = sqldb.session.query(CourseAccount, Course).join(Course) \
-                .filter(CourseAccount.account_id==account.id) \
-                .filter(Course.term==term)
+                .filter(CourseAccount.account_id == account.id) \
+                .filter(Course.term == term)
             for ca, course in query:
                 sqldb.session.delete(ca)
 
@@ -327,18 +327,18 @@ def add_courses(account, json_array):
 def get_courses(account, day=None, weekday=None):
     if day and weekday:
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-        .filter(CourseAccount.account_id==account.id) \
-        .filter(Course.end_date >= day) \
-        .filter(Course.start_date <= day) \
-        .filter(Course.weekdays.contains(weekday))
+            .filter(CourseAccount.account_id == account.id) \
+            .filter(Course.end_date >= day) \
+            .filter(Course.start_date <= day) \
+            .filter(Course.weekdays.contains(weekday))
     elif day:
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-        .filter(CourseAccount.account_id==account.id) \
-        .filter(Course.end_date >= day) \
-        .filter(Course.start_date <= day)
+            .filter(CourseAccount.account_id == account.id) \
+            .filter(Course.end_date >= day) \
+            .filter(Course.start_date <= day)
     else:
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-        .filter(CourseAccount.account_id==account.id)
+            .filter(CourseAccount.account_id==account.id)
 
     courses = [course for (ca, course) in course_query]
     course_ids = [course.id for course in courses]
@@ -376,13 +376,14 @@ def get_courses(account, day=None, weekday=None):
 
 
 def get_current_term_courses(account):
-    now_str= now.strftime("%Y-%m-%d")
+    now = datetime.datetime.now()
+    now_str = now.strftime("%Y-%m-%d")
     return get_courses(account, now_str)
 
 
 def get_todays_courses(account):
     now = datetime.datetime.now()
-    today= now.strftime("%Y-%m-%d")
+    today = now.strftime("%Y-%m-%d")
     weekday_array = ["", "M", "T", "W", "R", "F", ""]
     weekday = weekday_array[int(now.strftime("%w"))]
     return get_courses(account, today, weekday)
