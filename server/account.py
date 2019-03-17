@@ -397,7 +397,5 @@ def get_next_days_courses(account):
     while not courses and count < 7:
         weekday = weekday_array[(int(now.strftime("%w")) + 1) % 7]
         courses = get_courses(account, today, weekday)
-        print(weekday)
-        print(courses)
         count += 1
     return courses
