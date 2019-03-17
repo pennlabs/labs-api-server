@@ -1,5 +1,6 @@
 from flask import jsonify
 from .penndata import calendar
+from .base import cache_get
 from server import app
 import datetime
 
@@ -10,7 +11,7 @@ def pull_calendar(d):
 
     :param d: date object that specifies the date
     """
-    pulled_calendar = calendar.pull_3year()
+    pulled_calendar = cache_get("calendar:3year", datetime.timedelta(days=1), calendar.pull_3year)
     within_range = []
     for event in pulled_calendar:
         start = event['end']
