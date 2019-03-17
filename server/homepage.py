@@ -78,10 +78,10 @@ def get_homepage():
     dining = get_dining_cell(user)
     news = get_news_cell()
     gsr = get_study_spaces_cell()
-    calendar = get_university_event_cell()
+    # calendar = get_university_event_cell()
 
-    if calendar is not None:
-        cells.append(calendar)
+    # if calendar is not None:
+    #     cells.append(calendar)
 
     cells.append(dining)
 
