@@ -1,9 +1,85 @@
 import datetime
+import uuid
 
 from flask import jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 sqldb = SQLAlchemy()
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
+class Account(sqldb.Model):
+    id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
+    first = sqldb.Column(sqldb.Text, nullable=False)
+    last = sqldb.Column(sqldb.Text, nullable=False)
+    pennkey = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
+    email = sqldb.Column(sqldb.Text, nullable=True)
+    image_url = sqldb.Column(sqldb.Text, nullable=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+    @staticmethod
+    def get_account():
+        account_id = request.headers.get('X-Account-ID')
+        if not account_id:
+            raise ValueError("No device ID passed to the server.")
+        account = Account.query.filter_by(id=account_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
+
+class School(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    code = sqldb.Column(sqldb.Text, nullable=False)
+
+
+class Degree(sqldb.Model):
+    code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), nullable=False)
+
+
+class Major(sqldb.Model):
+    code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    degree_code = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("degree.code"), nullable=False)
+
+
+class SchoolMajorAccount(sqldb.Model):
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
+    major = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
+    expected_grad = sqldb.Column(sqldb.Text, nullable=False)
+
+
+class Course(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    dept = sqldb.Column(sqldb.Text, nullable=False)
+    code = sqldb.Column(sqldb.Text, nullable=False)
+    section = sqldb.Column(sqldb.Text, nullable=False)
+    term = sqldb.Column(sqldb.Text, nullable=False)
+    weekdays = sqldb.Column(sqldb.Text, nullable=False)
+    start_date = sqldb.Column(sqldb.Date, nullable=False)
+    end_date = sqldb.Column(sqldb.Date, nullable=False)
+    start_time = sqldb.Column(sqldb.Text, nullable=False)
+    end_time = sqldb.Column(sqldb.Text, nullable=False)
+    building = sqldb.Column(sqldb.Text, nullable=True)
+    room = sqldb.Column(sqldb.Text, nullable=True)
+
+
+class CourseInstructor(sqldb.Model):
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    name = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
+class CourseAccount(sqldb.Model):
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
 
 
 class LaundrySnapshot(sqldb.Model):
