@@ -386,3 +386,17 @@ def get_todays_courses(account):
     weekday_array = ["S", "M", "T", "W", "R", "F", "S"]
     weekday = weekday_array[int(now.strftime("%w"))]
     return get_courses(account, today, weekday)
+
+def get_next_days_courses(account):
+    now = datetime.datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    weekday_array = ["S", "M", "T", "W", "R", "F", "S"]
+    count = 1
+    courses = []
+    while not courses and count < 7:
+        weekday = weekday_array[(int(now.strftime("%w")) + 1) % 7]
+        courses = get_courses(account, today, weekday)
+        print(weekday)
+        print(courses)
+        count += 1
+    return courses

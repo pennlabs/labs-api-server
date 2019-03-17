@@ -322,8 +322,11 @@ def get_reservations_endpoint():
     else:
         libcal_search_span = 3
 
-    reservations = get_reservations(email, sessionid, libcal_search_span)
-    return jsonify({'reservations': reservations})
+    try:
+        reservations = get_reservations(email, sessionid, libcal_search_span)
+        return jsonify({'reservations': reservations})
+    except APIError as e:
+        return jsonify({"error": str(e)}), 400
 
 
 def get_reservations(email, sessionid, libcal_search_span):
@@ -333,6 +336,7 @@ def get_reservations(email, sessionid, libcal_search_span):
             gsr_reservations = wharton.get_reservations(sessionid)
             timezone = wharton.get_dst_gmt_timezone()
 
+            print(gsr_reservations)
             for res in gsr_reservations:
                 res["service"] = "wharton"
                 res["booking_id"] = str(res["booking_id"])
@@ -380,7 +384,7 @@ def get_reservations(email, sessionid, libcal_search_span):
             reservations.extend(gsr_reservations)
 
         except APIError as e:
-            return jsonify({"error": str(e)}), 400
+            raise e
 
     if email:
         try:
@@ -429,7 +433,7 @@ def get_reservations(email, sessionid, libcal_search_span):
                 del res["lastName"]
 
         except APIError as e:
-            return jsonify({"error": str(e)}), 400
+            raise e
 
         room_ids = ",".join(list(set([str(x["room_id"]) for x in confirmed_reservations])))
         if room_ids:
