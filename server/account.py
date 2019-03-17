@@ -387,6 +387,7 @@ def get_todays_courses(account):
     weekday = weekday_array[int(now.strftime("%w"))]
     return get_courses(account, today, weekday)
 
+
 def get_next_days_courses(account):
     now = datetime.datetime.now()
     today = now.strftime("%Y-%m-%d")
