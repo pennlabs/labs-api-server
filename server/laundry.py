@@ -227,9 +227,9 @@ def get_laundry_preferences():
 def get_laundry_status():
     def get_data():
         if laundry.check_is_working():
-            return jsonify({'is_working': True, 'error_msg': None})
+            return {'is_working': True, 'error_msg': None}
         else:
-            return jsonify({'is_working': False, 'error_msg': "Penn's laundry server is currently not updating. We hope this will be fixed shortly."})
+            return {'is_working': False, 'error_msg': "Penn's laundry server is currently not updating. We hope this will be fixed shortly."}
 
     td = datetime.timedelta(hours=1)
     return cached_route('laundry:working', td, get_data)
