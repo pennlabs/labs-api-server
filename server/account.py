@@ -1,10 +1,11 @@
 import requests
 import datetime
+import ast
 
 from flask import jsonify, request
 
 from server import app, db, sqldb
-from .models import Account, School, Degree, Major, SchoolMajorAccount, Course, CourseAccount, CourseInstructor
+from .models import Account, School, Degree, Major, SchoolMajorAccount, Course, CourseAccount, CourseInstructor, CourseMeetingTime
 from sqlalchemy.exc import IntegrityError
 
 
@@ -46,7 +47,7 @@ Example: JSON Encoding
         {
             "term": "2019A",
             "name": "Advanced Corp Finance",
-            "dept": "FNCE"
+            "dept": "FNCE",
             "code": "203",
             "section": "001",
             "building": "JMHH",
@@ -59,6 +60,27 @@ Example: JSON Encoding
             "instructors": [
                 "Christian Opp",
                 "Kevin Kaiser"
+            ],
+            "meeting_times": [
+                {
+                    "weekday": "M",
+                    "start_time": "10:00 AM",
+                    "end_time": "11:00 AM",
+                    "building": "JMHH",
+                    "room": "255"
+                },
+                {
+                    "weekday": "W",
+                    "start_time": "10:00 AM",
+                    "end_time": "11:00 AM",
+                    "building": "TOWN",
+                    "room": "100"
+                },
+                {
+                    "weekday": "R",
+                    "start_time": "2:00 PM",
+                    "end_time": "3:00 PM"
+                }
             ]
         }
     ]
@@ -258,6 +280,7 @@ def add_courses(account, json_array):
     courses_in_db = []
     courses_not_in_db = []
     course_instructors = {}
+    course_meetings_times = {}
     for json in json_array:
         term = json.get("term")
         name = json.get("name")
@@ -272,6 +295,12 @@ def add_courses(account, json_array):
         start_time = json.get("start_time")
         end_time = json.get("end_time")
         instructors = json.get("instructors")
+        meeting_times = json.get("meeting_times")
+
+        try:
+            meeting_times = ast.literal_eval(str(meeting_times))
+        except ValueError as error:
+            pass
 
         parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
         if any(x is None for x in parameters):
@@ -286,9 +315,11 @@ def add_courses(account, json_array):
         course = Course.query.filter_by(code=code, section=section, term=term).first()
         if course:
             courses_in_db.append(course)
+            add_meeting_times(course, meeting_times)
         if course is None:
             identifier = "{}{}{}".format(term, code, section)
             course_instructors[identifier] = instructors
+            course_meetings_times[identifier] = meeting_times
             course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
                             weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
                             end_time=end_time)
@@ -305,6 +336,8 @@ def add_courses(account, json_array):
                 for instructor in instructors:
                     cp = CourseInstructor(course_id=course.id, name=instructor)
                     sqldb.session.add(cp)
+            meeting_times = course_meetings_times.get(identifier)
+            add_meeting_times(course, meeting_times)
         courses_in_db.extend(courses_not_in_db)
 
     if courses_in_db:
@@ -321,6 +354,41 @@ def add_courses(account, json_array):
             ca = CourseAccount(account_id=account.id, course_id=course.id)
             sqldb.session.add(ca)
         sqldb.session.commit()
+
+
+def add_meeting_times(course, meeting_times_json):
+    if meeting_times_json:
+        if type(meeting_times_json) is not list:
+                raise KeyError("Meeting times json is not a list.")
+
+        for json in meeting_times_json:
+            if type(json) is not dict:
+                raise KeyError("Meeting time json is not a dictionary.")
+
+            building = json.get("building")
+            room = json.get("room")
+            weekday = json.get("weekday")
+            start_time = json.get("start_time")
+            end_time = json.get("end_time")
+
+            parameters = [weekday, start_time, end_time]
+            if any(x is None for x in parameters):
+                raise KeyError("Meeting time parameter is missing")
+
+            if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
+                # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
+                course.extra_meetings_flag = True
+
+            meeting = CourseMeetingTime.query.filter_by(course_id=course.id, weekday=weekday, start_time=start_time).first()
+            if meeting:
+                if meeting.building != building:
+                    meeting.building = building
+                if meeting.room != room:
+                    meeting.room = room
+            else:
+                meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
+                                                building=building, room=room)
+                sqldb.session.add(meeting)
 
 
 def get_courses(account, day=None, weekday=None):
