@@ -70,6 +70,16 @@ class Course(sqldb.Model):
     end_time = sqldb.Column(sqldb.Text, nullable=False)
     building = sqldb.Column(sqldb.Text, nullable=True)
     room = sqldb.Column(sqldb.Text, nullable=True)
+    extra_meetings_flag = sqldb.Column(sqldb.Boolean, default=False)
+
+
+class CourseMeetingTime(sqldb.Model):
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    weekday = sqldb.Column(sqldb.VARCHAR(3), primary_key=True)
+    start_time = sqldb.Column(sqldb.VARCHAR(10), primary_key=True)
+    end_time = sqldb.Column(sqldb.Text, nullable=False)
+    building = sqldb.Column(sqldb.Text, nullable=True)
+    room = sqldb.Column(sqldb.Text, nullable=True)
 
 
 class CourseInstructor(sqldb.Model):

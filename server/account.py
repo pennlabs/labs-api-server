@@ -1,10 +1,11 @@
 import requests
 import datetime
+import ast
 
 from flask import jsonify, request
 
 from server import app, db, sqldb
-from .models import Account, School, Degree, Major, SchoolMajorAccount, Course, CourseAccount, CourseInstructor
+from .models import Account, School, Degree, Major, SchoolMajorAccount, Course, CourseAccount, CourseInstructor, CourseMeetingTime
 from sqlalchemy.exc import IntegrityError
 
 
@@ -46,7 +47,7 @@ Example: JSON Encoding
         {
             "term": "2019A",
             "name": "Advanced Corp Finance",
-            "dept": "FNCE"
+            "dept": "FNCE",
             "code": "203",
             "section": "001",
             "building": "JMHH",
@@ -59,6 +60,27 @@ Example: JSON Encoding
             "instructors": [
                 "Christian Opp",
                 "Kevin Kaiser"
+            ],
+            "meeting_times": [
+                {
+                    "weekday": "M",
+                    "start_time": "10:00 AM",
+                    "end_time": "11:00 AM",
+                    "building": "JMHH",
+                    "room": "255"
+                },
+                {
+                    "weekday": "W",
+                    "start_time": "10:00 AM",
+                    "end_time": "11:00 AM",
+                    "building": "TOWN",
+                    "room": "100"
+                },
+                {
+                    "weekday": "R",
+                    "start_time": "2:00 PM",
+                    "end_time": "3:00 PM"
+                }
             ]
         }
     ]
@@ -124,6 +146,8 @@ def update_courses_endpoint():
 def get_courses_endpoint():
     """ Get the courses associated with the account """
     account_id = request.args.get("account_id")
+    date = request.args.get("date")
+    weekday = request.args.get("weekday")
     if account_id is None:
         return jsonify({'error': "Missing account_id field."}), 400
 
@@ -131,7 +155,7 @@ def get_courses_endpoint():
     if account is None:
         return jsonify({'error': "Account not found."}), 400
 
-    courses = get_courses(account)
+    courses = get_courses(account, date, weekday)
     return jsonify({'courses': courses})
 
 
@@ -258,6 +282,7 @@ def add_courses(account, json_array):
     courses_in_db = []
     courses_not_in_db = []
     course_instructors = {}
+    course_meetings_times = {}
     for json in json_array:
         term = json.get("term")
         name = json.get("name")
@@ -272,6 +297,12 @@ def add_courses(account, json_array):
         start_time = json.get("start_time")
         end_time = json.get("end_time")
         instructors = json.get("instructors")
+        meeting_times = json.get("meeting_times")
+
+        try:
+            meeting_times = ast.literal_eval(str(meeting_times))
+        except ValueError:
+            pass
 
         parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
         if any(x is None for x in parameters):
@@ -289,6 +320,7 @@ def add_courses(account, json_array):
         if course is None:
             identifier = "{}{}{}".format(term, code, section)
             course_instructors[identifier] = instructors
+            course_meetings_times[identifier] = meeting_times
             course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
                             weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
                             end_time=end_time)
@@ -305,6 +337,8 @@ def add_courses(account, json_array):
                 for instructor in instructors:
                     cp = CourseInstructor(course_id=course.id, name=instructor)
                     sqldb.session.add(cp)
+            meeting_times = course_meetings_times.get(identifier)
+            add_meeting_times(course, meeting_times)
         courses_in_db.extend(courses_not_in_db)
 
     if courses_in_db:
@@ -323,27 +357,89 @@ def add_courses(account, json_array):
         sqldb.session.commit()
 
 
+def add_meeting_times(course, meeting_times_json):
+    if meeting_times_json:
+        if type(meeting_times_json) is not list:
+            raise KeyError("Meeting times json is not a list.")
+
+        for json in meeting_times_json:
+            if type(json) is not dict:
+                raise KeyError("Meeting time json is not a dictionary.")
+
+            building = json.get("building")
+            room = json.get("room")
+            weekday = json.get("weekday")
+            start_time = json.get("start_time")
+            end_time = json.get("end_time")
+
+            parameters = [weekday, start_time, end_time]
+            if any(x is None for x in parameters):
+                raise KeyError("Meeting time parameter is missing")
+
+            if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
+                # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
+                course.extra_meetings_flag = True
+
+            meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
+                                        building=building, room=room)
+            sqldb.session.add(meeting)
+
+
 def get_courses(account, day=None, weekday=None):
+    json_array = []     # Final json array to be returned
+    courses = []        # All Courses. If weekday is not None, only ourses that do not have an extra_meetings_flag
+    course_ids = []     # All course IDs. Used to get instructors.
     if day and weekday:
-        course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-            .filter(CourseAccount.account_id == account.id) \
-            .filter(Course.end_date >= day) \
-            .filter(Course.start_date <= day) \
-            .filter(Course.weekdays.contains(weekday))
-    elif day:
+        # Get currently enrolled courses that are meeting today
+        # First, get all currently enrolled courses
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
             .filter(CourseAccount.account_id == account.id) \
             .filter(Course.end_date >= day) \
             .filter(Course.start_date <= day)
+        courses_this_term = [course for (ca, course) in course_query]
+        for course in courses_this_term:
+            # Check if need to lookup extra meeetings in CourseMeetingTime Table
+            if course.extra_meetings_flag:
+                meetings = CourseMeetingTime.query.filter_by(course_id=course.id, weekday=weekday)
+                for meeting in meetings:
+                    course_ids.append(course.id)
+                    # Add this meeting time to the JSON (may be more than one meeting time in a day for a class)
+                    json_array.append({
+                        "term": course.term,
+                        "name": course.name,
+                        "dept": course.dept,
+                        "code": course.code,
+                        "section": course.section,
+                        "building": meeting.building,
+                        "room": meeting.room,
+                        "weekdays": meeting.weekday,
+                        "start_date": course.start_date.strftime("%Y-%m-%d"),
+                        "end_date": course.end_date.strftime("%Y-%m-%d"),
+                        "start_time": meeting.start_time,
+                        "end_time": meeting.end_time
+                    })
+            elif weekday in course.weekdays:
+                # Add this course to the courses array to be processed later
+                courses.append(course)
+    elif day:
+        # Get courses for this account that they are currently enrolled in
+        course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
+            .filter(CourseAccount.account_id == account.id) \
+            .filter(Course.end_date >= day) \
+            .filter(Course.start_date <= day)
+        courses = [course for (ca, course) in course_query]
     else:
+        # Get all courses for this account
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
             .filter(CourseAccount.account_id == account.id)
+        courses = [course for (ca, course) in course_query]
 
-    courses = [course for (ca, course) in course_query]
-    course_ids = [course.id for course in courses]
+    # Query for instructors based on course id
+    course_ids.extend([course.id for course in courses])
     instructor_query = sqldb.session.query(Course, CourseInstructor).join(CourseInstructor) \
         .filter(CourseInstructor.course_id.in_(course_ids))
 
+    # Iterate through each instructor in query and add them to appropriate class
     course_instructor_dict = {}
     for course, instructor in instructor_query:
         identifier = "{}{}{}".format(course.term, course.code, course.section)
@@ -353,10 +449,13 @@ def get_courses(account, day=None, weekday=None):
         else:
             course_instructor_dict[identifier] = [instructor.name]
 
-    json = []
+    for json in json_array:
+        identifier = "{}{}{}".format(json["term"], json["code"], json["section"])
+        json["instructors"] = course_instructor_dict.get(identifier)
+
     for course in courses:
         identifier = "{}{}{}".format(course.term, course.code, course.section)
-        json.append({
+        json_array.append({
             "term": course.term,
             "name": course.name,
             "dept": course.dept,
@@ -371,7 +470,7 @@ def get_courses(account, day=None, weekday=None):
             "end_time": course.end_time,
             "instructors": course_instructor_dict.get(identifier)
         })
-    return json
+    return json_array
 
 
 def get_current_term_courses(account):
