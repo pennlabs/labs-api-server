@@ -384,26 +384,62 @@ def add_meeting_times(course, meeting_times_json):
 
 
 def get_courses(account, day=None, weekday=None):
+    json_array = [] # Final json array to be returned
+    courses = [] # All Courses. If weekday is not None, only ourses that do not have an extra_meetings_flag
+    course_ids = [] # All course IDs. Used to get instructors.
     if day and weekday:
-        course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
-            .filter(CourseAccount.account_id == account.id) \
-            .filter(Course.end_date >= day) \
-            .filter(Course.start_date <= day) \
-            .filter(Course.weekdays.contains(weekday))
-    elif day:
+        # Get currently enrolled courses that are meeting today
+        # First, get all currently enrolled courses
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
             .filter(CourseAccount.account_id == account.id) \
             .filter(Course.end_date >= day) \
             .filter(Course.start_date <= day)
+        courses_this_term = [course for (ca, course) in course_query]
+        for course in courses_this_term:
+            # Check if need to lookup extra meeetings in CourseMeetingTime Table
+            if course.extra_meetings_flag:
+                meetings_query = sqldb.session.query(Course, CourseMeetingTime).join(CourseMeetingTime) \
+                    .filter(Course.id == CourseMeetingTime.course_id) \
+                    .filter(CourseMeetingTime.weekdays.contains(weekday))
+                for (course, meeting) in meetings_query:
+                    course_ids.append(course.id)
+                    # Add this meeting time to the JSON (may be more than one meeting time in a day for a class)
+                    json.append({
+                        "term": course.term,
+                        "name": course.name,
+                        "dept": course.dept,
+                        "code": course.code,
+                        "section": course.section,
+                        "building": meeting.building,
+                        "room": meeting.room,
+                        "weekdays": meeting.weekday,
+                        "start_date": meeting.start_date.strftime("%Y-%m-%d"),
+                        "end_date": meeting.end_date.strftime("%Y-%m-%d"),
+                        "start_time": course.start_time,
+                        "end_time": course.end_time
+                    })
+            elif course.weekdays.contains(weekday):
+                # Add this course to the courses array to be processed later
+                courses.append(course)
+    elif day:
+        # Get courses for this account that they are currently enrolled in
+        course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
+            .filter(CourseAccount.account_id == account.id) \
+            .filter(Course.end_date >= day) \
+            .filter(Course.start_date <= day)
+        courses = [course for (ca, course) in course_query]
     else:
+        # Get all courses for this account
         course_query = sqldb.session.query(CourseAccount, Course).join(Course) \
             .filter(CourseAccount.account_id == account.id)
+        courses = [course for (ca, course) in course_query]
 
-    courses = [course for (ca, course) in course_query]
-    course_ids = [course.id for course in courses]
+    # Query for instructors based on course id
+    course_ids.extend([course.id for course in courses])
     instructor_query = sqldb.session.query(Course, CourseInstructor).join(CourseInstructor) \
         .filter(CourseInstructor.course_id.in_(course_ids))
 
+    # Iterate through each instructor in query and add them to appropriate class
     course_instructor_dict = {}
     for course, instructor in instructor_query:
         identifier = "{}{}{}".format(course.term, course.code, course.section)
@@ -413,10 +449,13 @@ def get_courses(account, day=None, weekday=None):
         else:
             course_instructor_dict[identifier] = [instructor.name]
 
-    json = []
+    for json in json_array:
+        identifier = "{}{}{}".format(json["term"], json["code"], json["section"])
+        json["instructors"] = course_instructor_dict.get(identifier)
+
     for course in courses:
         identifier = "{}{}{}".format(course.term, course.code, course.section)
-        json.append({
+        json_array.append({
             "term": course.term,
             "name": course.name,
             "dept": course.dept,
@@ -431,7 +470,7 @@ def get_courses(account, day=None, weekday=None):
             "end_time": course.end_time,
             "instructors": course_instructor_dict.get(identifier)
         })
-    return json
+    return json_array
 
 
 def get_current_term_courses(account):
