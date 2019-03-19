@@ -315,7 +315,6 @@ def add_courses(account, json_array):
         course = Course.query.filter_by(code=code, section=section, term=term).first()
         if course:
             courses_in_db.append(course)
-            add_meeting_times(course, meeting_times)
         if course is None:
             identifier = "{}{}{}".format(term, code, section)
             course_instructors[identifier] = instructors
@@ -379,16 +378,9 @@ def add_meeting_times(course, meeting_times_json):
                 # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
                 course.extra_meetings_flag = True
 
-            meeting = CourseMeetingTime.query.filter_by(course_id=course.id, weekday=weekday, start_time=start_time).first()
-            if meeting:
-                if meeting.building != building:
-                    meeting.building = building
-                if meeting.room != room:
-                    meeting.room = room
-            else:
-                meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
-                                            building=building, room=room)
-                sqldb.session.add(meeting)
+            meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
+                                        building=building, room=room)
+            sqldb.session.add(meeting)
 
 
 def get_courses(account, day=None, weekday=None):
