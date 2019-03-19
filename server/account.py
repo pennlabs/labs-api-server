@@ -146,6 +146,8 @@ def update_courses_endpoint():
 def get_courses_endpoint():
     """ Get the courses associated with the account """
     account_id = request.args.get("account_id")
+    date = request.args.get("date")
+    weekday = request.args.get("weekday")
     if account_id is None:
         return jsonify({'error': "Missing account_id field."}), 400
 
@@ -153,7 +155,7 @@ def get_courses_endpoint():
     if account is None:
         return jsonify({'error': "Account not found."}), 400
 
-    courses = get_courses(account)
+    courses = get_courses(account, date, weekday)
     return jsonify({'courses': courses})
 
 
@@ -398,13 +400,11 @@ def get_courses(account, day=None, weekday=None):
         for course in courses_this_term:
             # Check if need to lookup extra meeetings in CourseMeetingTime Table
             if course.extra_meetings_flag:
-                meetings_query = sqldb.session.query(Course, CourseMeetingTime).join(CourseMeetingTime) \
-                    .filter(Course.id == CourseMeetingTime.course_id) \
-                    .filter(CourseMeetingTime.weekdays.contains(weekday))
-                for (course, meeting) in meetings_query:
+                meetings = CourseMeetingTime.query.filter_by(course_id=course.id, weekday=weekday)
+                for meeting in meetings:
                     course_ids.append(course.id)
                     # Add this meeting time to the JSON (may be more than one meeting time in a day for a class)
-                    json.append({
+                    json_array.append({
                         "term": course.term,
                         "name": course.name,
                         "dept": course.dept,
@@ -413,12 +413,12 @@ def get_courses(account, day=None, weekday=None):
                         "building": meeting.building,
                         "room": meeting.room,
                         "weekdays": meeting.weekday,
-                        "start_date": meeting.start_date.strftime("%Y-%m-%d"),
-                        "end_date": meeting.end_date.strftime("%Y-%m-%d"),
-                        "start_time": course.start_time,
-                        "end_time": course.end_time
+                        "start_date": course.start_date.strftime("%Y-%m-%d"),
+                        "end_date": course.end_date.strftime("%Y-%m-%d"),
+                        "start_time": meeting.start_time,
+                        "end_time": meeting.end_time
                     })
-            elif course.weekdays.contains(weekday):
+            elif weekday in course.weekdays:
                 # Add this course to the courses array to be processed later
                 courses.append(course)
     elif day:
