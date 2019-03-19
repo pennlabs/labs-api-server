@@ -299,7 +299,7 @@ def add_courses(account, json_array):
 
         try:
             meeting_times = ast.literal_eval(str(meeting_times))
-        except ValueError as error:
+        except ValueError:
             pass
 
         parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
@@ -359,7 +359,7 @@ def add_courses(account, json_array):
 def add_meeting_times(course, meeting_times_json):
     if meeting_times_json:
         if type(meeting_times_json) is not list:
-                raise KeyError("Meeting times json is not a list.")
+            raise KeyError("Meeting times json is not a list.")
 
         for json in meeting_times_json:
             if type(json) is not dict:
@@ -387,7 +387,7 @@ def add_meeting_times(course, meeting_times_json):
                     meeting.room = room
             else:
                 meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
-                                                building=building, room=room)
+                                            building=building, room=room)
                 sqldb.session.add(meeting)
 
 
