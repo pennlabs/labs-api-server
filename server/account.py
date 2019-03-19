@@ -386,9 +386,9 @@ def add_meeting_times(course, meeting_times_json):
 
 
 def get_courses(account, day=None, weekday=None):
-    json_array = [] # Final json array to be returned
-    courses = [] # All Courses. If weekday is not None, only ourses that do not have an extra_meetings_flag
-    course_ids = [] # All course IDs. Used to get instructors.
+    json_array = []     # Final json array to be returned
+    courses = []        # All Courses. If weekday is not None, only ourses that do not have an extra_meetings_flag
+    course_ids = []     # All course IDs. Used to get instructors.
     if day and weekday:
         # Get currently enrolled courses that are meeting today
         # First, get all currently enrolled courses
