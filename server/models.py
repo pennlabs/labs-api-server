@@ -197,13 +197,15 @@ class HomeCell(object):
         >>> import HomeCell
         >>> type = "dining"
         >>> info = { "venues": [593, 724, 331] }
-        >>> cell = HomeCell(type, info)
+        >>> weight = 10
+        >>> cell = HomeCell(type, info, weight)
 
     """
 
-    def __init__(self, myType, myInfo=None):
+    def __init__(self, myType, myInfo=None, myWeight=0):
         self.type = myType
         self.info = myInfo
+        self.weight = myWeight
 
     def getCell(self):
         return {"type": self.type, "info": self.info}
