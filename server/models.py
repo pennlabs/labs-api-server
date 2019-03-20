@@ -184,11 +184,6 @@ class Event(sqldb.Model):
     facebook = sqldb.Column(sqldb.String(255))
 
 
-class HomeCellOrder(sqldb.Model):
-    id = sqldb.Column(sqldb.Integer, primary_key=True)
-    cell_type = sqldb.Column(sqldb.Text, nullable=False)
-
-
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 
@@ -197,13 +192,15 @@ class HomeCell(object):
         >>> import HomeCell
         >>> type = "dining"
         >>> info = { "venues": [593, 724, 331] }
-        >>> cell = HomeCell(type, info)
+        >>> weight = 10
+        >>> cell = HomeCell(type, info, weight)
 
     """
 
-    def __init__(self, myType, myInfo=None):
+    def __init__(self, myType, myInfo=None, myWeight=0):
         self.type = myType
         self.info = myInfo
+        self.weight = myWeight
 
     def getCell(self):
         return {"type": self.type, "info": self.info}

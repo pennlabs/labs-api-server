@@ -1,15 +1,16 @@
 from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event, Account
+from .models import User, DiningPreference, LaundryPreference, HomeCell, Event, Account
 from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 from .news import fetch_frontpage_article
-from .account import get_todays_courses, get_next_days_courses
+from .account import get_todays_courses, get_courses_in_N_days
 from .studyspaces import get_reservations
 from penn.base import APIError
 import json
 import pytz
+import datetime
 
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
@@ -30,39 +31,7 @@ def get_homepage():
     except ValueError:
         account = None
 
-    # Display information
     cells = []
-
-    # Adam's Dynamic Cell Code for changing order remotely #####
-
-    # cell_options = HomeCellOrder.query.all()
-    # options = [
-    #     x.cell_type
-    #  for x in cell_options]
-
-    # print('options', options)
-
-    # for option in options:
-    #     if option == 'Laundry':
-    #         print('yay laundry', option)
-    #         laundryCell = get_top_laundry_cell(user).getCell()
-    #         cells.append(laundryCell)
-    #     elif option == 'Dining':
-    #         print('yay dining', option)
-    #         diningCell = get_popular_dining_cell(user).getCell()
-    #         cells.append(diningCell)
-    #     elif option == 'News':
-    #         newsCell = get_news_cell().getCell()
-    #         cells.append(newsCell)
-    #     elif option == 'Event':
-    #         if get_event_cell():
-    #             eventCell = get_event_cell().getCell()
-    #             cells.append(eventCell)
-    #     elif option == 'GSR':
-    #         gsrCell = get_study_spaces_cell().getCell()
-    #         cells.append(gsrCell)
-    #     else:
-    #         print('other', option)
 
     sessionid = request.args.get("sessionid")
     reservations_cell = get_reservations_cell(user, sessionid)
@@ -76,19 +45,18 @@ def get_homepage():
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
-    news = get_news_cell()
     gsr = get_study_spaces_cell()
-    # calendar = get_university_event_cell()
+    cells.extend([dining, gsr, laundry])
 
+    # calendar = get_university_event_cell()
     # if calendar is not None:
     #     cells.append(calendar)
 
-    cells.append(dining)
-
+    news = get_news_cell()
     if news is not None:
         cells.append(news)
 
-    cells.extend([gsr, laundry])
+    cells.sort(key=lambda x: x.weight, reverse=True)
 
     response = jsonify({"cells": [x.getCell() for x in cells]})
     response.status_code = 200
@@ -107,7 +75,7 @@ def get_dining_cell(user):
         venue_ids = list(set(venue_ids))[:3]
 
     info = {"venues": venue_ids}
-    return HomeCell("dining", info)
+    return HomeCell("dining", info, 100)
 
 
 def get_laundry_cells(user):
@@ -127,20 +95,20 @@ def get_top_laundry_cell(user):
     top_preference = LaundryPreference.query.filter_by(user_id=user.id).first()
     # If no top choice, select bishop white
     if top_preference:
-        return HomeCell("laundry", {"room_id": top_preference.room_id})
-    return HomeCell("laundry", {"room_id": 0})
+        return HomeCell("laundry", {"room_id": top_preference.room_id}, 5)
+    return HomeCell("laundry", {"room_id": 0}, 5)
 
 
 def get_study_spaces_cell():
     # returns a study spaces cell
-    return HomeCell("studyRoomBooking", None)
+    return HomeCell("studyRoomBooking", None, 8)
 
 
 def get_university_event_cell():
     # returns a university notification cell
     calendar = pull_todays_calendar()
     if calendar:
-        return HomeCell("calendar", calendar)
+        return HomeCell("calendar", calendar, 150)
     else:
         return None
 
@@ -149,7 +117,7 @@ def get_news_cell():
     # returns a news cell
     article = fetch_frontpage_article()
     if article:
-        return HomeCell("news", article)
+        return HomeCell("news", article, 50)
     else:
         return None
 
@@ -176,47 +144,33 @@ def get_event_cell():
 
 def get_courses_cell(account):
     # return a cell containing today's courses
-    courses_json = get_todays_courses(account)
-    if courses_json:
-        return HomeCell("courses", courses_json)
-    else:
-        courses_json = get_next_days_courses(account)
-        if courses_json:
-            return HomeCell("courses", courses_json)
-    return None
+    courses = get_todays_courses(account)
+
+    # Return today's courses if last course has not yet ended
+    now = datetime.datetime.now()
+    for course in courses:
+        end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
+        if now.hour <= end_time.hour:
+            return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
+
+    # Return Monday's courses if today is Saturday
+    if int(now.strftime("%w")) == 6:
+        courses = get_courses_in_N_days(account, 2)
+        return HomeCell("courses", {"weekday": "Monday", "courses": courses}, 30)
+
+    # Return tomorrow's courses if today's last course has ended
+    courses = get_courses_in_N_days(account, 1)
+    return HomeCell("courses", {"weekday": "Tomorrow", "courses": courses}, 30)
 
 
 def get_reservations_cell(user, sessionid):
-    # returns a cell with the user's reservations
+    # returns a cell with the user's reservations, weighted extremely high to appear at the top
     # returns None if user has no reservations
     try:
         reservations = get_reservations(user.email, sessionid, 1)
         if reservations:
-            return HomeCell("reservations", reservations)
+            return HomeCell("reservations", reservations, 1000)
         else:
             return None
     except APIError:
         return None
-
-
-@app.route('/homepage/order', methods=['GET'])
-def get_order():
-    cell_options = HomeCellOrder.query.all()
-    options = [x.cell_type for x in cell_options]
-    return jsonify({'cells': options})
-
-
-@app.route('/homepage/order', methods=['POST'])
-def change_cell_order():
-    cell_options = request.get_json()['cellOptions']
-
-    # delete old homepage order
-    HomeCellOrder.query.delete()
-
-    # add new order
-    for cell_option in cell_options:
-        print('opt', cell_option)
-        home_order = HomeCellOrder(cell_type=cell_option)
-        sqldb.session.add(home_order)
-    sqldb.session.commit()
-    return jsonify({'success': True})
