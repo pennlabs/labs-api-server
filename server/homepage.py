@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCellOrder, Event, Account
+from .models import User, DiningPreference, LaundryPreference, HomeCell, Event, Account
 from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 from .news import fetch_frontpage_article

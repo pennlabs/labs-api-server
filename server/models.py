@@ -184,11 +184,6 @@ class Event(sqldb.Model):
     facebook = sqldb.Column(sqldb.String(255))
 
 
-class HomeCellOrder(sqldb.Model):
-    id = sqldb.Column(sqldb.Integer, primary_key=True)
-    cell_type = sqldb.Column(sqldb.Text, nullable=False)
-
-
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 
