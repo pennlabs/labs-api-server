@@ -5,11 +5,12 @@ from .models import User, DiningPreference, LaundryPreference, HomeCell, HomeCel
 from .calendar3year import pull_todays_calendar
 from sqlalchemy import func
 from .news import fetch_frontpage_article
-from .account import get_todays_courses, get_next_days_courses
+from .account import get_todays_courses, get_courses_in_N_days
 from .studyspaces import get_reservations
 from penn.base import APIError
 import json
 import pytz
+import datetime
 
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
@@ -176,14 +177,23 @@ def get_event_cell():
 
 def get_courses_cell(account):
     # return a cell containing today's courses
-    courses_json = get_todays_courses(account)
-    if courses_json:
-        return HomeCell("courses", courses_json)
-    else:
-        courses_json = get_next_days_courses(account)
-        if courses_json:
-            return HomeCell("courses", courses_json)
-    return None
+    courses = get_todays_courses(account)
+
+    # Return today's courses if last course has not yet ended
+    now = datetime.datetime.now()
+    for course in courses:
+        end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
+        if now.hour <= end_time.hour:
+            return HomeCell("courses", {"weekday": "Today", "courses": courses})
+
+    # Return Monday's courses if today is Saturday
+    if int(now.strftime("%w")) == 6:
+        courses = get_courses_in_N_days(account, 2)
+        return HomeCell("courses", {"weekday": "Monday", "courses": courses})
+
+    # Return tomorrow's courses if today's last course has ended
+    courses = get_courses_in_N_days(account, 1)
+    return HomeCell("courses", {"weekday": "Tomorrow", "courses": courses})
 
 
 def get_reservations_cell(user, sessionid):
