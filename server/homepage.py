@@ -150,7 +150,7 @@ def get_courses_cell(account):
     now = datetime.datetime.now()
     for course in courses:
         end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
-        if now.hour <= end_time.hour:
+        if now.hour < end_time.hour or (now.hour == end_time.hour and now.minute < end_time.minute):
             return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
 
     # Return Monday's courses if today is Saturday
