@@ -155,7 +155,7 @@ def get_courses_cell(account):
                 return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
     else:
         # Return empty cell for Today if there are no courses today
-        return HomeCell("courses", {"weekday": "Today", "courses": []}, 200)
+        return HomeCell("courses", {"weekday": "Today", "courses": []}, 30)
 
     # Return Monday's courses if today is Saturday
     if int(now.strftime("%w")) == 6:
