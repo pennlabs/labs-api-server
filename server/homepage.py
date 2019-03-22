@@ -147,11 +147,15 @@ def get_courses_cell(account):
     courses = get_todays_courses(account)
 
     # Return today's courses if last course has not yet ended
-    now = datetime.datetime.now()
-    for course in courses:
-        end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
-        if now.hour < end_time.hour or (now.hour == end_time.hour and now.minute < end_time.minute):
-            return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
+    if courses:
+        now = datetime.datetime.now()
+        for course in courses:
+            end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
+            if now.hour < end_time.hour or (now.hour == end_time.hour and now.minute < end_time.minute):
+                return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
+    else:
+        # Return empty cell for Today if there are no courses today
+        return HomeCell("courses", {"weekday": "Today", "courses": []}, 200)
 
     # Return Monday's courses if today is Saturday
     if int(now.strftime("%w")) == 6:
