@@ -38,7 +38,7 @@ def get_homepage():
     if reservations_cell:
         cells.append(reservations_cell)
 
-    if account:
+    if account and account.is_student():
         courses = get_courses_cell(account)
         if courses is not None:
             cells.append(courses)
