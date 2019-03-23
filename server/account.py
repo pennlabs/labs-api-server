@@ -155,7 +155,7 @@ def get_courses_endpoint():
     if account is None:
         return jsonify({'error': "Account not found."}), 400
 
-    courses = get_courses(account, date, weekday, weekday == None)
+    courses = get_courses(account, date, weekday, weekday is None)
     return jsonify({'courses': courses})
 
 
