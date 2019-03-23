@@ -30,6 +30,9 @@ class Account(sqldb.Model):
             raise ValueError("Unable to authenticate account id.")
         return account
 
+    def is_student(self):
+        return sqldb.session.query(SchoolMajorAccount.query.filter_by(account_id=self.id).exists()).scalar()
+
 
 class School(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)

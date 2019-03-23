@@ -155,7 +155,7 @@ def get_courses_endpoint():
     if account is None:
         return jsonify({'error': "Account not found."}), 400
 
-    courses = get_courses(account, date, weekday)
+    courses = get_courses(account, date, weekday, weekday is None)
     return jsonify({'courses': courses})
 
 
@@ -385,7 +385,7 @@ def add_meeting_times(course, meeting_times_json):
             sqldb.session.add(meeting)
 
 
-def get_courses(account, day=None, weekday=None):
+def get_courses(account, day=None, weekday=None, include_extra_meeting_times=False):
     json_array = []     # Final json array to be returned
     courses = []        # All Courses. If weekday is not None, only ourses that do not have an extra_meetings_flag
     course_ids = []     # All course IDs. Used to get instructors.
@@ -449,6 +449,23 @@ def get_courses(account, day=None, weekday=None):
         else:
             course_instructor_dict[identifier] = [instructor.name]
 
+    meeting_times_dict = {}
+    if include_extra_meeting_times:
+        # Iterate through each course and add its extra meetings times to the class
+        for course in courses:
+            identifier = "{}{}{}".format(course.term, course.code, course.section)
+            meetings = CourseMeetingTime.query.filter_by(course_id=course.id)
+            meetings_json_array = []
+            for meeting in meetings:
+                meetings_json_array.append({
+                    "weekday": meeting.weekday,
+                    "start_time": meeting.start_time,
+                    "end_time": meeting.end_time,
+                    "building": meeting.building,
+                    "room": meeting.room
+                })
+            meeting_times_dict[identifier] = meetings_json_array
+
     for json in json_array:
         identifier = "{}{}{}".format(json["term"], json["code"], json["section"])
         json["instructors"] = course_instructor_dict.get(identifier)
@@ -468,7 +485,8 @@ def get_courses(account, day=None, weekday=None):
             "end_date": course.end_date.strftime("%Y-%m-%d"),
             "start_time": course.start_time,
             "end_time": course.end_time,
-            "instructors": course_instructor_dict.get(identifier)
+            "instructors": course_instructor_dict.get(identifier),
+            "meeting_times": meeting_times_dict.get(identifier)
         })
     return json_array
 
@@ -480,11 +498,6 @@ def get_current_term_courses(account):
 
 
 def get_todays_courses(account):
-    # now = datetime.datetime.now()
-    # today = now.strftime("%Y-%m-%d")
-    # weekday_array = ["S", "M", "T", "W", "R", "F", "S"]
-    # weekday = weekday_array[int(now.strftime("%w"))]
-    # return get_courses(account, today, weekday)
     return get_courses_in_N_days(account, 0)
 
 
