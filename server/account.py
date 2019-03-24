@@ -302,7 +302,8 @@ def add_courses(account, json_array):
         try:
             meeting_times = ast.literal_eval(str(meeting_times))
         except ValueError:
-            pass
+            print(name)
+            print(meeting_times)
 
         parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
         if any(x is None for x in parameters):
@@ -314,11 +315,11 @@ def add_courses(account, json_array):
         if (start_date is None) or (end_date is None):
             raise KeyError("Date is not a valid format.")
 
-        course = Course.query.filter_by(code=code, section=section, term=term).first()
+        course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
         if course:
             courses_in_db.append(course)
         if course is None:
-            identifier = "{}{}{}".format(term, code, section)
+            identifier = "{}{}{}{}".format(term, dept, code, section)
             course_instructors[identifier] = instructors
             course_meetings_times[identifier] = meeting_times
             course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
@@ -331,7 +332,7 @@ def add_courses(account, json_array):
             sqldb.session.add(course)
         sqldb.session.commit()
         for course in courses_not_in_db:
-            identifier = "{}{}{}".format(course.term, course.code, course.section)
+            identifier = "{}{}{}{}".format(course.term, course.dept, course.code, course.section)
             instructors = course_instructors.get(identifier)
             if instructors:
                 for instructor in instructors:
@@ -379,6 +380,9 @@ def add_meeting_times(course, meeting_times_json):
             if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
                 # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
                 course.extra_meetings_flag = True
+                print(course.name)
+                print(course.id)
+                print(json)
 
             meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
                                         building=building, room=room)
@@ -442,7 +446,7 @@ def get_courses(account, day=None, weekday=None, include_extra_meeting_times=Fal
     # Iterate through each instructor in query and add them to appropriate class
     course_instructor_dict = {}
     for course, instructor in instructor_query:
-        identifier = "{}{}{}".format(course.term, course.code, course.section)
+        identifier = "{}{}{}{}".format(course.term, course.dept, course.code, course.section)
         instructor_arr = course_instructor_dict.get(identifier)
         if instructor_arr:
             instructor_arr.append(instructor.name)
@@ -453,7 +457,7 @@ def get_courses(account, day=None, weekday=None, include_extra_meeting_times=Fal
     if include_extra_meeting_times:
         # Iterate through each course and add its extra meetings times to the class
         for course in courses:
-            identifier = "{}{}{}".format(course.term, course.code, course.section)
+            identifier = "{}{}{}{}".format(course.term, course.dept, course.code, course.section)
             meetings = CourseMeetingTime.query.filter_by(course_id=course.id)
             meetings_json_array = []
             for meeting in meetings:
@@ -467,11 +471,11 @@ def get_courses(account, day=None, weekday=None, include_extra_meeting_times=Fal
             meeting_times_dict[identifier] = meetings_json_array
 
     for json in json_array:
-        identifier = "{}{}{}".format(json["term"], json["code"], json["section"])
+        identifier = "{}{}{}{}".format(json["term"], json["dept"], json["code"], json["section"])
         json["instructors"] = course_instructor_dict.get(identifier)
 
     for course in courses:
-        identifier = "{}{}{}".format(course.term, course.code, course.section)
+        identifier = "{}{}{}{}".format(course.term, course.dept, course.code, course.section)
         json_array.append({
             "term": course.term,
             "name": course.name,
