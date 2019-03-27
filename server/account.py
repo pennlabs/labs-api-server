@@ -302,8 +302,7 @@ def add_courses(account, json_array):
         try:
             meeting_times = ast.literal_eval(str(meeting_times))
         except ValueError:
-            print(name)
-            print(meeting_times)
+            pass
 
         parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
         if any(x is None for x in parameters):
@@ -380,9 +379,6 @@ def add_meeting_times(course, meeting_times_json):
             if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
                 # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
                 course.extra_meetings_flag = True
-                print(course.name)
-                print(course.id)
-                print(json)
 
             meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
                                         building=building, room=room)
