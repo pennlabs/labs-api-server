@@ -362,28 +362,6 @@ def add_meeting_times(course, meeting_times_json):
         if type(meeting_times_json) is not list:
             raise KeyError("Meeting times json is not a list.")
 
-        # Temporary check due to bad parsing in app if instructor field is missing
-        other_times_counter = 0
-        for json in meeting_times_json:
-            if type(json) is not dict:
-                raise KeyError("Meeting time json is not a dictionary.")
-
-            building = json.get("building")
-            room = json.get("room")
-            weekday = json.get("weekday")
-            start_time = json.get("start_time")
-            end_time = json.get("end_time")
-
-            parameters = [weekday, start_time, end_time]
-            if any(x is None for x in parameters):
-                raise KeyError("Meeting time parameter is missing")
-
-            if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
-                other_times_counter = other_times_counter + 1
-
-        if course.weekdays != "NA" and len(course.weekdays) <= other_times_counter:
-            return
-
         for json in meeting_times_json:
             if type(json) is not dict:
                 raise KeyError("Meeting time json is not a dictionary.")
@@ -401,12 +379,6 @@ def add_meeting_times(course, meeting_times_json):
             if course.start_time != start_time or course.end_time != end_time or weekday not in course.weekdays:
                 # Add flag to indicate that you need to lookup meeting times in the CourseMeetingTime table
                 course.extra_meetings_flag = True
-
-                # Temporary check to not include meeting times at different locations
-                # Due to a parsing bug on the app that combines course meeting times 
-                # If one has a missing instructor field
-                if (building is not None and course.building != building) or (room is not None and course.room != room):
-                    continue
 
             meeting = CourseMeetingTime(course_id=course.id, weekday=weekday, start_time=start_time, end_time=end_time,
                                         building=building, room=room)
