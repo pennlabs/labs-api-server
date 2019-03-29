@@ -203,12 +203,18 @@ def get_potential_email(json):
             if code:
                 if "WH" in code:
                     return "{}@wharton.upenn.edu".format(pennkey)
+                elif "COL" in code:
+                    email = "{}@sas.upenn.edu".format(pennkey)
                 elif "SAS" in code:
                     email = "{}@sas.upenn.edu".format(pennkey)
                 elif "EAS" in code:
-                    email = "{}@sas.upenn.edu".format(pennkey)
+                    email = "{}@seas.upenn.edu".format(pennkey)
                 elif "NURS" in code:
                     email = "{}@nursing.upenn.edu".format(pennkey)
+                elif "SOD" in code:
+                    email = "{}@design.upenn.edu".format(pennkey)
+                elif "EDG" in code:
+                    email = "{}@gse.upenn.edu".format(pennkey)
     return email
 
 
