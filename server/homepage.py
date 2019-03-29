@@ -48,9 +48,9 @@ def get_homepage():
     gsr = get_study_spaces_cell()
     cells.extend([dining, gsr, laundry])
 
-    # calendar = get_university_event_cell()
-    # if calendar is not None:
-    #     cells.append(calendar)
+    calendar = get_university_event_cell()
+    if calendar is not None:
+        cells.append(calendar)
 
     news = get_news_cell()
     if news is not None:
@@ -108,7 +108,7 @@ def get_university_event_cell():
     # returns a university notification cell
     calendar = pull_todays_calendar()
     if calendar:
-        return HomeCell("calendar", calendar, 150)
+        return HomeCell("calendar", calendar, 40)
     else:
         return None
 
