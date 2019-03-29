@@ -236,7 +236,7 @@ def book_room():
     email = None
 
     if lid == 1:
-        sessionid = request.form["sessionid"]
+        sessionid = request.form.get("sessionid")
         if not sessionid:
             return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
         resp = wharton.book_reservation(sessionid, room, start, end)
