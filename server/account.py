@@ -209,7 +209,7 @@ def get_potential_email(json):
                     email = "{}@sas.upenn.edu".format(pennkey)
                 elif "EAS" in code:
                     email = "{}@seas.upenn.edu".format(pennkey)
-                elif "NURS" in code:
+                elif "NUR" in code:
                     email = "{}@nursing.upenn.edu".format(pennkey)
                 elif "SOD" in code:
                     email = "{}@design.upenn.edu".format(pennkey)
