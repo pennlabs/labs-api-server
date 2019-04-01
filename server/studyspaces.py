@@ -182,7 +182,6 @@ def cancel_room():
             wharton.delete_booking(sessionid, booking_id)
             save_wharton_sessionid()
             if booking:
-                booking.booking_id = booking_id
                 booking.is_cancelled = True
                 sqldb.session.commit()
             else:
@@ -246,6 +245,17 @@ def book_room():
         if room_booked:
             save_wharton_sessionid()
             booking_id = None
+
+            # Look up the reservation to get the booking id
+            reservations = get_reservations(None, sessionid, 0)
+            startStr = request.form["start"].split("-")[0]
+            endStr = request.form["end"].split("-")[0]
+            for reservation in reservations:
+                resStartStr = reservation["fromDate"].split("-")[0]
+                resEndStr = reservation["toDate"].split("-")[0]
+                if startStr == resStartStr and endStr == resEndStr:
+                    booking_id = reservation["booking_id"]
+                    break
     else:
         contact = {}
         for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
