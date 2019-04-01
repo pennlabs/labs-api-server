@@ -336,7 +336,6 @@ def get_reservations(email, sessionid, libcal_search_span):
             gsr_reservations = wharton.get_reservations(sessionid)
             timezone = wharton.get_dst_gmt_timezone()
 
-            print(gsr_reservations)
             for res in gsr_reservations:
                 res["service"] = "wharton"
                 res["booking_id"] = str(res["booking_id"])
