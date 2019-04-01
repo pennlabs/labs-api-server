@@ -392,7 +392,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
 
             reservations.extend(gsr_reservations)
 
-        except APIError as e:
+        except APIError:
             pass
 
     if email:
@@ -414,7 +414,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i += 1
 
-        except APIError as e:
+        except APIError:
             pass
 
         # Fetch reservations in database that are not being returned by API
