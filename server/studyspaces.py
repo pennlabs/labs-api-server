@@ -409,7 +409,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr, timeout)
-                confirmed_reservations = [res for res in libcal_reservations if (res["status"] == "Confirmed"
+                confirmed_reservations = [res for res in libcal_reservations if (type(res) == dict and res["status"] == "Confirmed"
                                           and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now)]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i += 1
