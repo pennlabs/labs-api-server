@@ -99,11 +99,6 @@ def get_top_laundry_cell(user):
     return HomeCell("laundry", {"room_id": 0}, 5)
 
 
-def get_study_spaces_cell():
-    # returns a study spaces cell
-    return HomeCell("studyRoomBooking", None, 8)
-
-
 def get_gsr_locations_cell(user, account):
     # returns a gsr cell with list of locations
     # if student is a Wharton student, show at the top
