@@ -31,6 +31,10 @@ def get_homepage():
     except ValueError:
         account = None
 
+    if account and account.email and user.email is None:
+        user.email = account.email
+        sqldb.session.commit()
+
     cells = []
 
     sessionid = request.args.get("sessionid")
