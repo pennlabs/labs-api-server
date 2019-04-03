@@ -117,7 +117,7 @@ def get_gsr_locations_cell(user, account):
     showHuntsman = account is None or account.email is None or "wharton" in account.email
     if showHuntsman:
         default_gids = [1, 1086]
-        weighting = 120
+        weighting = 300
     else:
         default_gids = [1086, 2587]
         weighting = 10
