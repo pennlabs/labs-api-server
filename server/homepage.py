@@ -103,11 +103,11 @@ def get_gsr_locations_cell(user, account):
     # returns a gsr cell with list of locations
     # if student is a Wharton student, show at the top
     top_gsrs_query = sqldb.session.query(StudySpacesBooking.lid) \
-                                    .filter(and_(StudySpacesBooking.user == user.id, StudySpacesBooking.lid.isnot(None))) \
-                                    .group_by(StudySpacesBooking.lid) \
-                                    .order_by(func.count(StudySpacesBooking.lid).desc()) \
-                                    .limit(2) \
-                                    .all()
+                                  .filter(and_(StudySpacesBooking.user == user.id, StudySpacesBooking.lid.isnot(None))) \
+                                  .group_by(StudySpacesBooking.lid) \
+                                  .order_by(func.count(StudySpacesBooking.lid).desc()) \
+                                  .limit(2) \
+                                  .all()
     preferences = [x for (x,) in top_gsrs_query]
 
     showHuntsman = account is None or account.email is None or "wharton" in account.email
