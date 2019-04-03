@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from server import app, sqldb
 from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, Event, Account
+from .models import User, DiningPreference, LaundryPreference, HomeCell, Event, Account, StudySpacesBooking
 from .calendar3year import pull_todays_calendar
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from .news import fetch_frontpage_article
 from .account import get_todays_courses, get_courses_in_N_days
 from .studyspaces import get_reservations
@@ -49,8 +49,8 @@ def get_homepage():
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
-    gsr = get_study_spaces_cell()
-    cells.extend([dining, gsr, laundry])
+    gsr_locations = get_gsr_locations_cell(user, account)
+    cells.extend([dining, laundry, gsr_locations])
 
     calendar = get_university_event_cell()
     if calendar is not None:
@@ -103,9 +103,33 @@ def get_top_laundry_cell(user):
     return HomeCell("laundry", {"room_id": 0}, 5)
 
 
-def get_study_spaces_cell():
-    # returns a study spaces cell
-    return HomeCell("studyRoomBooking", None, 8)
+def get_gsr_locations_cell(user, account):
+    # returns a gsr cell with list of locations
+    # if student is a Wharton student, show at the top
+    top_gsrs_query = sqldb.session.query(StudySpacesBooking.lid) \
+                                  .filter(and_(StudySpacesBooking.user == user.id, StudySpacesBooking.lid.isnot(None))) \
+                                  .group_by(StudySpacesBooking.lid) \
+                                  .order_by(func.count(StudySpacesBooking.lid).desc()) \
+                                  .limit(2) \
+                                  .all()
+    preferences = [x for (x,) in top_gsrs_query]
+
+    showHuntsman = account is None or account.email is None or "wharton" in account.email
+    if showHuntsman:
+        default_gids = [1, 1086]
+        weighting = 300
+    else:
+        default_gids = [1086, 2587]
+        weighting = 10
+
+    # Remove duplicates while retaining relative ordering
+    def f7(seq):
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
+
+    gids = f7(preferences + default_gids)[:2]
+    return HomeCell("gsr-locations", gids, weighting)
 
 
 def get_university_event_cell():
