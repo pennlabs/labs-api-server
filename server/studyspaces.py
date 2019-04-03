@@ -339,11 +339,11 @@ def get_reservations_endpoint():
         return jsonify({"error": str(e)}), 400
 
 
-def get_reservations(email, sessionid, libcal_search_span):
+def get_reservations(email, sessionid, libcal_search_span, timeout=20):
     reservations = []
     if sessionid:
         try:
-            gsr_reservations = wharton.get_reservations(sessionid)
+            gsr_reservations = wharton.get_reservations(sessionid, timeout)
             timezone = wharton.get_dst_gmt_timezone()
 
             for res in gsr_reservations:
@@ -392,10 +392,11 @@ def get_reservations(email, sessionid, libcal_search_span):
 
             reservations.extend(gsr_reservations)
 
-        except APIError as e:
-            raise e
+        except APIError:
+            pass
 
     if email:
+        confirmed_reservations = []
         try:
             def is_not_cancelled_in_db(booking_id):
                 booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
@@ -404,45 +405,44 @@ def get_reservations(email, sessionid, libcal_search_span):
             now = datetime.datetime.now()
             dateFormat = "%Y-%m-%d"
             i = 0
-            confirmed_reservations = []
             while len(confirmed_reservations) == 0 and i < libcal_search_span:
                 date = now + datetime.timedelta(days=i)
                 dateStr = datetime.datetime.strftime(date, dateFormat)
-                libcal_reservations = studyspaces.get_reservations(email, dateStr)
+                libcal_reservations = studyspaces.get_reservations(email, dateStr, timeout)
                 confirmed_reservations = [res for res in libcal_reservations if (type(res) == dict and res["status"] == "Confirmed"
                                           and datetime.datetime.strptime(res["toDate"][:-6], "%Y-%m-%dT%H:%M:%S") >= now)]
                 confirmed_reservations = [res for res in confirmed_reservations if is_not_cancelled_in_db(res["bookId"])]
                 i += 1
 
-            # Fetch reservations in database that are not being returned by API
-            db_bookings = StudySpacesBooking.query.filter_by(email=email)
-            db_booking_ids = [str(x.booking_id) for x in db_bookings if x.end
-                              and x.end > now
-                              and not str(x.booking_id).isdigit()
-                              and not x.is_cancelled]
-            reservation_ids = [x["bookId"] for x in confirmed_reservations]
-            missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
-            if missing_booking_ids:
-                missing_bookings_str = ",".join(missing_booking_ids)
-                missing_reservations = studyspaces.get_reservations_for_booking_ids(missing_bookings_str)
-                confirmed_missing_reservations = [res for res in missing_reservations if type(res) == dict and res["status"] == "Confirmed"]
-                confirmed_reservations.extend(confirmed_missing_reservations)
+        except APIError:
+            pass
 
-            for res in confirmed_reservations:
-                res["service"] = "libcal"
-                res["booking_id"] = res["bookId"]
-                res["room_id"] = res["eid"]
-                res["gid"] = res["cid"]
-                del res["bookId"]
-                del res["eid"]
-                del res["cid"]
-                del res["status"]
-                del res["email"]
-                del res["firstName"]
-                del res["lastName"]
+        # Fetch reservations in database that are not being returned by API
+        db_bookings = StudySpacesBooking.query.filter_by(email=email)
+        db_booking_ids = [str(x.booking_id) for x in db_bookings if x.end
+                          and x.end > now
+                          and not str(x.booking_id).isdigit()
+                          and not x.is_cancelled]
+        reservation_ids = [x["bookId"] for x in confirmed_reservations]
+        missing_booking_ids = list(set(db_booking_ids) - set(reservation_ids))
+        if missing_booking_ids:
+            missing_bookings_str = ",".join(missing_booking_ids)
+            missing_reservations = studyspaces.get_reservations_for_booking_ids(missing_bookings_str)
+            confirmed_missing_reservations = [res for res in missing_reservations if res["status"] == "Confirmed"]
+            confirmed_reservations.extend(confirmed_missing_reservations)
 
-        except APIError as e:
-            raise e
+        for res in confirmed_reservations:
+            res["service"] = "libcal"
+            res["booking_id"] = res["bookId"]
+            res["room_id"] = res["eid"]
+            res["gid"] = res["cid"]
+            del res["bookId"]
+            del res["eid"]
+            del res["cid"]
+            del res["status"]
+            del res["email"]
+            del res["firstName"]
+            del res["lastName"]
 
         room_ids = ",".join(list(set([str(x["room_id"]) for x in confirmed_reservations])))
         if room_ids:

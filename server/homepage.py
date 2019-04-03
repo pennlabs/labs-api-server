@@ -175,7 +175,7 @@ def get_reservations_cell(user, sessionid):
     # returns a cell with the user's reservations, weighted extremely high to appear at the top
     # returns None if user has no reservations
     try:
-        reservations = get_reservations(user.email, sessionid, 1)
+        reservations = get_reservations(user.email, sessionid, 1, 2)
         if reservations:
             return HomeCell("reservations", reservations, 1000)
         else:
