@@ -226,7 +226,7 @@ def get_potential_email(json):
                 elif "LPS" in code:
                     email = "{}@sas.upenn.edu".format(pennkey)
                 elif "SP2" in code:
-                    email = "{}@upenn.edu".format(pennkey)   
+                    email = "{}@upenn.edu".format(pennkey)
     return email
 
 
