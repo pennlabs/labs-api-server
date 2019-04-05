@@ -176,6 +176,12 @@ def get_event_cell():
 
 def get_feature_announcement_cell():
     # returns an announcement for a new Penn Mobile feature
+    now = datetime.datetime.now().date()
+    start = datetime.date(2019, 4, 12)
+    end = datetime.date(2019, 4, 13)
+    if now < start or now > end:
+        return None
+
     info = {
         'source': 'Spring Fling',
         'title': "Tap to view the Fling schedule, performers, and more!",
