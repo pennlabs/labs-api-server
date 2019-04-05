@@ -44,7 +44,7 @@ def get_homepage():
 
     if account and account.is_student():
         courses = get_courses_cell(account)
-        if courses is not None:
+        if courses:
             cells.append(courses)
 
     laundry = get_top_laundry_cell(user)
@@ -53,12 +53,16 @@ def get_homepage():
     cells.extend([dining, laundry, gsr_locations])
 
     calendar = get_university_event_cell()
-    if calendar is not None:
+    if calendar:
         cells.append(calendar)
 
     news = get_news_cell()
-    if news is not None:
+    if news:
         cells.append(news)
+
+    feature = get_feature_announcement_cell()
+    if feature:
+        cells.append(feature)
 
     cells.sort(key=lambda x: x.weight, reverse=True)
 
@@ -168,6 +172,19 @@ def get_event_cell():
         return HomeCell("event", info)
     else:
         return None
+
+
+def get_feature_announcement_cell():
+    # returns an announcement for a new Penn Mobile feature
+    info = {
+        'source': 'Spring Fling',
+        'title': "Tap to view the Fling schedule, performers, and more!",
+        'description': None,
+        'timestamp': "Saturday 4/13",
+        'image_url': "https://scontent-iad3-1.xx.fbcdn.net/v/t1.0-0/p280x280/54379874_2655055964522927_582504398354120704_o.jpg?_nc_cat=102&_nc_ht=scontent-iad3-1.xx&oh=f3dfe9c6cc7fb4126c9702c2b2349980&oe=5D0960FD",
+        'feature': "Spring Fling",
+    }
+    return HomeCell("feature", info, 2000)
 
 
 def get_courses_cell(account):
