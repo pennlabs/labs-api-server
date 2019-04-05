@@ -11,7 +11,7 @@ BASE_URL = "https://www.thedp.com/"
 @app.route('/news/', methods=['GET'])
 def fetch_news_article():
     article = fetch_frontpage_article()
-    if article is not None:
+    if article:
         return jsonify({"article": article})
     else:
         return jsonify({'error': 'Site could not be reached or could not be parsed.'})
@@ -19,8 +19,12 @@ def fetch_news_article():
 
 def fetch_frontpage_article():
     """Returns a list of articles."""
-    url = BASE_URL
-    resp = requests.get(url)
+    try:
+        url = BASE_URL
+        resp = requests.get(url)
+    except ConnectionError:
+        return None
+
     html = resp.content.decode("utf8")
 
     soup = BeautifulSoup(html, "html5lib")
