@@ -361,15 +361,21 @@ def add_courses(account, json_array):
         courses_in_db.extend(courses_not_in_db)
 
     if courses_in_db:
+        # Delete all courses associated with this account for this term
         terms = set([x.term for x in courses_in_db])
         for term in terms:
-            # Delete all courses associated with this account for this term
             query = sqldb.session.query(CourseAccount, Course).join(Course) \
                 .filter(CourseAccount.account_id == account.id) \
                 .filter(Course.term == term)
             for ca, course in query:
                 sqldb.session.delete(ca)
 
+        # Just in case, delete any course accounts with same account id and course id
+        for course in courses_in_db:
+            ca = CourseAccount.query.filter_by(account_id=account.id, course_id=course.id).first()
+            if ca:
+                sqldb.session.delete(ca)
+            
         for course in courses_in_db:
             ca = CourseAccount(account_id=account.id, course_id=course.id)
             sqldb.session.add(ca)
