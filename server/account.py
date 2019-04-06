@@ -322,12 +322,16 @@ def add_courses(account, json_array):
         except ValueError:
             pass
 
-        parameters = [term, name, dept, code, section, weekdays, start_date_str, end_date_str, start_time, end_time, instructors]
+        parameters = [term, name, dept, code, section, weekdays, start_time, end_time, instructors]
         if any(x is None for x in parameters):
             raise KeyError("Course parameter is missing")
 
-        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        if start_date_str && end_date_str: 
+            start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        else:
+            start_date = None
+            end_date = None
 
         if (start_date is None) or (end_date is None):
             raise KeyError("Date is not a valid format.")
