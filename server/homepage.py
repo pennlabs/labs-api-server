@@ -49,8 +49,9 @@ def get_homepage():
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
-    gsr_locations = get_gsr_locations_cell(user, account)
-    cells.extend([dining, laundry, gsr_locations])
+    # gsr_locations = get_gsr_locations_cell(user, account)
+    # cells.extend([dining, laundry, gsr_locations])
+    cells.extend([dining, laundry])
 
     calendar = get_university_event_cell()
     if calendar:
