@@ -183,8 +183,7 @@ def get_feature_announcement_cell():
     if now < start or now > end:
         return None
 
-    image_url = "https://scontent-iad3-1.xx.fbcdn.net/v/t1.0-0/p280x280/54379874_2655055964522927_582504398354120704_o.jpg\
-                ?_nc_cat=102&_nc_ht=scontent-iad3-1.xx&oh=f3dfe9c6cc7fb4126c9702c2b2349980&oe=5D0960FD"
+    image_url = "https://scontent-iad3-1.xx.fbcdn.net/v/t1.0-0/p280x280/54379874_2655055964522927_582504398354120704_o.jpg?_nc_cat=102&_nc_ht=scontent-iad3-1.xx&oh=f3dfe9c6cc7fb4126c9702c2b2349980&oe=5D0960FD"
     info = {
         'source': 'Spring Fling',
         'title': "Tap to view the Fling schedule, performers, and more!",
