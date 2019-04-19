@@ -42,6 +42,8 @@ def get_homepage():
     if reservations_cell:
         cells.append(reservations_cell)
 
+    version = request.args.get("version")
+
     if account and account.is_student():
         courses = get_courses_cell(account)
         if courses:
@@ -49,9 +51,11 @@ def get_homepage():
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
-    # gsr_locations = get_gsr_locations_cell(user, account)
-    # cells.extend([dining, laundry, gsr_locations])
     cells.extend([dining, laundry])
+
+    if version and version == "5.1.1":
+        gsr_locations = get_gsr_locations_cell(user, account)
+        cells.append(gsr_locations)
 
     calendar = get_university_event_cell()
     if calendar:
