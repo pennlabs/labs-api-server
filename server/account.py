@@ -345,12 +345,12 @@ def add_courses(account, json_array):
             course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
                             weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
                             end_time=end_time)
+            sqldb.session.add(course)
+            sqldb.session.commit()
+
             courses_not_in_db.append(course)
 
     if courses_not_in_db:
-        for course in courses_not_in_db:
-            sqldb.session.add(course)
-        sqldb.session.commit()
         for course in courses_not_in_db:
             identifier = "{}{}{}{}".format(course.term, course.dept, course.code, course.section)
             instructors = course_instructors.get(identifier)
