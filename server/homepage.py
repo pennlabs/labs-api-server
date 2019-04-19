@@ -53,7 +53,7 @@ def get_homepage():
     dining = get_dining_cell(user)
     cells.extend([dining, laundry])
 
-    if version and version == "5.1.1":
+    if version and version >= "5.1.1":
         gsr_locations = get_gsr_locations_cell(user, account)
         cells.append(gsr_locations)
 
