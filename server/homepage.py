@@ -11,9 +11,27 @@ from penn.base import APIError
 import json
 import pytz
 import datetime
+import os
 
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
+
+@app.route('/appversion', methods=['POST'])
+def update_app_verion():
+    secret = os.environ.get('AUTH_SECRET')
+    auth_secret = request.form.get("auth_secret")
+    if auth_secret is None:
+        return jsonify({"error": "Auth secret is not provided."}), 400
+    if not auth_secret == secret:
+        return jsonify({"error": "Auth secret is not correct."}), 400
+
+    try:
+        version = request.form.get('version')
+    except:
+        return jsonify({'err': 'No version passed to server'}), 400
+
+    os.environ['APP_VERSION'] = version
+    return jsonify({'success': 'App version has been updated to ' + version})
 
 
 @app.route('/homepage', methods=['GET'])
@@ -56,6 +74,12 @@ def get_homepage():
     if version and version >= "5.1.1":
         gsr_locations = get_gsr_locations_cell(user, account)
         cells.append(gsr_locations)
+
+    app_version = os.environ.get('APP_VERSION')
+
+    if version and version < app_version:
+        update_cell = get_version_cell(version)
+        cells.append(update_cell)
 
     calendar = get_university_event_cell()
     if calendar:
@@ -234,3 +258,6 @@ def get_reservations_cell(user, sessionid):
             return None
     except APIError:
         return None
+
+def get_version_cell(version):
+    return HomeCell("new-version-released", None, 10000)
