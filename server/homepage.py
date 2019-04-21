@@ -16,8 +16,9 @@ import os
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
 
-@app.route('/appversion', methods=['POST'])
-def update_app_verion():
+
+@app.route('/appversion/iOS', methods=['POST'])
+def update_app_version():
     secret = os.environ.get('AUTH_SECRET')
     auth_secret = request.form.get("auth_secret")
     if auth_secret is None:
@@ -25,13 +26,18 @@ def update_app_verion():
     if not auth_secret == secret:
         return jsonify({"error": "Auth secret is not correct."}), 400
 
-    try:
-        version = request.form.get('version')
-    except:
+    version = request.form.get('version')
+    if version is None:
         return jsonify({'err': 'No version passed to server'}), 400
 
     os.environ['APP_VERSION'] = version
     return jsonify({'success': 'App version has been updated to ' + version})
+
+
+@app.route('/appversion/iOS', methods=['GET'])
+def get_app_version():
+    version = os.environ.get('APP_VERSION')
+    return jsonify({'version': version})
 
 
 @app.route('/homepage', methods=['GET'])
@@ -258,6 +264,7 @@ def get_reservations_cell(user, sessionid):
             return None
     except APIError:
         return None
+
 
 def get_version_cell(version):
     return HomeCell("new-version-released", None, 10000)

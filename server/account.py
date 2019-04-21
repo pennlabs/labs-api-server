@@ -328,7 +328,7 @@ def add_courses(account, json_array):
         if any(x is None for x in parameters):
             raise KeyError("Course parameter is missing")
 
-        if start_date_str and end_date_str: 
+        if start_date_str and end_date_str:
             start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
             end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
         else:
@@ -377,7 +377,7 @@ def add_courses(account, json_array):
             ca = CourseAccount.query.filter_by(account_id=account.id, course_id=course.id).first()
             if ca:
                 sqldb.session.delete(ca)
-            
+
         for course in courses_in_db:
             ca = CourseAccount(account_id=account.id, course_id=course.id)
             sqldb.session.add(ca)

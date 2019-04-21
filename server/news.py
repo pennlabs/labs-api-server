@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from flask import jsonify
 
+from requests.exceptions import ConnectionError
+
 BASE_URL = "https://www.thedp.com/"
 
 
