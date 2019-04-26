@@ -24,7 +24,7 @@ class Account(sqldb.Model):
     def get_account():
         account_id = request.headers.get('X-Account-ID')
         if not account_id:
-            raise ValueError("No device ID passed to the server.")
+            raise ValueError("No account ID passed to the server.")
         account = Account.query.filter_by(id=account_id).first()
         if not account:
             raise ValueError("Unable to authenticate account id.")
@@ -172,6 +172,15 @@ class DiningPreference(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
     venue_id = sqldb.Column(sqldb.Integer, nullable=False)
+
+
+class DiningBalance(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"))
+    dining_dollars = sqldb.Column(sqldb.Float, nullable=False)
+    swipes = sqldb.Column(sqldb.Integer, nullable=False)
+    guest_swipes = sqldb.Column(sqldb.Integer, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
 class Event(sqldb.Model):
