@@ -173,17 +173,20 @@ def get_dining_balance():
     dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
         .order_by(DiningBalance.created_at.desc()).first()
 
-    dining_dollars = dining_balance.dining_dollars
-    swipes = dining_balance.swipes
-    guest_swipes = dining_balance.guest_swipes
-    created_at = dining_balance.created_at
-    timestamp = created_at.strftime("%Y-%m-%dT%H:%M:%S") + "-{}".format(wharton.get_dst_gmt_timezone())
+    if dining_balance:
+        dining_dollars = dining_balance.dining_dollars
+        swipes = dining_balance.swipes
+        guest_swipes = dining_balance.guest_swipes
+        created_at = dining_balance.created_at
+        timestamp = created_at.strftime("%Y-%m-%dT%H:%M:%S") + "-{}".format(wharton.get_dst_gmt_timezone())
 
-    return jsonify({'balance': {
-            'dining_dollars': dining_dollars,
-            'swipes': swipes,
-            'guest_swipes': guest_swipes,
-            'timestamp': timestamp
-        }})
+        return jsonify({'balance': {
+                'dining_dollars': dining_dollars,
+                'swipes': swipes,
+                'guest_swipes': guest_swipes,
+                'timestamp': timestamp
+            }})
+    else:
+        return jsonify({'balance': None})
 
 
