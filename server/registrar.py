@@ -92,16 +92,13 @@ def get_type_search(search_query):
 @app.route('/registrar/search', methods=['GET'])
 def search():
     search_query = request.args['q']
-    now = datetime.datetime.today()
-    endDay = datetime.datetime(now.year, now.month,
-                               now.day) + datetime.timedelta(days=1)
 
     def get_data():
         query_results = search_course(get_type_search(search_query))
         if query_results is None:
-            return {"Error": "The search query could not be processed"}
+            return {"error": "The search query could not be processed"}
         else:
             return query_results
 
-    return cached_route('registrar_query:%s' % search_query, endDay - now,
+    return cached_route('registrar_query:%s' % search_query, datetime.timedelta(days=1),
                         get_data)
