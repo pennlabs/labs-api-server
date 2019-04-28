@@ -154,7 +154,7 @@ def save_dining_balance():
         guest_swipes = int(guest_swipes_str)
 
         dining_balance = DiningBalance(account_id=account.id, dining_dollars=dining_dollars, swipes=swipes,
-                guest_swipes=guest_swipes)
+                    guest_swipes=guest_swipes)
         sqldb.session.add(dining_balance)
         sqldb.session.commit()
 
