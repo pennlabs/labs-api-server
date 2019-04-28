@@ -181,12 +181,10 @@ def get_dining_balance():
         timestamp = created_at.strftime("%Y-%m-%dT%H:%M:%S") + "-{}".format(wharton.get_dst_gmt_timezone())
 
         return jsonify({'balance': {
-                'dining_dollars': dining_dollars,
-                'swipes': swipes,
-                'guest_swipes': guest_swipes,
-                'timestamp': timestamp
+            'dining_dollars': dining_dollars,
+            'swipes': swipes,
+            'guest_swipes': guest_swipes,
+            'timestamp': timestamp
             }})
     else:
         return jsonify({'balance': None})
-
-
