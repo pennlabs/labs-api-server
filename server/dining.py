@@ -153,8 +153,8 @@ def save_dining_balance():
         swipes = int(swipes_str)
         guest_swipes = int(guest_swipes_str)
 
-        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dining_dollars, swipes=swipes, 
-            guest_swipes=guest_swipes)
+        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dining_dollars, swipes=swipes,
+                guest_swipes=guest_swipes)
         sqldb.session.add(dining_balance)
         sqldb.session.commit()
 
@@ -185,6 +185,6 @@ def get_dining_balance():
             'swipes': swipes,
             'guest_swipes': guest_swipes,
             'timestamp': timestamp
-            }})
+        }})
     else:
         return jsonify({'balance': None})
