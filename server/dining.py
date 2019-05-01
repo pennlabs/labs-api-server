@@ -1,9 +1,9 @@
 from server import app, sqldb
 import datetime
 from .base import cached_route
-from .penndata import din, dinV2
+from .penndata import din, dinV2, wharton
 from flask import jsonify, request
-from .models import User, DiningPreference
+from .models import User, DiningPreference, Account, DiningBalance
 from sqlalchemy import func
 
 
@@ -135,3 +135,55 @@ def get_dining_preferences():
                                .filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
     preference_arr = [{'venue_id': x[0], 'count': x[1]} for x in preferences]
     return jsonify({'preferences': preference_arr})
+
+
+@app.route('/dining/balance', methods=['POST'])
+def save_dining_balance():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+    dining_dollars_str = request.form.get('dining_dollars')
+    swipes_str = request.form.get('swipes')
+    guest_swipes_str = request.form.get('guest_swipes')
+
+    if dining_dollars_str and swipes_str and guest_swipes_str:
+        dollars = float(dining_dollars_str)
+        swipes = int(swipes_str)
+        g_swipes = int(guest_swipes_str)
+
+        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=swipes, guest_swipes=g_swipes)
+        sqldb.session.add(dining_balance)
+        sqldb.session.commit()
+
+        return jsonify({'success': True, 'error': None})
+    else:
+        return jsonify({"success": False, "error": "Field missing"}), 400
+
+
+@app.route('/dining/balance', methods=['GET'])
+def get_dining_balance():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+    dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
+        .order_by(DiningBalance.created_at.desc()).first()
+
+    if dining_balance:
+        dining_dollars = dining_balance.dining_dollars
+        swipes = dining_balance.swipes
+        guest_swipes = dining_balance.guest_swipes
+        created_at = dining_balance.created_at
+        timestamp = created_at.strftime("%Y-%m-%dT%H:%M:%S") + "-{}".format(wharton.get_dst_gmt_timezone())
+
+        return jsonify({'balance': {
+            'dining_dollars': dining_dollars,
+            'swipes': swipes,
+            'guest_swipes': guest_swipes,
+            'timestamp': timestamp
+        }})
+    else:
+        return jsonify({'balance': None})
