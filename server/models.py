@@ -183,6 +183,16 @@ class DiningBalance(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
+class DiningTransaction(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"))
+    date = sqldb.Column(sqldb.DateTime, nullable=False)
+    description = sqldb.Column(sqldb.Text, nullable=False)
+    amount = sqldb.Column(sqldb.Float, nullable=False)
+    balance = sqldb.Column(sqldb.Float, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
 class Event(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     type = sqldb.Column(sqldb.Text, nullable=False)
