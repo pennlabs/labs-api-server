@@ -210,7 +210,7 @@ class AnalyticsEvent(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"))
     account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), nullable=True)
-    timestamp = sqldb.Column(sqldb.DateTime(3), nullable=False) 
+    timestamp = sqldb.Column(sqldb.DateTime(3), nullable=False)
     type = sqldb.Column(sqldb.Text, nullable=False)
     index = sqldb.Column(sqldb.Integer, nullable=False)
     post_id = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
