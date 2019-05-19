@@ -1,7 +1,6 @@
 from flask import request, jsonify
 from server import app, sqldb
 from .models import User, Account, AnalyticsEvent
-from penn.base import APIError
 import json
 import datetime
 
