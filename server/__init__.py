@@ -43,6 +43,7 @@ import server.fitness
 import server.homepage
 import server.news
 import server.account
+import server.analytics
 
 if __name__ == '__main__':
     app.run(debug=True)

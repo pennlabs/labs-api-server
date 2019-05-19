@@ -206,6 +206,18 @@ class Event(sqldb.Model):
     facebook = sqldb.Column(sqldb.String(255))
 
 
+class AnalyticsEvent(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"))
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), nullable=True)
+    timestamp = sqldb.Column(sqldb.DateTime(3), nullable=False) 
+    type = sqldb.Column(sqldb.Text, nullable=False)
+    index = sqldb.Column(sqldb.Integer, nullable=False)
+    post_id = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
+    is_interaction = sqldb.Column(sqldb.Boolean, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 
