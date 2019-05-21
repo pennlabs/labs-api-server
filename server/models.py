@@ -221,12 +221,24 @@ class AnalyticsEvent(sqldb.Model):
 class PostAccount(sqldb.Model):
     id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
     name = sqldb.Column(sqldb.Text, nullable=False)
-    email = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
+    encrypted_password = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
+    reset_password_token = sqldb.Column(sqldb.VARCHAR(255), nullable=True, unique=True)
+    reset_password_token_sent_at = sqldb.Column(sqldb.DateTime, nullable=True)
+    remember_created_at = sqldb.Column(sqldb.DateTime, nullable=True)
+    sign_in_count = sqldb.Column(sqldb.Integer, nullable=True)
+    current_sign_in_at = sqldb.Column(sqldb.DateTime, nullable=True)
+    last_sign_in_at = sqldb.Column(sqldb.DateTime, nullable=True)
+    current_sign_in_ip = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
+    last_sign_in_ip = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
     @staticmethod
     def get_account(account_id):
+        if not account_id:
+            raise ValueError("No account id provided.")
+
         account = PostAccount.query.filter_by(id=account_id).first()
         if not account:
             raise ValueError("Unable to authenticate account id.")
@@ -248,15 +260,25 @@ class Post(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
+    @staticmethod
+    def get_post(post_id):
+        if not post_id:
+            raise ValueError("No post id provided.")
+
+        account = Post.query.filter_by(id=post_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
 
 class PostFilter(sqldb.Model):
     post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
-    name = sqldb.Column(sqldb.Text, primary_key=True)
+    type = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class PostStatus(sqldb.Model):
     post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
-    status = sqldb.Column(sqldb.Text, primary_key=True)
+    status = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
 
 
