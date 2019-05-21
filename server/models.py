@@ -218,6 +218,48 @@ class AnalyticsEvent(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
+class PostAccount(sqldb.Model):
+    id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.Text, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+    @staticmethod
+    def get_account(account_id):
+        account = PostAccount.query.filter_by(id=account_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
+
+class Post(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), nullable=False)
+    source = sqldb.Column(sqldb.Text, nullable=True)
+    title = sqldb.Column(sqldb.Text, nullable=True)
+    subtitle = sqldb.Column(sqldb.Text, nullable=True)
+    time_label = sqldb.Column(sqldb.Text, nullable=True)
+    post_url = sqldb.Column(sqldb.Text, nullable=True)
+    image_url = sqldb.Column(sqldb.Text, nullable=False)
+    filters = sqldb.Column(sqldb.Boolean, default=False)
+    start_date = sqldb.Column(sqldb.DateTime, nullable=False)
+    end_date = sqldb.Column(sqldb.DateTime, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
+class PostFilter(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    name = sqldb.Column(sqldb.Text, primary_key=True)
+
+
+class PostStatus(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    status = sqldb.Column(sqldb.Text, primary_key=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
+
+
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 
