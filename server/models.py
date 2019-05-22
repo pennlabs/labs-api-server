@@ -257,6 +257,7 @@ class Post(sqldb.Model):
     filters = sqldb.Column(sqldb.Boolean, default=False)
     start_date = sqldb.Column(sqldb.DateTime, nullable=False)
     end_date = sqldb.Column(sqldb.DateTime, nullable=False)
+    approved = sqldb.Column(sqldb.Boolean, default=False)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 

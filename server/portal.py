@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from server import app, sqldb
-from .models import PostAccount, Post, PostFilter, PostStatus
+from .models import PostAccount, Post, PostFilter, PostStatus, SchoolMajorAccount, School
 from sqlalchemy import desc
 import json
 import datetime
@@ -129,7 +129,7 @@ def update_post():
     post.image_url = image_url
 
     post.start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
-    post.end_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
+    post.end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
 
     filters = list(data.get("filters"))
     post.filters = True if filters else False
@@ -191,3 +191,82 @@ def get_posts():
         json_arr.append(post_json)
     
     return jsonify({'posts': json_arr})
+
+
+def get_posts_for_account(account):
+    now = datetime.datetime.now()
+
+    if not account:
+        posts = Post.query.filter(Post.start_date <= now, now <= Post.end_date, Post.filters.is_(False), Post.approved.is_(True)).all()
+    else:
+        majr_filters = sqldb.session.query(SchoolMajorAccount.major, SchoolMajorAccount.expected_grad, School.code) \
+                                    .join(School, School.id == SchoolMajorAccount.school_id) \
+                                    .filter(SchoolMajorAccount.account_id == account.id) \
+                                    .all()
+
+        grad_years = set()
+        school_codes = set()
+        majors = set()
+        for (major, grad, code) in majr_filters:
+            school_codes.add(code)
+            majors.add(major)
+
+            # If grad is Fall 2019, round up grad year to 2020
+            grad_years_list = [int(s) for s in grad.split() if s.isdigit()]
+            if grad_years_list:
+                year = grad_years_list[0]
+                if 'Fall' in grad:
+                    year = year + 1
+                grad_years.add(year)
+
+        posts = []
+        post_filters = sqldb.session.query(Post, PostFilter).join(PostFilter, isouter=True, full=False) \
+                                    .filter(Post.start_date <= now) \
+                                    .filter(Post.end_date >= now) \
+                                    .filter(Post.approved.is_(True)) \
+                                    .all()
+        approved_posts=[]
+        post_filter_dict = {}
+        for (post, filter_obj) in post_filters:
+            if post.id not in post_filter_dict:
+                approved_posts.append(post)
+                if filter_obj:
+                    post_filter_dict[post.id] = [filter_obj]
+                else:
+                    post_filter_dict[post.id] = []
+            else:
+                post_filter_dict[post.id].append(filter_obj)
+
+        for post in approved_posts:
+            filters = post_filter_dict[post.id]
+            filters_by_type = {}
+            for filter_obj in filters:
+                if filter_obj.type in filters_by_type:
+                    filters_by_type[filter_obj.type].add(filter_obj.filter)
+                else:
+                    filters_by_type[filter_obj.type] = {filter_obj.filter}
+
+            # Class Year
+            if 'class' in filters_by_type:
+                class_filters = filters_by_type['class']
+                if not any(int(x) in grad_years for x in class_filters):
+                    # Reject post if no class filters match a grad year
+                    continue
+
+            # School
+            if 'school' in filters_by_type:
+                school_filters = filters_by_type['school']
+                if not any(x in school_codes for x in school_filters):
+                    # Reject post if no class filters match a grad year
+                    continue
+
+            # Major
+            if 'major' in filters_by_type:
+                major_filters = filters_by_type['major']
+                if not any(x in majors for x in major_filters):
+                    # Reject post if no class filters match a grad year
+                    continue
+
+            # Accept post if passes all conditions
+            posts.append(post)
+    return posts
