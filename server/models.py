@@ -274,6 +274,7 @@ class Post(sqldb.Model):
 class PostFilter(sqldb.Model):
     post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
     type = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    filter = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class PostStatus(sqldb.Model):
