@@ -258,6 +258,8 @@ class Post(sqldb.Model):
     start_date = sqldb.Column(sqldb.DateTime, nullable=False)
     end_date = sqldb.Column(sqldb.DateTime, nullable=False)
     approved = sqldb.Column(sqldb.Boolean, default=False)
+    testers = sqldb.Column(sqldb.Boolean, default=False)
+    emails = sqldb.Column(sqldb.Boolean, default=False)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
@@ -282,6 +284,16 @@ class PostStatus(sqldb.Model):
     post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
     status = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
+
+
+class PostTester(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
+class PostTargetEmail(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class HomeCell(object):

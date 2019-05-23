@@ -275,16 +275,7 @@ def get_post_cells(account):
     posts = get_posts_for_account(account)
     cells = []
     for post in posts:
-        info = {
-            'source': post.source,
-            'title': post.title,
-            'subtitle': post.subtitle,
-            'time_label': post.time_label,
-            'image_url': post.image_url,
-            'post_url': post.post_url,
-            'post_id': post.id
-        }
-        cell = HomeCell('post', info, 15000)
+        cell = HomeCell('post', post, 15000)
         cells.append(cell)
     return cells
 
