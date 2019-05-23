@@ -225,12 +225,8 @@ class PostAccount(sqldb.Model):
     encrypted_password = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
     reset_password_token = sqldb.Column(sqldb.VARCHAR(255), nullable=True, unique=True)
     reset_password_token_sent_at = sqldb.Column(sqldb.DateTime, nullable=True)
-    remember_created_at = sqldb.Column(sqldb.DateTime, nullable=True)
-    sign_in_count = sqldb.Column(sqldb.Integer, nullable=True)
-    current_sign_in_at = sqldb.Column(sqldb.DateTime, nullable=True)
-    last_sign_in_at = sqldb.Column(sqldb.DateTime, nullable=True)
-    current_sign_in_ip = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
-    last_sign_in_ip = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
+    sign_in_count = sqldb.Column(sqldb.Integer, default=1)
+    last_sign_in_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
@@ -261,7 +257,6 @@ class Post(sqldb.Model):
     testers = sqldb.Column(sqldb.Boolean, default=False)
     emails = sqldb.Column(sqldb.Boolean, default=False)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
-    updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
     @staticmethod
     def get_post(post_id):
@@ -283,7 +278,16 @@ class PostFilter(sqldb.Model):
 class PostStatus(sqldb.Model):
     post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
     status = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    msg = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
+
+
+class PostAccountEmail(sqldb.Model):
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    verified = sqldb.Column(sqldb.Boolean, default=False)
+    auth_token = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
 class PostTester(sqldb.Model):

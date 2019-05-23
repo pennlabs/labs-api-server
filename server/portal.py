@@ -1,10 +1,12 @@
-from flask import request, jsonify
+from flask import request, jsonify, redirect
 from server import app, sqldb
 from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
+from .models import PostAccountEmail
 from sqlalchemy import desc, or_, case
 from sqlalchemy.sql import select
 import json
 import datetime
+import uuid
 
 
 """
@@ -32,7 +34,15 @@ Example: JSON Encoding
             "type": "major",
             "filter": "CIS"
         }
-    ]
+    ],
+    "testers": [
+        "amyg@upenn.edu"
+    ],
+    "emails": [
+        "benfranklin@upenn.edu",
+        "elonmusk@upenn.edu"
+    ],
+    "comments": "This is a post to test Penn Mobile. Please approve!"
 }
 """
 
@@ -54,6 +64,8 @@ def create_post():
     post_url = data.get("post_url")
     image_url = data.get("image_url")
     filters = list(data.get("filters"))
+    testers = list(data.get("testers"))
+    emails = list(data.get("emails"))
 
     start_date_str = data.get("start_date")
     end_date_str = data.get("end_date")
@@ -65,39 +77,17 @@ def create_post():
     end_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
 
     post = Post(account=account.id, source=source, title=title, subtitle=subtitle, time_label=time_label, post_url=post_url, 
-                image_url=image_url, start_date=start_date, end_date=end_date, filters=(True if filters else False))
+                image_url=image_url, start_date=start_date, end_date=end_date, filters=(True if filters else False), 
+                testers=(True if testers else False), emails=(True if emails else False))
     sqldb.session.add(post)
     sqldb.session.commit()
 
-    filters = list(data.get("filters"))
-    for filter_obj_str in filters:
-        filter_obj = dict(filter_obj_str)
-        type_str = filter_obj["type"]
-        filter_str = filter_obj["filter"]
-        post_filter = PostFilter(post=post.id, type=type_str, filter=filter_str)
-        sqldb.session.add(post_filter)
+    add_filters_testers_emails(account, post, filters, testers, emails)
 
-    status = PostStatus(post=post.id, status="submitted")
-    sqldb.session.add(status)
-    sqldb.session.commit()
+    msg = data.get("comments")
+    update_status(post, "submitted", msg)
 
     return jsonify({"post_id": post.id})
-
-
-@app.route('/portal/account/new', methods=['POST'])
-def create_account():
-    name = request.form.get("name")
-    email = request.form.get("email")
-    encrypted_password = request.form.get("encrypted_password")
-
-    if any(x is None for x in [name, email, encrypted_password]):
-        return jsonify({"error": "Parameter is missing"}), 400
-
-    account = PostAccount(name=name, email=email, encrypted_password=encrypted_password)
-    sqldb.session.add(account)
-    sqldb.session.commit()
-
-    return jsonify({'account_id': account.id})
 
 
 @app.route('/portal/post/update', methods=['POST'])
@@ -133,23 +123,110 @@ def update_post():
     post.end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
 
     filters = list(data.get("filters"))
+    testers = list(data.get("testers"))
+    emails = list(data.get("emails"))
     post.filters = True if filters else False
+    post.testers = True if testers else False
+    post.emails = True if emails else False
 
     PostFilter.query.filter_by(post=post.id).delete()
-    for filter_obj_str in filters:
-        filter_obj = dict(filter_obj_str)
-        type_str = filter_obj["type"]
-        filter_str = filter_obj["filter"]
-        post_filter = PostFilter(post=post.id, type=type_str, filter=filter_str)
-        sqldb.session.add(post_filter)
+    PostTester.query.filter_by(post=post.id).delete()
+    PostTargetEmail.query.filter_by(post=post.id).delete()
 
-    status = PostStatus(post=post.id, status="updated")
-    sqldb.session.add(status)
-    sqldb.session.commit()
+    add_filters_testers_emails(account, post, filters, testers, emails)
+
+    msg = data.get("comments")
+    update_status(post, "updated")
 
     return jsonify({"post_id": post.id})
 
 
+@app.route('/portal/post/approve', methods=['POST'])
+def approve_post():
+    try:
+        account_id = request.form.get("account_id")
+        account = PostAccount.get_account(account_id)
+        post_id = request.form.get("post_id")
+        post = Post.get_post(post_id)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    # Verify that this account is Penn Labs
+    if account.email != "pennappslabs@gmail.com":
+        return jsonify({"error": "This account does not have permission to issue post approval decisions."}), 400
+
+    approved = bool(account.form.get("approved"))
+    if approved:
+        post.approved = True
+        update_status(post, "approved", None)
+    else:
+        # TODO: Send rejection email
+        post.approved = False
+        msg = account.form.get("msg")
+        if not msg:
+            return jsonify({"error": "Denied posts must include a reason"}), 400
+        update_status(post, "rejected", msg)
+
+    return jsonify({"post_id": post.id})
+
+
+# Adds filters, testers, and emails to post. If tester is not verified, a verification email is sent and added later.
+def add_filters_testers_emails(account, post, filters, testers, emails):
+    for filter_obj_str in filters:
+        filter_obj = dict(filter_obj_str)
+        post_filter = PostFilter(post=post.id, type=filter_obj["type"], filter=filter_obj["filter"])
+        sqldb.session.add(post_filter)
+
+    verified_testers = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
+    unverified_testers = PostAccountEmail.query.filter_by(account=account.id, verified=False).all()
+    for tester in testers:
+        if tester in verified_testers:
+            post_tester = PostTester(post=post.id, email=tester)
+            sqldb.session.add(post_tester)
+        else:
+            # TODO: send verification email
+            token = str(uuid.uuid4())
+            if any(tester == x.email for x in unverified_testers):
+                unverified_tester = next(x for x in unverified_testers if x.email == tester)
+                unverified_tester.auth_token = token
+            else:
+                account_email = PostAccountEmail(account=account.id, email=tester, auth_token=token)
+                sqldb.session.add(account_email)
+            print("Email {} with link: localhost:5000/portal/email/verify?token={}".format(tester, token))
+
+    for email in emails:
+        post_email = PostTargetEmail(post=post.id, email=email)
+        sqldb.session.add(post_email)
+
+    sqldb.session.commit()
+
+
+def update_status(post, status, msg):
+    status = PostStatus(post=post.id, status="updated", msg=msg)
+    sqldb.session.add(status)
+    sqldb.session.commit()
+
+
+@app.route('/portal/account/new', methods=['POST'])
+def create_account():
+    name = request.form.get("name")
+    email = request.form.get("email")
+    encrypted_password = request.form.get("encrypted_password")
+
+    if any(x is None for x in [name, email, encrypted_password]):
+        return jsonify({"error": "Parameter is missing"}), 400
+
+    exists = sqldb.session.query(exists().where(PostAccount.email == email)).scalar()
+    if exists:
+        return jsonify({'msg': 'An account already exists for this email.'}), 400
+
+    account = PostAccount(name=name, email=email, encrypted_password=encrypted_password)
+    sqldb.session.add(account)
+    sqldb.session.commit()
+    return jsonify({'account_id': account.id})
+
+
+# Login and retrieve account ID 
 @app.route('/portal/account/login', methods=['POST'])
 def login():
     email = request.form.get("email")
@@ -160,9 +237,98 @@ def login():
 
     account = PostAccount.query.filter_by(email=email, encrypted_password=encrypted_password).first()
     if account:
-        return jsonify({'account_id': account.id, 'email': account.email})
+        account.sign_in_count = account.sign_in_count + 1
+        account.last_sign_in_at = datetime.datetime.now()
+        sqldb.session.commit()
+        return jsonify({'account_id': account.id})
     else:
-        return jsonify({'error': 'Unable to authenticate'})
+        return jsonify({'error': 'Unable to authenticate'}), 400
+
+
+# Get all relevant information for an account
+@app.route('/portal/account', methods=['GET'])
+def get_account_info():
+    try:
+        account_id = data.get("account_id")
+        account = PostAccount.get_account(account_id)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    verified_emails = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
+    account_json = {
+        'id': account.id,
+        'name': account.name,
+        'email': account.email,
+        'verified_emails': verified_emails
+    }
+    return jsonify({'account': account_json})
+
+
+# Request password reset
+@app.route('/portal/account/reset/request', methods=['POST'])
+def request_account_password_reset_token():
+    email = request.form.get("email")
+    account = PostAccount.query.filter_by(email=email).first()
+    if not account:
+        return jsonify({'error': 'Account not found with this email'}), 400
+
+    # TODO: send verification email
+    token = str(uuid.uuid4())
+    account.reset_password_token = token
+    account.reset_password_token_sent_at = datetime.datetime.now()
+    sqldb.session.commit()
+    return jsonify({'msg': 'An email has been sent to reset your password.'})
+
+
+# Verify a reset password token
+@app.route('/portal/account/reset', methods=['GET'])
+def verify_account_password_reset():
+    token = request.args.get("token")
+    now = datetime.datetime.now()
+    account = PostAccount.query.filter_by(reset_password_token=token).first()
+    if not account:
+        return jsonify({'error': 'Invalid auth token. Please try again.'})
+    elif account.reset_password_token_sent_at and account.reset_password_token_sent_at.time_delta(minutes=30) < now:
+        return jsonify({'error': 'This token has expired.'})
+    else:
+        return redirect("https://pennlabs.org?token={}".format(token), code=302)
+
+
+# Reset password
+@app.route('/portal/account/reset', methods=['POST'])
+def reset_account_password():
+    token = request.args.get("token")
+    encrypted_password = request.args.get("encrypted_password")
+    account = PostAccount.query.filter_by(reset_password_token=token).first()
+    if not account:
+        return jsonify({'error': 'Invalid auth token. Please try again.'})
+    elif not encrypted_password:
+        return jsonify({'error': 'Invalid password. Please try again.'})
+
+    account.encrypted_password = encrypted_password
+    account.updated_at = datetime.datetime.now()
+    sqldb.session.commit()
+    return jsonify({'msg': 'Your password has been reset.'})
+
+
+# Verifies a test email for an account and adds that test email to all upcoming posts
+@app.route('/portal/email/verify', methods=['GET'])
+def verify_account_email_token():
+    token = request.args.get("token")
+    account_email = PostAccountEmail.query.filter_by(auth_token=token).first()
+    if not account_email:
+        return jsonify({'error': 'Invalid auth token. Please try again.'})
+    elif account_email.verified:
+        return jsonify({'error': 'This email has already been verified for this account.'})
+    else:
+        account_email.verified = True
+        now = datetime.datetime.now()
+        upcoming_posts = Post.query.filter(Post.account==account_email.account).filter(Post.end_date >= now).all()
+        for post in upcoming_posts:
+            tester = PostTester(post=post.id, email=account_email.email)
+            sqldb.session.add(tester)
+        sqldb.session.commit()
+        return redirect("https://pennlabs.org", code=302)
 
 
 @app.route('/portal/posts', methods=['GET'])
@@ -178,16 +344,23 @@ def get_posts():
             'time_label': post.time_label,
             'image_url': post.image_url,
             'post_url': post.post_url,
-            'filters': []
+            'filters': [],
+            'testers': [],
+            'emails': []
         }
-        if post.filters:
-            filters = PostFilter.query.filter_by(post=post.id).all()
-            for obj in filters:
+        filters = PostFilter.query.filter_by(post=post.id).all()
+        for obj in filters:
+            post_json['filters'].append({'type': obj.type, 'filter': obj.filter})
 
-                post_json['filters'].append({'type': obj.type, 'filter': obj.filter})
+        testers = sqldb.session.query(PostTester.email).filter_by(post=post.id).all()
+        post_json['testers'] = testers
+
+        emails = sqldb.session.query(PostTargetEmail.email).filter_by(post=post.id).all()
+        post_json['emails'] = emails
 
         status = PostStatus.query.filter_by(post=post.id).order_by(desc(PostStatus.created_at)).first()
         post_json['status'] = status.status
+        post_json['comments'] = status.msg
 
         json_arr.append(post_json)
     
