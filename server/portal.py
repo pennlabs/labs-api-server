@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from server import app, sqldb
-from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School
+from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
 from sqlalchemy import desc, or_, case
 from sqlalchemy.sql import select
 import json
@@ -192,6 +192,39 @@ def get_posts():
         json_arr.append(post_json)
     
     return jsonify({'posts': json_arr})
+
+
+@app.route('/portal/filters', methods=['GET'])
+def get_filters():
+    filters_by_type = {}
+    filters_by_type['email-only'] = {'name': 'Email-Filtering Only', 'filter': 'none'}
+    filters_by_type['school'] = [
+        {'name': 'Wharton Undegraduate (WH)', 'filter': 'WH'},
+        {'name': 'College of Arts & Sciences (SAS)', 'filter': 'COL'},
+        {'name': 'Engineering & Applied Science (SEAS)', 'filter': 'EAS'},
+        {'name': 'Nursing Undegraduate (NURS)', 'filter': 'NURS'}
+    ]
+
+    today = datetime.date.today()
+    senior_class_year = today.year
+    if today.month >= 6:
+        # If after May, current senior class will graduate in following year
+        senior_class_year = senior_class_year + 1
+
+    class_filters = []
+    for i in range(4):
+        name = 'Class of {}'.format(senior_class_year + i)
+        filter = str(senior_class_year + i)
+        class_filters.append({'name': name, 'filter': filter})
+    filters_by_type['class'] = class_filters
+
+    major_filters = []
+    majors = Major.query.all()
+    for major in majors:
+        major_filters.append({'name': major.name, 'filter': major.code})
+    filters_by_type['major'] = major_filters
+
+    return jsonify({'filters_by_type': filters_by_type})
 
 
 def get_posts_for_account(account):
