@@ -15,7 +15,7 @@ def send_analytics():
     try:
         account = Account.get_account()
         account_id = account.id
-    except ValueError as e:
+    except ValueError:
         account_id = None
 
     data = request.get_json()
