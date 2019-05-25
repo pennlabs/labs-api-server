@@ -177,10 +177,10 @@ def add_filters_testers_emails(account, post, filters, testers, emails):
         post_filter = PostFilter(post=post.id, type=filter_obj["type"], filter=filter_obj["filter"])
         sqldb.session.add(post_filter)
 
-    verified_testers = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
+    verified_testers = PostAccountEmail.query.filter_by(account=account.id, verified=True).all()
     unverified_testers = PostAccountEmail.query.filter_by(account=account.id, verified=False).all()
     for tester in testers:
-        if tester in verified_testers:
+        if any(x.email == tester for x in verified_testers):
             post_tester = PostTester(post=post.id, email=tester)
             sqldb.session.add(post_tester)
         else:
@@ -192,7 +192,7 @@ def add_filters_testers_emails(account, post, filters, testers, emails):
             else:
                 account_email = PostAccountEmail(account=account.id, email=tester, auth_token=token)
                 sqldb.session.add(account_email)
-            print("Email {} with link: localhost:5000/portal/email/verify?token={}".format(tester, token))
+            # print("Email {} with link: localhost:5000/portal/email/verify?token={}".format(tester, token))
 
     for email in emails:
         post_email = PostTargetEmail(post=post.id, email=email)
