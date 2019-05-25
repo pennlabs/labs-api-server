@@ -370,7 +370,7 @@ def get_posts():
 
 
 @app.route('/portal/post/<int:post_id>', methods=['GET'])
-def get_post():
+def get_post(post_id):
     account_id = request.args.get("account")
     post = Post.query.filter_by(id=post_id, account=account_id).first()
     if not post:
