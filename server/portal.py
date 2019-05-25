@@ -372,10 +372,10 @@ def get_post_json(post):
         post_json['filters'].append({'type': obj.type, 'filter': obj.filter})
 
     testers = sqldb.session.query(PostTester.email).filter_by(post=post.id).all()
-    post_json['testers'] = testers
+    post_json['testers'] = [x for (x,) in testers]
 
     emails = sqldb.session.query(PostTargetEmail.email).filter_by(post=post.id).all()
-    post_json['emails'] = emails
+    post_json['emails'] = [x for (x,) in emails]
 
     status = PostStatus.query.filter_by(post=post.id).order_by(desc(PostStatus.created_at)).first()
     post_json['status'] = status.status
