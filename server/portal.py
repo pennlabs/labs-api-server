@@ -344,6 +344,8 @@ def get_posts():
             'time_label': post.time_label,
             'image_url': post.image_url,
             'post_url': post.post_url,
+            'start_date': datetime.datetime.strptime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
+            'end_date': datetime.datetime.strptime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
             'filters': [],
             'testers': [],
             'emails': []
@@ -365,6 +367,43 @@ def get_posts():
         json_arr.append(post_json)
 
     return jsonify({'posts': json_arr})
+
+
+@app.route('/portal/post/<int:post_id>', methods=['GET'])
+def get_post():
+    account_id = request.args.get("account")
+    post = Post.query.filter_by(id=post_id, account=account_id).first()
+    if not post:
+        return jsonify({'error': 'Post not found.'}), 400
+
+    post_json = {
+        'source': post.source,
+        'title': post.title,
+        'subtitle': post.subtitle,
+        'time_label': post.time_label,
+        'image_url': post.image_url,
+        'post_url': post.post_url,
+        'start_date': datetime.datetime.strptime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
+        'end_date': datetime.datetime.strptime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
+        'filters': [],
+        'testers': [],
+        'emails': []
+    }
+    filters = PostFilter.query.filter_by(post=post.id).all()
+    for obj in filters:
+        post_json['filters'].append({'type': obj.type, 'filter': obj.filter})
+
+    testers = sqldb.session.query(PostTester.email).filter_by(post=post.id).all()
+    post_json['testers'] = testers
+
+    emails = sqldb.session.query(PostTargetEmail.email).filter_by(post=post.id).all()
+    post_json['emails'] = emails
+
+    status = PostStatus.query.filter_by(post=post.id).order_by(desc(PostStatus.created_at)).first()
+    post_json['status'] = status.status
+    post_json['comments'] = status.msg
+
+    return jsonify(post_json)
 
 
 @app.route('/portal/filters', methods=['GET'])
