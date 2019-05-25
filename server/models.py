@@ -218,6 +218,88 @@ class AnalyticsEvent(sqldb.Model):
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
+class PostAccount(sqldb.Model):
+    id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
+    name = sqldb.Column(sqldb.Text, nullable=False)
+    email = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
+    encrypted_password = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
+    reset_password_token = sqldb.Column(sqldb.VARCHAR(255), nullable=True, unique=True)
+    reset_password_token_sent_at = sqldb.Column(sqldb.DateTime, nullable=True)
+    sign_in_count = sqldb.Column(sqldb.Integer, default=1)
+    last_sign_in_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+    @staticmethod
+    def get_account(account_id):
+        if not account_id:
+            raise ValueError("No account id provided.")
+
+        account = PostAccount.query.filter_by(id=account_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
+
+class Post(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), nullable=False)
+    source = sqldb.Column(sqldb.Text, nullable=True)
+    title = sqldb.Column(sqldb.Text, nullable=True)
+    subtitle = sqldb.Column(sqldb.Text, nullable=True)
+    time_label = sqldb.Column(sqldb.Text, nullable=True)
+    post_url = sqldb.Column(sqldb.Text, nullable=True)
+    image_url = sqldb.Column(sqldb.Text, nullable=False)
+    filters = sqldb.Column(sqldb.Boolean, default=False)
+    start_date = sqldb.Column(sqldb.DateTime, nullable=False)
+    end_date = sqldb.Column(sqldb.DateTime, nullable=False)
+    approved = sqldb.Column(sqldb.Boolean, default=False)
+    testers = sqldb.Column(sqldb.Boolean, default=False)
+    emails = sqldb.Column(sqldb.Boolean, default=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+    @staticmethod
+    def get_post(post_id):
+        if not post_id:
+            raise ValueError("No post id provided.")
+
+        account = Post.query.filter_by(id=post_id).first()
+        if not account:
+            raise ValueError("Unable to authenticate account id.")
+        return account
+
+
+class PostFilter(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    type = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    filter = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
+class PostStatus(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    status = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    msg = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
+
+
+class PostAccountEmail(sqldb.Model):
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    verified = sqldb.Column(sqldb.Boolean, default=False)
+    auth_token = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
+class PostTester(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
+class PostTargetEmail(sqldb.Model):
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 

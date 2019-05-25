@@ -6,6 +6,7 @@ from .calendar3year import pull_todays_calendar
 from sqlalchemy import func, and_
 from .news import fetch_frontpage_article
 from .account import get_todays_courses, get_courses_in_N_days
+from .portal import get_posts_for_account
 from .studyspaces import get_reservations
 from penn.base import APIError
 import json
@@ -98,6 +99,10 @@ def get_homepage():
     feature = get_feature_announcement_cell()
     if feature:
         cells.append(feature)
+
+    posts = get_post_cells(account)
+    if posts:
+        cells.extend(posts)
 
     cells.sort(key=lambda x: x.weight, reverse=True)
 
@@ -264,6 +269,15 @@ def get_reservations_cell(user, sessionid):
             return None
     except APIError:
         return None
+
+
+def get_post_cells(account):
+    posts = get_posts_for_account(account)
+    cells = []
+    for post in posts:
+        cell = HomeCell('post', post, 15000)
+        cells.append(cell)
+    return cells
 
 
 def get_version_cell(version):
