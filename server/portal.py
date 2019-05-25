@@ -344,8 +344,8 @@ def get_posts():
             'time_label': post.time_label,
             'image_url': post.image_url,
             'post_url': post.post_url,
-            'start_date': datetime.datetime.strptime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
-            'end_date': datetime.datetime.strptime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
+            'start_date': datetime.datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
+            'end_date': datetime.datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
             'filters': [],
             'testers': [],
             'emails': []
@@ -383,8 +383,8 @@ def get_post():
         'time_label': post.time_label,
         'image_url': post.image_url,
         'post_url': post.post_url,
-        'start_date': datetime.datetime.strptime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
-        'end_date': datetime.datetime.strptime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
+        'start_date': datetime.datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
+        'end_date': datetime.datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
         'filters': [],
         'testers': [],
         'emails': []
