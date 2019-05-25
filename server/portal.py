@@ -333,39 +333,12 @@ def verify_account_email_token():
 
 @app.route('/portal/posts', methods=['GET'])
 def get_posts():
-    account_id = request.args.get("account_id")
+    account_id = request.args.get("account")
     posts = Post.query.filter_by(account=account_id).all()
     json_arr = []
     for post in posts:
-        post_json = {
-            'source': post.source,
-            'title': post.title,
-            'subtitle': post.subtitle,
-            'time_label': post.time_label,
-            'image_url': post.image_url,
-            'post_url': post.post_url,
-            'start_date': datetime.datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
-            'end_date': datetime.datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
-            'filters': [],
-            'testers': [],
-            'emails': []
-        }
-        filters = PostFilter.query.filter_by(post=post.id).all()
-        for obj in filters:
-            post_json['filters'].append({'type': obj.type, 'filter': obj.filter})
-
-        testers = sqldb.session.query(PostTester.email).filter_by(post=post.id).all()
-        post_json['testers'] = testers
-
-        emails = sqldb.session.query(PostTargetEmail.email).filter_by(post=post.id).all()
-        post_json['emails'] = emails
-
-        status = PostStatus.query.filter_by(post=post.id).order_by(desc(PostStatus.created_at)).first()
-        post_json['status'] = status.status
-        post_json['comments'] = status.msg
-
+        post_json = get_post_json(post)
         json_arr.append(post_json)
-
     return jsonify({'posts': json_arr})
 
 
@@ -376,6 +349,11 @@ def get_post(post_id):
     if not post:
         return jsonify({'error': 'Post not found.'}), 400
 
+    post_json = get_post_json(post)
+    return jsonify(post_json)
+
+
+def get_post_json(post):
     post_json = {
         'source': post.source,
         'title': post.title,
@@ -402,8 +380,7 @@ def get_post(post_id):
     status = PostStatus.query.filter_by(post=post.id).order_by(desc(PostStatus.created_at)).first()
     post_json['status'] = status.status
     post_json['comments'] = status.msg
-
-    return jsonify(post_json)
+    return post_json
 
 
 @app.route('/portal/filters', methods=['GET'])
