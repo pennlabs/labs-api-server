@@ -1,12 +1,13 @@
 from flask import request, jsonify, redirect
-from server import app, sqldb
+from server import app, sqldb, bcrypt
 from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
 from .models import PostAccountEmail
 from sqlalchemy import desc, or_, case, exists
 from sqlalchemy.sql import select
 import json
-import datetime
+from datetime import date, datetime, timedelta
 import uuid
+import sys
 
 
 """
@@ -73,8 +74,8 @@ def create_post():
     if any(x is None for x in [image_url, start_date_str, end_date_str]):
         return jsonify({"error": "Parameter is missing"}), 400
 
-    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
-    end_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
+    end_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
 
     post = Post(account=account.id, source=source, title=title, subtitle=subtitle, time_label=time_label, post_url=post_url,
                 image_url=image_url, start_date=start_date, end_date=end_date, filters=(True if filters else False),
@@ -119,8 +120,8 @@ def update_post():
     post.post_url = data.get("post_url")
     post.image_url = image_url
 
-    post.start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
-    post.end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
+    post.start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
+    post.end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
 
     filters = list(data.get("filters"))
     testers = list(data.get("testers"))
@@ -211,7 +212,8 @@ def update_status(post, status, msg):
 def create_account():
     name = request.form.get("name")
     email = request.form.get("email")
-    encrypted_password = request.form.get("encrypted_password")
+    password = request.form.get("password")
+    encrypted_password = bcrypt.generate_password_hash(password)
 
     if any(x is None for x in [name, email, encrypted_password]):
         return jsonify({"error": "Parameter is missing"}), 400
@@ -230,15 +232,16 @@ def create_account():
 @app.route('/portal/account/login', methods=['POST'])
 def login():
     email = request.form.get("email")
-    encrypted_password = request.form.get("encrypted_password")
+    password = request.form.get("password")
 
-    if any(x is None for x in [email, encrypted_password]):
+    if any(x is None for x in [email, password]):
         return jsonify({"error": "Parameter is missing"}), 400
 
-    account = PostAccount.query.filter_by(email=email, encrypted_password=encrypted_password).first()
+    pw_hash = bcrypt.generate_password_hash(password)
+    account = PostAccount.query.filter(PostAccount.email == email and bcrypt.check_password_hash(pw_hash, password)).first()
     if account:
         account.sign_in_count = account.sign_in_count + 1
-        account.last_sign_in_at = datetime.datetime.now()
+        account.last_sign_in_at = datetime.now()
         sqldb.session.commit()
         return jsonify({'account_id': account.id})
     else:
@@ -270,12 +273,13 @@ def request_account_password_reset_token():
     email = request.form.get("email")
     account = PostAccount.query.filter_by(email=email).first()
     if not account:
-        return jsonify({'error': 'Account not found with this email'}), 400
+        return jsonify({'error': 'Account not found.'}), 400
 
     # TODO: send verification email
     token = str(uuid.uuid4())
+    print(token)
     account.reset_password_token = token
-    account.reset_password_token_sent_at = datetime.datetime.now()
+    account.reset_password_token_sent_at = datetime.now()
     sqldb.session.commit()
     return jsonify({'msg': 'An email has been sent to reset your password.'})
 
@@ -284,11 +288,11 @@ def request_account_password_reset_token():
 @app.route('/portal/account/reset', methods=['GET'])
 def verify_account_password_reset():
     token = request.args.get("token")
-    now = datetime.datetime.now()
+    now = datetime.now()
     account = PostAccount.query.filter_by(reset_password_token=token).first()
     if not account:
         return jsonify({'error': 'Invalid auth token. Please try again.'})
-    elif account.reset_password_token_sent_at and account.reset_password_token_sent_at.time_delta(minutes=30) < now:
+    elif account.reset_password_token_sent_at and account.reset_password_token_sent_at + timedelta(minutes=30) < now:
         return jsonify({'error': 'This token has expired.'})
     else:
         return redirect("https://pennlabs.org?token={}".format(token), code=302)
@@ -297,8 +301,9 @@ def verify_account_password_reset():
 # Reset password
 @app.route('/portal/account/reset', methods=['POST'])
 def reset_account_password():
-    token = request.args.get("token")
-    encrypted_password = request.args.get("encrypted_password")
+    token = request.form.get("token")
+    password = request.form.get("password")
+    encrypted_password = bcrypt.generate_password_hash(password)
     account = PostAccount.query.filter_by(reset_password_token=token).first()
     if not account:
         return jsonify({'error': 'Invalid auth token. Please try again.'})
@@ -306,7 +311,7 @@ def reset_account_password():
         return jsonify({'error': 'Invalid password. Please try again.'})
 
     account.encrypted_password = encrypted_password
-    account.updated_at = datetime.datetime.now()
+    account.updated_at = datetime.now()
     sqldb.session.commit()
     return jsonify({'msg': 'Your password has been reset.'})
 
@@ -322,7 +327,7 @@ def verify_account_email_token():
         return jsonify({'error': 'This email has already been verified for this account.'})
     else:
         account_email.verified = True
-        now = datetime.datetime.now()
+        now = datetime.now()
         upcoming_posts = Post.query.filter(Post.account == account_email.account).filter(Post.end_date >= now).all()
         for post in upcoming_posts:
             tester = PostTester(post=post.id, email=account_email.email)
@@ -361,8 +366,8 @@ def get_post_json(post):
         'time_label': post.time_label,
         'image_url': post.image_url,
         'post_url': post.post_url,
-        'start_date': datetime.datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
-        'end_date': datetime.datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
+        'start_date': datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
+        'end_date': datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
         'filters': [],
         'testers': [],
         'emails': []
@@ -394,7 +399,7 @@ def get_filters():
         {'name': 'Nursing Undegraduate (NURS)', 'filter': 'NURS'}
     ]
 
-    today = datetime.date.today()
+    today = date.today()
     senior_class_year = today.year
     if today.month >= 6:
         # If after May, current senior class will graduate in following year
@@ -417,7 +422,7 @@ def get_filters():
 
 
 def get_posts_for_account(account):
-    now = datetime.datetime.now()
+    now = datetime.now()
     post_arr = []
 
     if not account:
@@ -440,7 +445,7 @@ def get_posts_for_account(account):
 
 def get_posts_where_tester(account):
     # Find any posts that have yet to end for which this account is a tester
-    now = datetime.datetime.now()
+    now = datetime.now()
     post_testers = sqldb.session.query(Post) \
                                 .join(PostTester, isouter=True, full=False) \
                                 .filter(Post.end_date >= now) \
@@ -457,7 +462,7 @@ def get_posts_where_tester(account):
 
 def get_email_targeted_posts(account):
     # Find running posts that have yet to end for which this account is in target email list
-    now = datetime.datetime.now()
+    now = datetime.now()
     posts_emails = sqldb.session.query(Post) \
                                 .join(PostTargetEmail, isouter=True, full=False) \
                                 .filter(Post.start_date <= now) \
@@ -475,7 +480,7 @@ def get_email_targeted_posts(account):
 
 
 def get_filtered_posts(account):
-    now = datetime.datetime.now()
+    now = datetime.now()
     majr_filters = sqldb.session.query(SchoolMajorAccount.major, SchoolMajorAccount.expected_grad, School.code) \
                                 .join(School, School.id == SchoolMajorAccount.school_id) \
                                 .filter(SchoolMajorAccount.account_id == account.id) \
