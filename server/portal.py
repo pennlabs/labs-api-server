@@ -1,8 +1,8 @@
 from flask import request, jsonify, redirect
 from server import app, sqldb, bcrypt
 from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
-from .models import PostAccountEmail
-from sqlalchemy import desc, or_, case, exists
+from .models import PostAccountEmail, AnalyticsEvent
+from sqlalchemy import desc, or_, case, exists, func, and_
 from sqlalchemy.sql import select
 import json
 from datetime import date, datetime, timedelta
@@ -340,9 +340,60 @@ def verify_account_email_token():
 def get_posts():
     account_id = request.args.get("account")
     posts = Post.query.filter_by(account=account_id).all()
+    posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
+
+    qry1 = sqldb.session.query(AnalyticsEvent.post_id.label("id"), func.count(AnalyticsEvent.post_id).label("interactions")) \
+                        .filter(AnalyticsEvent.type == "post") \
+                        .filter(AnalyticsEvent.post_id.in_(posts_query)) \
+                        .filter(AnalyticsEvent.is_interaction == True) \
+                        .group_by(AnalyticsEvent.post_id) \
+                        .subquery()
+
+    qry2 = sqldb.session.query(AnalyticsEvent.post_id.label("id"), func.count(AnalyticsEvent.post_id).label("impressions")) \
+                        .filter(AnalyticsEvent.type == "post") \
+                        .filter(AnalyticsEvent.post_id.in_(posts_query)) \
+                        .filter(AnalyticsEvent.is_interaction == False) \
+                        .group_by(AnalyticsEvent.post_id) \
+                        .subquery()
+
+    qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label("id"), AnalyticsEvent.user) \
+                            .filter(AnalyticsEvent.type == "post") \
+                            .filter(AnalyticsEvent.post_id.in_(posts_query)) \
+                            .filter(AnalyticsEvent.is_interaction == False) \
+                            .group_by(AnalyticsEvent.post_id, AnalyticsEvent.user) \
+                            .subquery()
+
+    qry3 = sqldb.session.query(qry3_sub.c.id, func.count(qry3_sub.c.user).label("unique_impr")) \
+                        .select_from(qry3_sub) \
+                        .group_by(qry3_sub.c.id) \
+                        .subquery()
+
+    analytic_qry = sqldb.session.query(qry1.c.id, qry1.c.interactions, qry2.c.impressions, qry3.c.unique_impr) \
+                                .select_from(qry1) \
+                                .join(qry2, qry1.c.id == qry2.c.id) \
+                                .join(qry3, and_(qry1.c.id == qry2.c.id, qry2.c.id == qry3.c.id)) \
+                                .all()
+
+    analytics_by_post = {}
+    for post_id, interactions, impressions, unique_impr in analytic_qry:
+        analytics_by_post[post_id] = (interactions, impressions, unique_impr)
+
     json_arr = []
     for post in posts:
         post_json = get_post_json(post)
+        if str(post.id) in analytics_by_post:
+            (interactions, impressions, unique_impr) = analytics_by_post[str(post.id)]
+            post_json["interactions"] = interactions
+            post_json["impressions"] = impressions
+            post_json["unique_impressions"] = unique_impr
+        elif post.approved:
+            post_json["interactions"] = 0
+            post_json["impressions"] = 0
+            post_json["unique_impressions"] = 0
+        else:
+            ost_json["interactions"] = None
+            post_json["impressions"] = None
+            post_json["unique_impressions"] = None
         json_arr.append(post_json)
     return jsonify({'posts': json_arr})
 
