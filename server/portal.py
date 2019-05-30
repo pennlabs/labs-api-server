@@ -411,6 +411,7 @@ def get_post(post_id):
 
 def get_post_json(post):
     post_json = {
+        'id': post.id,
         'source': post.source,
         'title': post.title,
         'subtitle': post.subtitle,
