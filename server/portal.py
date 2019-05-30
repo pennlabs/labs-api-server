@@ -391,7 +391,7 @@ def get_posts():
             post_json["impressions"] = 0
             post_json["unique_impressions"] = 0
         else:
-            ost_json["interactions"] = None
+            post_json["interactions"] = None
             post_json["impressions"] = None
             post_json["unique_impressions"] = None
         json_arr.append(post_json)
