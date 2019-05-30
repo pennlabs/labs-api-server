@@ -75,7 +75,7 @@ def create_post():
         return jsonify({"error": "Parameter is missing"}), 400
 
     start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
-    end_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
 
     post = Post(account=account.id, source=source, title=title, subtitle=subtitle, time_label=time_label, post_url=post_url,
                 image_url=image_url, start_date=start_date, end_date=end_date, filters=(True if filters else False),
