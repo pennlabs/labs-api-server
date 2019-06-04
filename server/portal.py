@@ -7,7 +7,8 @@ from sqlalchemy.sql import select
 import json
 from datetime import date, datetime, timedelta
 import uuid
-import sys, os
+import sys
+import os
 import tinify
 
 
@@ -152,15 +153,22 @@ def save_image():
     if not file.filename:
         return jsonify({"error": "File must have a filename"}), 400
 
+    # Validate account
+    try:
+        account_id = request.form.get("account")
+        account = PostAccount.get_account(account_id)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
     source_data = file.read()
     aws_url = tinify.from_buffer(source_data) \
                     .resize(method="cover", width=600, height=300) \
                     .store(
-                        service="s3",
-                        aws_access_key_id=os.environ.get("AWS_KEY"),
-                        aws_secret_access_key=os.environ.get("AWS_SECRET"),
-                        region="us-east-1",
-                        path="penn.mobile.portal/images/{}".format(file.filename)
+                    service="s3",
+                    aws_access_key_id=os.environ.get("AWS_KEY"),
+                    aws_secret_access_key=os.environ.get("AWS_SECRET"),
+                    region="us-east-1",
+                    path="penn.mobile.portal/images/{}/{}".format(account_id, file.filename)
                     ).location
 
     if not aws_url:
@@ -374,21 +382,21 @@ def get_posts():
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == True) \
                         .group_by(AnalyticsEvent.post_id) \
-                        .subquery()
+                        .subquery() # noqa: E712
 
     qry2 = sqldb.session.query(AnalyticsEvent.post_id.label("id"), func.count(AnalyticsEvent.post_id).label("impressions")) \
                         .filter(AnalyticsEvent.type == "post") \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == False) \
                         .group_by(AnalyticsEvent.post_id) \
-                        .subquery()
+                        .subquery() # noqa: E712
 
     qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label("id"), AnalyticsEvent.user) \
                             .filter(AnalyticsEvent.type == "post") \
                             .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                             .filter(AnalyticsEvent.is_interaction == False) \
                             .group_by(AnalyticsEvent.post_id, AnalyticsEvent.user) \
-                            .subquery()
+                            .subquery() # noqa: E712
 
     qry3 = sqldb.session.query(qry3_sub.c.id, func.count(qry3_sub.c.user).label("unique_impr")) \
                         .select_from(qry3_sub) \
