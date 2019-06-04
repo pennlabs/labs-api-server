@@ -67,12 +67,12 @@ class MobileAppApiTests(unittest.TestCase):
             self.assertTrue("id" in s)
             self.assertTrue("wind" in s)
 
-    def testFitness(self):
-        with server.app.test_request_context():
-            resp = json.loads(server.fitness.fitness_usage().data.decode('utf8'))
-            self.assertTrue(len(resp["results"]) > 0)
-            for location in resp["results"]:
-                self.assertTrue("updated" in location)
+    # def testFitness(self):
+    #     with server.app.test_request_context():
+    #         resp = json.loads(server.fitness.fitness_usage().data.decode('utf8'))
+    #         self.assertTrue(len(resp["results"]) > 0)
+    #         for location in resp["results"]:
+    #             self.assertTrue("updated" in location)
 
     def testCalendarToday(self):
         with server.app.test_request_context():
