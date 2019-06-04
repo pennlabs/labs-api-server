@@ -1,5 +1,6 @@
 import os
 import redis
+import tinify
 
 from flask import Flask
 from flask_cors import CORS
@@ -9,6 +10,9 @@ from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+
+# Tinify Image Compression API
+tinify.key = os.environ.get("TINIFY_KEY")
 
 # sentry
 sentry = Sentry(app)

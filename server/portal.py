@@ -7,7 +7,8 @@ from sqlalchemy.sql import select
 import json
 from datetime import date, datetime, timedelta
 import uuid
-import sys
+import sys, os
+import tinify
 
 
 """
@@ -140,6 +141,32 @@ def update_post():
     update_status(post, "updated", msg)
 
     return jsonify({"post_id": post.id})
+
+
+@app.route('/portal/post/image', methods=['POST'])
+def save_image():
+    if "image" not in request.files:
+        return jsonify({"error": "No file passed to server"}), 400
+
+    file = request.files["image"]
+    if not file.filename:
+        return jsonify({"error": "File must have a filename"}), 400
+
+    source_data = file.read()
+    aws_url = tinify.from_buffer(source_data) \
+                    .resize(method="cover", width=600, height=300) \
+                    .store(
+                        service="s3",
+                        aws_access_key_id=os.environ.get("AWS_KEY"),
+                        aws_secret_access_key=os.environ.get("AWS_SECRET"),
+                        region="us-east-1",
+                        path="penn.mobile.portal/images/{}".format(file.filename)
+                    ).location
+
+    if not aws_url:
+        return jsonify({"error": "Something went wrong. Please try again."}), 400
+    else:
+        return jsonify({"image_url": aws_url})
 
 
 @app.route('/portal/post/approve', methods=['POST'])
