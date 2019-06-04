@@ -168,7 +168,7 @@ def save_image():
                     aws_access_key_id=os.environ.get("AWS_KEY"),
                     aws_secret_access_key=os.environ.get("AWS_SECRET"),
                     region="us-east-1",
-                    path="penn.mobile.portal/images/{}/{}".format(account_id, file.filename)
+                    path="penn.mobile.portal/images/{}/{}".format(account.name, file.filename)
                     ).location
 
     if not aws_url:
