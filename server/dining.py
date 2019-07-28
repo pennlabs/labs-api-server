@@ -1,11 +1,13 @@
 from server import app, sqldb
 import datetime
 import csv
+import re
 from .base import cached_route
 from .penndata import din, dinV2, wharton
 from flask import jsonify, request
 from .models import User, DiningPreference, Account, DiningBalance, DiningTransaction
 from sqlalchemy import func
+from bs4 import BeautifulSoup
 
 
 @app.route('/dining/v2/venues', methods=['GET'])
@@ -137,6 +139,45 @@ def get_dining_preferences():
                                .filter_by(user_id=user.id).group_by(DiningPreference.venue_id).all()
     preference_arr = [{'venue_id': x[0], 'count': x[1]} for x in preferences]
     return jsonify({'preferences': preference_arr})
+
+
+@app.route('/dining/balance/v2', methods=['POST'])
+def parse_and_save_dining_balance():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+    html = request.form.get("html")
+    if "You are not currently signed up" in html:
+        return jsonify({'hasPlan': False, 'balance': None, 'error': None})
+
+    soup = BeautifulSoup(html, "html.parser")
+    divs = soup.findAll("div", {"class": "info-column"})
+    dollars = None
+    swipes = None
+    guest_swipes = None
+    added_swipes = None
+    if len(divs) >= 4:
+        for div in divs[:4]:
+            if "Dining Dollars" in div.text:
+                dollars = float(div.span.text[1:])
+            elif "Regular Visits" in div.text:
+                swipes = int(div.span.text)
+            elif "Guest Visits" in div.text:
+                guest_swipes = int(div.span.text)
+            elif "Add-on Visits" in div.text: 
+                added_swipes = int(div.span.text)
+    else:
+        return jsonify({"success": False, "error": "Something went wrong parsing HTML."}), 400
+
+    total_swipes = swipes + added_swipes
+    dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=total_swipes, guest_swipes=guest_swipes)
+    sqldb.session.add(dining_balance)
+    sqldb.session.commit()
+
+    balance = {'dollars': dollars, 'swipes': total_swipes, 'guest_swipes': guest_swipes}
+    return jsonify({'hasPlan': True, 'balance': balance, 'error': None})
 
 
 @app.route('/dining/balance', methods=['POST'])
