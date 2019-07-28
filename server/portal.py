@@ -1,5 +1,5 @@
 from flask import request, jsonify, redirect
-from server import app, sqldb, bcrypt
+from server import app, sqldb, bcrypt, s3
 from .models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
 from .models import PostAccountEmail, AnalyticsEvent
 from sqlalchemy import desc, or_, case, exists, func, and_
@@ -159,6 +159,9 @@ def save_image():
         account = PostAccount.get_account(account_id)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+    # if request.args.original:
+    #     s3.upload_fileobj(file, "penn.mobile.portal/images/{}".format(account.name), file.filename)
 
     source_data = file.read()
     resized_image = tinify.from_buffer(source_data).resize(method="cover", width=600, height=300)

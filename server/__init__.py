@@ -1,6 +1,7 @@
 import os
 import redis
 import tinify
+import boto3
 
 from flask import Flask
 from flask_cors import CORS
@@ -16,6 +17,13 @@ tinify.key = os.environ.get("TINIFY_KEY")
 
 # sentry
 sentry = Sentry(app)
+
+# AWS S3
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=os.environ.get("AWS_KEY"),
+    aws_secret_access_key=os.environ.get("AWS_SECRET"),
+)
 
 # allow cors
 CORS(app)
