@@ -337,6 +337,11 @@ def add_courses(account, json_array):
 
         course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
         if course:
+            # If start/end date field was null, add the start/end date
+            if course.start_date is None or course.end_date is None:
+                course.start_date = start_date
+                course.end_date = end_date
+                sqldb.session.commit()
             courses_in_db.append(course)
         if course is None:
             identifier = "{}{}{}{}".format(term, dept, code, section)
