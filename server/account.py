@@ -7,6 +7,7 @@ from flask import jsonify, request
 from server import app, db, sqldb
 from .models import Account, School, Degree, Major, SchoolMajorAccount, Course, CourseAccount, CourseInstructor, CourseMeetingTime
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 
 """
@@ -335,10 +336,21 @@ def add_courses(account, json_array):
             start_date = None
             end_date = None
 
+            # Use the most common start and end dates for this term if they are not explicitly defined
+            term_start_end_dates = sqldb.session.query(Course.start_date, Course.end_date, func.count(Course.id).label('count')) \
+                                                .filter_by(term=term) \
+                                                .group_by(Course.start_date, Course.end_date) \
+                                                .order_by('count DESC') \
+                                                .all()
+
+            if len(term_start_end_dates) > 0:
+                start_date = term_start_end_dates[0][0]
+                end_date = term_start_end_dates[0][1]
+
         course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
         if course:
-            # If start/end date field was null, add the start/end date
-            if course.start_date is None or course.end_date is None:
+            # If start/end date field was null or different, add the start/end date
+            if course.start_date != start_date or course.end_date != end_date:
                 course.start_date = start_date
                 course.end_date = end_date
                 sqldb.session.commit()
