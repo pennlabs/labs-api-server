@@ -350,9 +350,11 @@ def add_courses(account, json_array):
         course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
         if course:
             # If start/end date field was null or different, add the start/end date
-            if course.start_date != start_date or course.end_date != end_date:
+            if course.start_date != start_date or course.end_date != end_date or course.building != building or course.room != room:
                 course.start_date = start_date
                 course.end_date = end_date
+                course.building = building
+                course.room = room
                 sqldb.session.commit()
             courses_in_db.append(course)
         if course is None:
