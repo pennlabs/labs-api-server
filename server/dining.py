@@ -166,7 +166,7 @@ def parse_and_save_dining_balance():
                 swipes = int(div.span.text)
             elif "Guest Visits" in div.text:
                 guest_swipes = int(div.span.text)
-            elif "Add-on Visits" in div.text: 
+            elif "Add-on Visits" in div.text:
                 added_swipes = int(div.span.text)
     else:
         return jsonify({"success": False, "error": "Something went wrong parsing HTML."}), 400
