@@ -41,7 +41,10 @@ app.secret_key = os.urandom(24)
 
 import server.registrar
 import server.transit
-import server.dining.dining
+import server.dining.hours_menus
+import server.dining.balance
+import server.dining.transactions
+import server.dining.preferences
 import server.buildings
 import server.directory
 import server.laundry
