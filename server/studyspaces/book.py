@@ -10,7 +10,7 @@ from penn.base import APIError
 from ..models import StudySpacesBooking, User
 from ..penndata import studyspaces, wharton
 from ..base import cached_route
-from .book import get_reservations
+from .reservations import get_reservations
 
 
 def get_wharton_sessionid(public=False):
