@@ -6,7 +6,7 @@ from .calendar3year import pull_todays_calendar
 from sqlalchemy import func, and_
 from .news import fetch_frontpage_article
 from .account import get_todays_courses, get_courses_in_N_days
-from .portal import get_posts_for_account
+from .portal.posts import get_posts_for_account
 from .studyspaces import get_reservations
 from penn.base import APIError
 import json

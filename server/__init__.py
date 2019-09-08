@@ -41,7 +41,10 @@ app.secret_key = os.urandom(24)
 
 import server.registrar
 import server.transit
-import server.dining
+import server.dining.hours_menus
+import server.dining.balance
+import server.dining.transactions
+import server.dining.preferences
 import server.buildings
 import server.directory
 import server.laundry
@@ -58,7 +61,9 @@ import server.homepage
 import server.news
 import server.account
 import server.analytics
-import server.portal
+import server.portal.posts
+import server.portal.account
+import server.portal.creation
 
 if __name__ == '__main__':
     app.run(debug=True)
