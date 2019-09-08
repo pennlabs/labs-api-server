@@ -7,7 +7,7 @@ from sqlalchemy import func, and_
 from .news import fetch_frontpage_article
 from .account import get_todays_courses, get_courses_in_N_days
 from .portal.posts import get_posts_for_account
-from .studyspaces import get_reservations
+from .studyspaces.reservations import get_reservations
 from penn.base import APIError
 import json
 import pytz

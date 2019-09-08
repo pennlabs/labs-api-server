@@ -52,7 +52,11 @@ import server.auth
 import server.pcr
 import server.athletics
 import server.nso
-import server.studyspaces
+import server.studyspaces.availability
+import server.studyspaces.book
+import server.studyspaces.cancel
+import server.studyspaces.deprecated
+import server.studyspaces.reservations
 import server.weather
 import server.calendar3year
 import server.event

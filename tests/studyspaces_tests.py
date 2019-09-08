@@ -10,34 +10,6 @@ class StudySpacesApiTests(unittest.TestCase):
     def setUp(self):
         server.app.config['TESTING'] = True
 
-    def testStudyspacesIDs(self):
-        with server.app.test_request_context():
-            res = json.loads(server.studyspaces.display_id_pairs().data.decode(
-                'utf8'))
-            self.assertTrue(len(res) > 0)
-            for i in res['locations']:
-                self.assertTrue(i['lid'] > 0)
-                self.assertTrue('name' in i)
-                self.assertTrue('service' in i)
-
-    def testStudyspaceExtraction(self):
-        with server.app.test_request_context():
-            res = json.loads(
-                server.studyspaces.parse_times(2683).data.decode('utf8'))
-            self.assertTrue(len(res) > 0)
-            self.assertTrue("id" in res)
-            self.assertTrue("categories" in res)
-
-    def testStudyspaceLegacySupport(self):
-        with server.app.test_request_context():
-            res = json.loads(server.studyspaces.parse_times(2683).data.decode('utf8'))
-            self.assertTrue("location_id" in res)
-            self.assertTrue("rooms" in res)
-            for room in res["rooms"]:
-                self.assertTrue("room_id" in room)
-                self.assertTrue("gid" in room)
-                self.assertTrue("lid" in room)
-
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:
             # fake the actual booking
