@@ -396,6 +396,7 @@ def add_courses(account, json_array):
             ca = CourseAccount.query.filter_by(account_id=account.id, course_id=course.id).first()
             if ca:
                 sqldb.session.delete(ca)
+        sqldb.session.commit()
 
         for course in courses_in_db:
             ca = CourseAccount(account_id=account.id, course_id=course.id)
