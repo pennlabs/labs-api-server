@@ -10,6 +10,7 @@ from penn.base import APIError
 from ..models import StudySpacesBooking, User
 from ..penndata import studyspaces, wharton
 from ..base import cached_route
+from .book import get_wharton_sessionid, save_wharton_sessionid
 
 
 @app.route('/studyspaces/availability/<int:building>', methods=['GET'])
