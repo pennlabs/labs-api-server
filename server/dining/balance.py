@@ -3,6 +3,7 @@ import datetime
 import csv
 import re
 from flask import jsonify, request
+from ..penndata import wharton
 from ..models import Account, DiningBalance
 from bs4 import BeautifulSoup
 

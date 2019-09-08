@@ -61,7 +61,9 @@ import server.homepage
 import server.news
 import server.account
 import server.analytics
-import server.portal
+import server.portal.posts
+import server.portal.account
+import server.portal.creation
 
 if __name__ == '__main__':
     app.run(debug=True)
