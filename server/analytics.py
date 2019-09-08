@@ -23,6 +23,11 @@ def send_analytics():
 
     for event_json in events:
         timestamp_str = event_json.get("timestamp")
+
+        # Some timestamps malformed as '2019-09-08T4:18:24.709 PM'
+        if "AM" in timestamp_str or "PM" in timestamp_str:
+            timestamp_str = timestamp_str.split(" ")[0]
+
         timestamp = datetime.datetime.strptime(timestamp_str, '%Y-%m-%dT%H:%M:%S.%f')
         type = event_json.get("cell_type")
         index = int(event_json.get("index"))
