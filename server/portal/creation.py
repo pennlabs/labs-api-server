@@ -1,6 +1,6 @@
 from flask import request, jsonify, redirect
 from server import app, sqldb, bcrypt, s3
-from ..models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, PostAccountEmail
+from ..models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, PostAccountEmail, Major
 from sqlalchemy import desc, or_, case, exists, func, and_
 from sqlalchemy.sql import select
 import json
