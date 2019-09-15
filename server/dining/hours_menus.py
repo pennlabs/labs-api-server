@@ -61,9 +61,6 @@ def retrieve_venues():
                             new_meals.append(meal)
                     day["meal"] = new_meals
 
-                    if day.get("dailyMenuURL"):
-                        del day["dailyMenuURL"]
-
             imageUrlJSON = db.get("venue:%s" % (str(venue["id"])))
             if imageUrlJSON:
                 venue["imageUrl"] = imageUrlJSON.decode('utf8').replace("\"","")
@@ -72,6 +69,9 @@ def retrieve_venues():
 
             if venue.get("weeklyMenuURL"):
                 del venue["weeklyMenuURL"]
+
+            if venue.get("dailyMenuURL"):
+                del venue["dailyMenuURL"]
         return json
 
     now = datetime.datetime.today()
