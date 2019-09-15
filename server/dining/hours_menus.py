@@ -1,4 +1,4 @@
-from server import app, sqldb
+from server import app, sqldb, db
 import datetime
 import csv
 import re
@@ -60,6 +60,18 @@ def retrieve_venues():
                         if "Light" not in meal_type:
                             new_meals.append(meal)
                     day["meal"] = new_meals
+
+                    if day.get("dailyMenuURL"):
+                        del day["dailyMenuURL"]
+
+            imageUrlJSON = db.get("venue:%s" % (str(venue["id"])))
+            if imageUrlJSON:
+                venue["imageUrl"] = imageUrlJSON.decode('utf8').replace("\"","")
+            else:
+                venue["imageUrl"] = None
+
+            if venue.get("weeklyMenuURL"):
+                del venue["weeklyMenuURL"]
         return json
 
     now = datetime.datetime.today()
