@@ -39,10 +39,10 @@ with app.app_context():
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
 
-import diningRedis
 
 import server.registrar
 import server.transit
+import server.dining.diningRedis
 import server.dining.hours_menus
 import server.dining.balance
 import server.dining.transactions
