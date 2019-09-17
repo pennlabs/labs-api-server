@@ -1,12 +1,15 @@
-from flask import request, jsonify
-from server import app
-import datetime
 import copy
+import datetime
 from functools import reduce
-from .base import cached_route, cache_get
+
+import requests
+from flask import jsonify, request
+
+from server import app
+
+from .base import cache_get, cached_route
 from .penndata import transit
 from .utils import haversine
-import requests
 
 
 def get_stop_info():
@@ -28,7 +31,7 @@ def transit_routes():
     {
       result_data: [
         {
-          route_name: "Route 1"
+          route_name: 'Route 1'
           stops: []
         }
       ]
@@ -77,11 +80,11 @@ def fastest_route():
         # Calculate the closest stops to the start and destination
         for stop in stops:
             distFrom = haversine(lonFrom, latFrom,
-                                 float(stop["Longitude"]),
-                                 float(stop["Latitude"]))
+                                 float(stop['Longitude']),
+                                 float(stop['Latitude']))
             distTo = haversine(lonTo, latTo,
-                               float(stop["Longitude"]),
-                               float(stop["Latitude"]))
+                               float(stop['Longitude']),
+                               float(stop['Latitude']))
             if minFrom == -1:
                 fromStop = stop
                 minFrom = distFrom
@@ -120,7 +123,7 @@ def fastest_route():
 
     if len(possible_routes) == 0:
         return jsonify({
-            "Error":
+            'Error':
             "We couldn't find a helpful Penn Transit route for those locations."
         })
     # Choose the route with the minimum total walking distance
@@ -131,28 +134,28 @@ def fastest_route():
     if final_route['walkingDistanceBefore'] + final_route[
             'walkingDistanceAfter'] > bird_dist:
         return jsonify({
-            "Error":
+            'Error':
             "We couldn't find a helpful Penn Transit route for those locations."
         })
 
     return jsonify({'result_data': final_route})
 
 
-pennride_id = {"Campus Loop": 291, "PennBUS East": 229, "PennBUS West": 230}
+pennride_id = {'Campus Loop': 291, 'PennBUS East': 229, 'PennBUS West': 230}
 
 
 def routes_with_directions(route_data):
     """Takes route data in the format
     [
       {
-        route_name: "Route 1"
+        route_name: 'Route 1'
         stops: []
       },
       {
-        route_name: "PennBUS West"
+        route_name: 'PennBUS West'
         stops: [
           {
-            BusStopName: "The Quad, 3700 Spruce St.",
+            BusStopName: 'The Quad, 3700 Spruce St.',
             Latitude: 39.9,
             Longitude: -75.2,
             BusStopId: 29207,
@@ -173,8 +176,8 @@ def routes_with_directions(route_data):
 
     def is_stop(waypoint, stop, epsilon=0.0002):
         """Return whether waypoint is actually a stop based on a margin of error"""
-        diff_latitude = abs(waypoint["Latitude"] - stop["Latitude"])
-        diff_longitude = abs(waypoint["Longitude"] - stop["Longitude"])
+        diff_latitude = abs(waypoint['Latitude'] - stop['Latitude'])
+        diff_longitude = abs(waypoint['Longitude'] - stop['Longitude'])
         return diff_latitude + diff_longitude > epsilon
 
     for route in route_data:
@@ -215,7 +218,7 @@ def populate_stop_info(stops):
                             stop['stopOrder'])
         return list(stop_dict.values())
     except KeyError:
-        return {"error": "JSON error in building stops"}
+        return {'error': 'JSON error in building stops'}
 
 
 def populate_route_info():
@@ -237,14 +240,14 @@ def populate_route_info():
             del stop['routes']
             for route_name, val in items:
                 to_insert = copy.deepcopy(stop)
-                to_insert["order"] = val
+                to_insert['order'] = val
 
                 if route_name in routes:
                     routes[route_name].append(to_insert)
                 else:
                     routes[route_name] = [to_insert]
     for route in routes:
-        routes[route] = sorted(routes[route], key=lambda stop: stop["order"])
+        routes[route] = sorted(routes[route], key=lambda stop: stop['order'])
 
     # Filter out bad routes
     good_routes = ['PennBUS East', 'PennBUS West', 'Campus Loop']

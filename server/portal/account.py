@@ -1,22 +1,25 @@
-from flask import request, jsonify, redirect
-from server import app, sqldb, bcrypt
-from ..models import PostAccount, Post, PostTester, PostAccountEmail
-from sqlalchemy import desc, or_, case, exists, func, and_
-from sqlalchemy.sql import select
 import json
 import uuid
 from datetime import date, datetime, timedelta
 
+from flask import jsonify, redirect, request
+from sqlalchemy import and_, case, desc, exists, func, or_
+from sqlalchemy.sql import select
+
+from server import app, bcrypt, sqldb
+
+from ..models import Post, PostAccount, PostAccountEmail, PostTester
+
 
 @app.route('/portal/account/new', methods=['POST'])
 def create_account():
-    name = request.form.get("name")
-    email = request.form.get("email")
-    password = request.form.get("password")
+    name = request.form.get('name')
+    email = request.form.get('email')
+    password = request.form.get('password')
     encrypted_password = bcrypt.generate_password_hash(password)
 
     if any(x is None for x in [name, email, encrypted_password]):
-        return jsonify({"error": "Parameter is missing"}), 400
+        return jsonify({'error': 'Parameter is missing'}), 400
 
     account_exists = sqldb.session.query(exists().where(PostAccount.email == email)).scalar()
     if account_exists:
@@ -31,11 +34,11 @@ def create_account():
 # Login and retrieve account ID
 @app.route('/portal/account/login', methods=['POST'])
 def login():
-    email = request.form.get("email")
-    password = request.form.get("password")
+    email = request.form.get('email')
+    password = request.form.get('password')
 
     if any(x is None for x in [email, password]):
-        return jsonify({"error": "Parameter is missing"}), 400
+        return jsonify({'error': 'Parameter is missing'}), 400
 
     pw_hash = bcrypt.generate_password_hash(password)
     account = PostAccount.query.filter(PostAccount.email == email and bcrypt.check_password_hash(pw_hash, password)).first()
@@ -52,10 +55,10 @@ def login():
 @app.route('/portal/account', methods=['GET'])
 def get_account_info():
     try:
-        account_id = request.args.get("account_id")
+        account_id = request.args.get('account_id')
         account = PostAccount.get_account(account_id)
     except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({'error': str(e)}), 400
 
     verified_emails = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
     account_json = {
@@ -70,7 +73,7 @@ def get_account_info():
 # Request password reset
 @app.route('/portal/account/reset/request', methods=['POST'])
 def request_account_password_reset_token():
-    email = request.form.get("email")
+    email = request.form.get('email')
     account = PostAccount.query.filter_by(email=email).first()
     if not account:
         return jsonify({'error': 'Account not found.'}), 400
@@ -87,7 +90,7 @@ def request_account_password_reset_token():
 # Verify a reset password token
 @app.route('/portal/account/reset', methods=['GET'])
 def verify_account_password_reset():
-    token = request.args.get("token")
+    token = request.args.get('token')
     now = datetime.now()
     account = PostAccount.query.filter_by(reset_password_token=token).first()
     if not account:
@@ -95,14 +98,14 @@ def verify_account_password_reset():
     elif account.reset_password_token_sent_at and account.reset_password_token_sent_at + timedelta(minutes=30) < now:
         return jsonify({'error': 'This token has expired.'})
     else:
-        return redirect("https://pennlabs.org?token={}".format(token), code=302)
+        return redirect('https://pennlabs.org?token={}'.format(token), code=302)
 
 
 # Reset password
 @app.route('/portal/account/reset', methods=['POST'])
 def reset_account_password():
-    token = request.form.get("token")
-    password = request.form.get("password")
+    token = request.form.get('token')
+    password = request.form.get('password')
     encrypted_password = bcrypt.generate_password_hash(password)
     account = PostAccount.query.filter_by(reset_password_token=token).first()
     if not account:
@@ -119,7 +122,7 @@ def reset_account_password():
 # Verifies a test email for an account and adds that test email to all upcoming posts
 @app.route('/portal/email/verify', methods=['GET'])
 def verify_account_email_token():
-    token = request.args.get("token")
+    token = request.args.get('token')
     account_email = PostAccountEmail.query.filter_by(auth_token=token).first()
     if not account_email:
         return jsonify({'error': 'Invalid auth token. Please try again.'})
@@ -133,4 +136,4 @@ def verify_account_email_token():
             tester = PostTester(post=post.id, email=account_email.email)
             sqldb.session.add(tester)
         sqldb.session.commit()
-        return redirect("https://pennlabs.org", code=302)
+        return redirect('https://pennlabs.org', code=302)

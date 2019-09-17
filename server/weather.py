@@ -1,16 +1,19 @@
-from server import app
-from .base import cached_route
-import requests
 import datetime
 import os
+
+import requests
+
+from server import app
+
+from .base import cached_route
 
 
 @app.route('/weather', methods=['GET'])
 def retrieve_weather_data():
-    '''Retrieves the current weather from the Open Weather Map API.
+    """Retrieves the current weather from the Open Weather Map API.
     Stores data in a cache whenever data is retrieved; cache is updated
     if it has not been updated within 10 minutes.
-    '''
+    """
     OWM_API_KEY = os.getenv('OWM_API_KEY')
 
     def get_data():

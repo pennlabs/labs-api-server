@@ -1,15 +1,16 @@
-import os
 import datetime
-import requests
+import os
 
-from flask import jsonify, request
+import requests
 from dateutil.parser import parse
+from flask import jsonify, request
+from penn.base import APIError
 
 from server import app, db, sqldb
-from penn.base import APIError
+
+from ..base import cached_route
 from ..models import StudySpacesBooking, User
 from ..penndata import studyspaces, wharton
-from ..base import cached_route
 from .book import get_wharton_sessionid, save_wharton_sessionid
 
 
@@ -41,7 +42,7 @@ def get_wharton_gsr_reservations():
         save_wharton_sessionid()
         return jsonify({'reservations': reservations})
     except APIError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({'error': str(e)}), 400
 
 
 @app.route('/studyspaces/gsr/delete', methods=['POST'])
@@ -52,13 +53,13 @@ def delete_wharton_gsr_reservation():
     booking = request.form.get('booking')
     sessionid = request.form.get('sessionid')
     if not booking:
-        return jsonify({"error": "No booking sent to server."})
+        return jsonify({'error': 'No booking sent to server.'})
     if not sessionid:
-        return jsonify({"error": "No session id sent to server."})
+        return jsonify({'error': 'No session id sent to server.'})
 
     try:
         result = wharton.delete_booking(sessionid, booking)
         save_wharton_sessionid()
         return jsonify({'result': result})
     except APIError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({'error': str(e)}), 400

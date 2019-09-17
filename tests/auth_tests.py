@@ -1,6 +1,8 @@
-import unittest
 import json
+import unittest
+
 import server
+
 
 # Fake
 authHeaders = [(
@@ -30,7 +32,7 @@ class AuthApiTests(unittest.TestCase):
         with server.app.test_request_context(headers=authHeaders):
             server.auth.auth()
             res = json.loads(
-                server.auth.validate("badtoken")[0].data.decode('utf8'))
+                server.auth.validate('badtoken')[0].data.decode('utf8'))
             self.assertEquals(res['status'], 'invalid')
 
     def testTokenValidationNoHttps(self):

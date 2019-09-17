@@ -1,10 +1,13 @@
-from server import app, sqldb
-import datetime
 import csv
-from flask import jsonify, request
-from ..models import Account, DiningTransaction
-from sqlalchemy import func
+import datetime
+
 from bs4 import BeautifulSoup
+from flask import jsonify, request
+from sqlalchemy import func
+
+from server import app, sqldb
+
+from ..models import Account, DiningTransaction
 
 
 @app.route('/dining/transactions', methods=['POST'])
@@ -12,14 +15,14 @@ def save_dining_dollar_transactions():
     try:
         account = Account.get_account()
     except ValueError as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        return jsonify({'success': False, 'error': str(e)}), 400
 
     last_transaction = sqldb.session.query(DiningTransaction.date) \
                                     .filter_by(account_id=account.id) \
                                     .order_by(DiningTransaction.date.desc()) \
                                     .first()
 
-    decoded_content = request.form.get("transactions")
+    decoded_content = request.form.get('transactions')
     cr = csv.reader(decoded_content.splitlines(), delimiter=',')
 
     # Create list of rows, remove headers, and reverse so in order of date

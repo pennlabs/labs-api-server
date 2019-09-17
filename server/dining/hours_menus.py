@@ -1,14 +1,20 @@
-from server import app, sqldb, db
-import datetime
 import csv
+import datetime
 import re
 import os
 from ..base import cached_route
 from ..penndata import din, dinV2, wharton
-from flask import jsonify, request
-from ..models import User, DiningPreference, Account, DiningBalance, DiningTransaction
-from sqlalchemy import func
+
 from bs4 import BeautifulSoup
+
+from flask import jsonify, request
+from sqlalchemy import func
+
+from server import app, db, sqldb
+
+from ..base import cached_route
+from ..models import Account, DiningBalance, DiningPreference, DiningTransaction, User
+from ..penndata import din, dinV2, wharton
 
 
 @app.route('/dining/v2/venues', methods=['GET'])
@@ -49,24 +55,34 @@ def retrieve_item_v2(item_id):
 def retrieve_venues():
     def get_data():
         json = din.venues()['result_data']
-        venues = json["document"]["venue"]
+        venues = json['document']['venue']
         for venue in venues:
-            days = venue.get("dateHours")
+            days = venue.get('dateHours')
             if days:
                 for day in days:
-                    meals = day["meal"]
+                    meals = day['meal']
                     new_meals = []
                     for meal in meals:
-                        meal_type = meal["type"]
-                        if "Light" not in meal_type:
+                        meal_type = meal['type']
+                        if 'Light' not in meal_type:
                             new_meals.append(meal)
-                    day["meal"] = new_meals
+                    day['meal'] = new_meals
 
-            imageUrlJSON = db.get("venue:%s" % (str(venue["id"])))
+            imageUrlJSON = db.get('venue:%s' % (str(venue['id'])))
             if imageUrlJSON:
-                venue["imageUrl"] = imageUrlJSON.decode('utf8').replace("\"", "")
+                venue['imageUrl'] = imageUrlJSON.decode('utf8').replace("'", '')
             else:
+<<<<<<< HEAD
                 venue["imageUrl"] = None
+=======
+                venue['imageUrl'] = None
+
+            if venue.get('weeklyMenuURL'):
+                del venue['weeklyMenuURL']
+
+            if venue.get('dailyMenuURL'):
+                del venue['dailyMenuURL']
+>>>>>>> Lint
         return json
 
     now = datetime.datetime.today()
@@ -94,7 +110,7 @@ def retrieve_weekly_menu(venue_id):
 
     def get_data():
         menu = din.menu_weekly(venue_id)
-        return menu["result_data"]
+        return menu['result_data']
 
     return cached_route('dining:venues:weekly:%s' % venue_id, td, get_data)
 
@@ -106,7 +122,7 @@ def retrieve_daily_menu(venue_id):
                                  now.day) + datetime.timedelta(hours=4)
 
     def get_data():
-        return din.menu_daily(venue_id)["result_data"]
+        return din.menu_daily(venue_id)['result_data']
 
     return cached_route('dining:venues:daily:%s' % venue_id, end_time - now,
                         get_data)

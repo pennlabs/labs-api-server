@@ -1,45 +1,48 @@
-from flask import request, jsonify, redirect
-from server import app, sqldb, bcrypt, s3
-from ..models import PostAccount, Post, PostFilter, PostStatus, PostTester, PostTargetEmail, SchoolMajorAccount, School, Major
-from ..models import PostAccountEmail, AnalyticsEvent
-from sqlalchemy import desc, or_, case, exists, func, and_
-from sqlalchemy.sql import select
 import json
-from datetime import date, datetime, timedelta
-import uuid
-import sys
 import os
+import sys
+import uuid
+from datetime import date, datetime, timedelta
+
 import tinify
+from flask import jsonify, redirect, request
+from sqlalchemy import and_, case, desc, exists, func, or_
+from sqlalchemy.sql import select
+
+from server import app, bcrypt, s3, sqldb
+
+from ..models import (AnalyticsEvent, Major, Post, PostAccount, PostAccountEmail, PostFilter,
+                      PostStatus, PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
 @app.route('/portal/posts', methods=['GET'])
 def get_posts():
-    account_id = request.args.get("account")
+    account_id = request.args.get('account')
     posts = Post.query.filter_by(account=account_id).all()
     posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
 
-    qry1 = sqldb.session.query(AnalyticsEvent.post_id.label("id"), func.count(AnalyticsEvent.post_id).label("interactions")) \
-                        .filter(AnalyticsEvent.type == "post") \
+    qry1 = sqldb.session.query(AnalyticsEvent.post_id.label('id'), func.count(AnalyticsEvent.post_id).label('interactions')) \
+                        .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == True) \
                         .group_by(AnalyticsEvent.post_id) \
                         .subquery()  # noqa: E712
 
-    qry2 = sqldb.session.query(AnalyticsEvent.post_id.label("id"), func.count(AnalyticsEvent.post_id).label("impressions")) \
-                        .filter(AnalyticsEvent.type == "post") \
+    qry2 = sqldb.session.query(AnalyticsEvent.post_id.label('id'), func.count(AnalyticsEvent.post_id).label('impressions')) \
+                        .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == False) \
                         .group_by(AnalyticsEvent.post_id) \
                         .subquery()  # noqa: E712
 
-    qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label("id"), AnalyticsEvent.user) \
-                            .filter(AnalyticsEvent.type == "post") \
+    qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label('id'), AnalyticsEvent.user) \
+                            .filter(AnalyticsEvent.type == 'post') \
                             .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                             .filter(AnalyticsEvent.is_interaction == False) \
                             .group_by(AnalyticsEvent.post_id, AnalyticsEvent.user) \
                             .subquery()  # noqa: E712
 
-    qry3 = sqldb.session.query(qry3_sub.c.id, func.count(qry3_sub.c.user).label("unique_impr")) \
+    qry3 = sqldb.session.query(qry3_sub.c.id, func.count(qry3_sub.c.user).label('unique_impr')) \
                         .select_from(qry3_sub) \
                         .group_by(qry3_sub.c.id) \
                         .subquery()
@@ -59,24 +62,24 @@ def get_posts():
         post_json = get_post_json(post)
         if str(post.id) in analytics_by_post:
             (interactions, impressions, unique_impr) = analytics_by_post[str(post.id)]
-            post_json["interactions"] = interactions
-            post_json["impressions"] = impressions
-            post_json["unique_impressions"] = unique_impr
+            post_json['interactions'] = interactions
+            post_json['impressions'] = impressions
+            post_json['unique_impressions'] = unique_impr
         elif post.approved:
-            post_json["interactions"] = 0
-            post_json["impressions"] = 0
-            post_json["unique_impressions"] = 0
+            post_json['interactions'] = 0
+            post_json['impressions'] = 0
+            post_json['unique_impressions'] = 0
         else:
-            post_json["interactions"] = None
-            post_json["impressions"] = None
-            post_json["unique_impressions"] = None
+            post_json['interactions'] = None
+            post_json['impressions'] = None
+            post_json['unique_impressions'] = None
         json_arr.append(post_json)
     return jsonify({'posts': json_arr})
 
 
 @app.route('/portal/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
-    account_id = request.args.get("account")
+    account_id = request.args.get('account')
     post = Post.query.filter_by(id=post_id, account=account_id).first()
     if not post:
         return jsonify({'error': 'Post not found.'}), 400

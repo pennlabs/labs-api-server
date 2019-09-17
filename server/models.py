@@ -4,6 +4,7 @@ import uuid
 from flask import jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
+
 sqldb = SQLAlchemy()
 
 
@@ -24,10 +25,10 @@ class Account(sqldb.Model):
     def get_account():
         account_id = request.headers.get('X-Account-ID')
         if not account_id:
-            raise ValueError("No account ID passed to the server.")
+            raise ValueError('No account ID passed to the server.')
         account = Account.query.filter_by(id=account_id).first()
         if not account:
-            raise ValueError("Unable to authenticate account id.")
+            raise ValueError('Unable to authenticate account id.')
         return account
 
     def is_student(self):
@@ -43,19 +44,19 @@ class School(sqldb.Model):
 class Degree(sqldb.Model):
     code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
-    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), nullable=False)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('school.id'), nullable=False)
 
 
 class Major(sqldb.Model):
     code = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     name = sqldb.Column(sqldb.Text, nullable=False)
-    degree_code = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("degree.code"), nullable=False)
+    degree_code = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('degree.code'), nullable=False)
 
 
 class SchoolMajorAccount(sqldb.Model):
-    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
-    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("school.id"), primary_key=True)
-    major = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("major.code"), primary_key=True, nullable=True)
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), primary_key=True)
+    school_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('school.id'), primary_key=True)
+    major = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('major.code'), primary_key=True, nullable=True)
     expected_grad = sqldb.Column(sqldb.Text, nullable=False)
 
 
@@ -77,7 +78,7 @@ class Course(sqldb.Model):
 
 
 class CourseMeetingTime(sqldb.Model):
-    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('course.id'), primary_key=True)
     weekday = sqldb.Column(sqldb.VARCHAR(3), primary_key=True)
     start_time = sqldb.Column(sqldb.VARCHAR(10), primary_key=True)
     end_time = sqldb.Column(sqldb.Text, nullable=False)
@@ -86,13 +87,13 @@ class CourseMeetingTime(sqldb.Model):
 
 
 class CourseInstructor(sqldb.Model):
-    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('course.id'), primary_key=True)
     name = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class CourseAccount(sqldb.Model):
-    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), primary_key=True)
-    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("course.id"), primary_key=True)
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('course.id'), primary_key=True)
 
 
 class LaundrySnapshot(sqldb.Model):
@@ -108,7 +109,7 @@ class LaundrySnapshot(sqldb.Model):
 
 class StudySpacesBooking(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=True)
+    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'), nullable=True)
     booking_id = sqldb.Column(sqldb.Text, nullable=True)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.now)
     lid = sqldb.Column(sqldb.Integer, nullable=True)
@@ -130,19 +131,19 @@ class User(sqldb.Model):
     def get_or_create(device_id=None, platform=None, email=None):
         device_id = device_id or request.headers.get('X-Device-ID')
         if not device_id:
-            raise ValueError("No device ID passed to the server.")
+            raise ValueError('No device ID passed to the server.')
 
         user = User.query.filter_by(device_id=device_id).first()
         if user:
             return user
 
         agent = request.headers.get('User-Agent')
-        if any(device in agent.lower() for device in ["iphone", "ipad"]):
-            platform = "ios"
-        elif any(device in agent.lower() for device in ["android"]):
-            platform = "android"
+        if any(device in agent.lower() for device in ['iphone', 'ipad']):
+            platform = 'ios'
+        elif any(device in agent.lower() for device in ['android']):
+            platform = 'android'
         else:
-            platform = "unknown"
+            platform = 'unknown'
 
         user = User(platform=platform, device_id=device_id, email=email)
         sqldb.session.add(user)
@@ -153,30 +154,30 @@ class User(sqldb.Model):
     def get_user():
         device_id = request.headers.get('X-Device-ID')
         if not device_id:
-            raise ValueError("No device ID passed to the server.")
+            raise ValueError('No device ID passed to the server.')
         user = User.query.filter_by(device_id=device_id).first()
         if not user:
-            raise ValueError("Unable to authenticate on the server.")
+            raise ValueError('Unable to authenticate on the server.')
         return user
 
 
 class LaundryPreference(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
-    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'), nullable=False)
     room_id = sqldb.Column(sqldb.Integer, nullable=False)
 
 
 class DiningPreference(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
-    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"), nullable=False)
+    user_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'), nullable=False)
     venue_id = sqldb.Column(sqldb.Integer, nullable=False)
 
 
 class DiningBalance(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"))
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'))
     dining_dollars = sqldb.Column(sqldb.Float, nullable=False)
     swipes = sqldb.Column(sqldb.Integer, nullable=False)
     guest_swipes = sqldb.Column(sqldb.Integer, nullable=False)
@@ -185,7 +186,7 @@ class DiningBalance(sqldb.Model):
 
 class DiningTransaction(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"))
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'))
     date = sqldb.Column(sqldb.DateTime, nullable=False)
     description = sqldb.Column(sqldb.Text, nullable=False)
     amount = sqldb.Column(sqldb.Float, nullable=False)
@@ -208,8 +209,8 @@ class Event(sqldb.Model):
 
 class AnalyticsEvent(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("user.id"))
-    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("account.id"), nullable=True)
+    user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'))
+    account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), nullable=True)
     timestamp = sqldb.Column(sqldb.DateTime(3), nullable=False)
     type = sqldb.Column(sqldb.Text, nullable=False)
     index = sqldb.Column(sqldb.Integer, nullable=False)
@@ -233,17 +234,17 @@ class PostAccount(sqldb.Model):
     @staticmethod
     def get_account(account_id):
         if not account_id:
-            raise ValueError("No account id provided.")
+            raise ValueError('No account id provided.')
 
         account = PostAccount.query.filter_by(id=account_id).first()
         if not account:
-            raise ValueError("Unable to authenticate account id.")
+            raise ValueError('Unable to authenticate account id.')
         return account
 
 
 class Post(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
-    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), nullable=False)
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('post_account.id'), nullable=False)
     source = sqldb.Column(sqldb.Text, nullable=True)
     title = sqldb.Column(sqldb.Text, nullable=True)
     subtitle = sqldb.Column(sqldb.Text, nullable=True)
@@ -261,29 +262,29 @@ class Post(sqldb.Model):
     @staticmethod
     def get_post(post_id):
         if not post_id:
-            raise ValueError("No post id provided.")
+            raise ValueError('No post id provided.')
 
         account = Post.query.filter_by(id=post_id).first()
         if not account:
-            raise ValueError("Unable to authenticate account id.")
+            raise ValueError('Unable to authenticate account id.')
         return account
 
 
 class PostFilter(sqldb.Model):
-    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('post.id'), primary_key=True)
     type = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     filter = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class PostStatus(sqldb.Model):
-    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('post.id'), primary_key=True)
     status = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     msg = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now(), primary_key=True)
 
 
 class PostAccountEmail(sqldb.Model):
-    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey("post_account.id"), primary_key=True)
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('post_account.id'), primary_key=True)
     email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     verified = sqldb.Column(sqldb.Boolean, default=False)
     auth_token = sqldb.Column(sqldb.VARCHAR(255), nullable=False)
@@ -291,12 +292,12 @@ class PostAccountEmail(sqldb.Model):
 
 
 class PostTester(sqldb.Model):
-    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('post.id'), primary_key=True)
     email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class PostTargetEmail(sqldb.Model):
-    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("post.id"), primary_key=True)
+    post = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('post.id'), primary_key=True)
     email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
@@ -306,8 +307,8 @@ class HomeCell(object):
     Usage:
 
         >>> import HomeCell
-        >>> type = "dining"
-        >>> info = { "venues": [593, 724, 331] }
+        >>> type = 'dining'
+        >>> info = { 'venues': [593, 724, 331] }
         >>> weight = 10
         >>> cell = HomeCell(type, info, weight)
 
@@ -319,4 +320,4 @@ class HomeCell(object):
         self.weight = myWeight
 
     def getCell(self):
-        return {"type": self.type, "info": self.info}
+        return {'type': self.type, 'info': self.info}

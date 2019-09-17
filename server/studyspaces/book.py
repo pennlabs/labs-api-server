@@ -1,15 +1,16 @@
-import os
 import datetime
-import requests
+import os
 
-from flask import jsonify, request
+import requests
 from dateutil.parser import parse
+from flask import jsonify, request
+from penn.base import APIError
 
 from server import app, db, sqldb
-from penn.base import APIError
+
+from ..base import cached_route
 from ..models import StudySpacesBooking, User
 from ..penndata import studyspaces, wharton
-from ..base import cached_route
 from .reservations import get_reservations
 
 
@@ -44,65 +45,65 @@ def book_room():
     Books a room.
     """
     try:
-        room = int(request.form["room"])
+        room = int(request.form['room'])
     except (KeyError, ValueError):
-        return jsonify({"results": False, "error": "Please specify a correct room id!"}), 400
+        return jsonify({'results': False, 'error': 'Please specify a correct room id!'}), 400
 
     try:
-        start = parse(request.form["start"])
-        end = parse(request.form["end"])
+        start = parse(request.form['start'])
+        end = parse(request.form['end'])
     except KeyError:
-        return jsonify({"results": False, "error": "No start and end parameters passed to server!"}), 400
+        return jsonify({'results': False, 'error': 'No start and end parameters passed to server!'}), 400
 
     try:
-        lid = int(request.form["lid"])
+        lid = int(request.form['lid'])
     except (KeyError, ValueError):
         lid = None
 
     email = None
 
     if lid == 1:
-        sessionid = request.form.get("sessionid")
+        sessionid = request.form.get('sessionid')
         if not sessionid:
-            return jsonify({"results": False, "error": "You must pass a sessionid when booking a Wharton GSR!"}), 400
+            return jsonify({'results': False, 'error': 'You must pass a sessionid when booking a Wharton GSR!'}), 400
         resp = wharton.book_reservation(sessionid, room, start, end)
-        resp["results"] = resp["success"]
-        room_booked = resp["success"]
-        del resp["success"]
+        resp['results'] = resp['success']
+        room_booked = resp['success']
+        del resp['success']
         if room_booked:
             save_wharton_sessionid()
             booking_id = None
 
             # Look up the reservation to get the booking id
             reservations = get_reservations(None, sessionid, 0)
-            startStr = request.form["start"].split("-")[0]
-            endStr = request.form["end"].split("-")[0]
+            startStr = request.form['start'].split('-')[0]
+            endStr = request.form['end'].split('-')[0]
             for reservation in reservations:
-                resStartStr = reservation["fromDate"].split("-")[0]
-                resEndStr = reservation["toDate"].split("-")[0]
+                resStartStr = reservation['fromDate'].split('-')[0]
+                resEndStr = reservation['toDate'].split('-')[0]
                 if startStr == resStartStr and endStr == resEndStr:
-                    booking_id = reservation["booking_id"]
+                    booking_id = reservation['booking_id']
                     break
     else:
         contact = {}
-        for arg, field in [("fname", "firstname"), ("lname", "lastname"), ("email", "email"), ("nickname", "groupname")]:
+        for arg, field in [('fname', 'firstname'), ('lname', 'lastname'), ('email', 'email'), ('nickname', 'groupname')]:
             try:
                 contact[arg] = request.form[field]
             except KeyError:
-                return jsonify({"results": False, "error": "'{}' is a required parameter!".format(field)})
+                return jsonify({'results': False, 'error': "'{}' is a required parameter!".format(field)})
 
-        email = contact.get("email")
-        contact["custom"] = {}
-        contact["custom"]["q3699"] = get_affiliation(email)
-        for arg, field in [("q2533", "phone"), ("q2555", "size"), ("q2537", "size"), ("q3699", "affiliation")]:
+        email = contact.get('email')
+        contact['custom'] = {}
+        contact['custom']['q3699'] = get_affiliation(email)
+        for arg, field in [('q2533', 'phone'), ('q2555', 'size'), ('q2537', 'size'), ('q3699', 'affiliation')]:
             try:
-                contact["custom"][arg] = request.form[field]
+                contact['custom'][arg] = request.form[field]
             except KeyError:
                 pass
 
         resp = studyspaces.book_room(room, start.isoformat(), end.isoformat(), **contact)
-        room_booked = resp.get("results")
-        booking_id = resp.get("booking_id")
+        room_booked = resp.get('results')
+        booking_id = resp.get('booking_id')
 
     try:
         user = User.get_user()
@@ -129,14 +130,14 @@ def book_room():
 
 
 def get_affiliation(email):
-    if "wharton" in email:
-        return "Wharton"
-    elif "seas" in email:
-        return "SEAS"
-    elif "sas" in email:
-        return "SAS"
+    if 'wharton' in email:
+        return 'Wharton'
+    elif 'seas' in email:
+        return 'SEAS'
+    elif 'sas' in email:
+        return 'SAS'
     else:
-        return "Other"
+        return 'Other'
 
 
 def save_booking(**info):

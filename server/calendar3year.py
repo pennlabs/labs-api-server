@@ -1,9 +1,12 @@
-from flask import jsonify
-from .penndata import calendar
-from .base import cache_get
-from server import app
 import datetime
 import re
+
+from flask import jsonify
+
+from server import app
+
+from .base import cache_get
+from .penndata import calendar
 
 
 def pull_calendar(d):
@@ -12,7 +15,7 @@ def pull_calendar(d):
 
     :param d: date object that specifies the date
     """
-    pulled_calendar = cache_get("calendar:3year", datetime.timedelta(weeks=1), calendar.pull_3year)
+    pulled_calendar = cache_get('calendar:3year', datetime.timedelta(weeks=1), calendar.pull_3year)
     within_range = []
     for event in pulled_calendar:
         start = event['end']
@@ -20,7 +23,7 @@ def pull_calendar(d):
         time_diff = event_date - d
         if time_diff.total_seconds() > 0 and time_diff.total_seconds() <= 1209600:
             event['name'] = re.split('Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday', event['name'])[0].strip()
-            if "Advance Registration" in event['name']:
+            if 'Advance Registration' in event['name']:
                 event['name'] = 'Advance Registration'
             within_range.append(event)
     return within_range
@@ -53,5 +56,5 @@ def pull_date(date):
     """Return JSON object with all events 2 weeks from the
     date passed in as an argument.
     """
-    d = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    d = datetime.datetime.strptime(date, '%Y-%m-%d').date()
     return pull_calendar_response(d)

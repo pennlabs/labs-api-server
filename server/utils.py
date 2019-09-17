@@ -1,4 +1,4 @@
-from math import radians, cos, sin, asin, sqrt
+from math import asin, cos, radians, sin, sqrt
 
 
 def haversine(lon1, lat1, lon2, lat2):
