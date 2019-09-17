@@ -1,7 +1,7 @@
 Labs API Server
 ===============
 
-[![Build Status](https://travis-ci.org/pennlabs/labs-api-server.svg?branch=master)](https://travis-ci.org/pennlabs/labs-api-server)
+[![CircleCI](https://circleci.com/gh/pennlabs/labs-api-server.svg?style=shield)](https://circleci.com/gh/pennlabs/labs-api-server)
 
 Redis-backed caching server for the Open Data APIs.
 Intended for internal use at Penn Labs to speed up queries to Open Data.
