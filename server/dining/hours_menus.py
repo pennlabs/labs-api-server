@@ -48,12 +48,6 @@ def retrieve_item_v2(item_id):
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     def get_data():
-        imageUrls = {}
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'diningImages.csv')) as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                imageUrls[row["id"]] = row["imageUrl"]
-
         json = din.venues()['result_data']
         venues = json["document"]["venue"]
         for venue in venues:
@@ -68,9 +62,9 @@ def retrieve_venues():
                             new_meals.append(meal)
                     day["meal"] = new_meals
 
-            imageUrl = imageUrls[venue["id"]]
-            if imageUrl:
-                venue["imageUrl"] = imageUrl
+            imageUrlJSON = db.get("venue:%s" % (str(venue["id"])))
+            if imageUrlJSON:
+                venue["imageUrl"] = imageUrlJSON.decode('utf8').replace("\"", "")
             else:
                 venue["imageUrl"] = None
 
