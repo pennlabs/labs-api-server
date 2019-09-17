@@ -4,6 +4,8 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+mock = "*"
+nose = "*"
 
 [packages]
 boto3 = "*"
@@ -13,10 +15,8 @@ click = "*"
 funcsigs = "*"
 html5lib = "*"
 itsdangerous = "*"
-mock = "*"
 mysqlclient = "*"
 nameparser = "*"
-nose = "*"
 pandas = "*"
 pbr = "*"
 penncoursereview = "*"
