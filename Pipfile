@@ -6,6 +6,10 @@ verify_ssl = true
 [dev-packages]
 mock = "*"
 nose = "*"
+flake8 = "*"
+flake8-isort = "*"
+flake8-quotes = "*"
+coveralls = "*"
 
 [packages]
 boto3 = "*"
