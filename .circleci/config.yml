@@ -49,6 +49,7 @@ jobs:
           destination: trl
 workflows:
   version: 2
-  build-and-deploy:
+  build:
     jobs:
-      - build
+      - build:
+          context: labs-api-server
