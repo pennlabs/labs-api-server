@@ -5,9 +5,8 @@ import string
 from flask import request
 
 from server import app
-
-from .base import cached_route
-from .penndata import depts, reg
+from server.base import cached_route
+from server.penndata import depts, reg
 
 
 def is_dept(keyword):

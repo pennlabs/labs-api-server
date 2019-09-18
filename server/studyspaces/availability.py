@@ -7,10 +7,10 @@ from flask import jsonify, request
 from penn.base import APIError
 
 from server import app, db, sqldb
+from server.base import cached_route
+from server.models import StudySpacesBooking, User
+from server.penndata import studyspaces, wharton
 
-from ..base import cached_route
-from ..models import StudySpacesBooking, User
-from ..penndata import studyspaces, wharton
 from .book import get_wharton_sessionid, save_wharton_sessionid
 
 

@@ -4,9 +4,8 @@ import re
 from flask import jsonify
 
 from server import app
-
-from .base import cache_get
-from .penndata import calendar
+from server.base import cache_get
+from server.penndata import calendar
 
 
 def pull_calendar(d):

@@ -3,9 +3,8 @@ import datetime
 from flask import json, jsonify, request
 
 from server import app, db
-
-from .base import cached_route
-from .penndata import map_search
+from server.base import cached_route
+from server.penndata import map_search
 
 
 @app.route('/buildings/<building_code>', methods=['GET'])

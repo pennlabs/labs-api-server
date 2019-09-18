@@ -6,10 +6,9 @@ import requests
 from flask import jsonify, request
 
 from server import app
-
-from .base import cache_get, cached_route
-from .penndata import transit
-from .utils import haversine
+from server.base import cache_get, cached_route
+from server.penndata import transit
+from server.utils import haversine
 
 
 def get_stop_info():

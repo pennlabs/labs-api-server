@@ -6,8 +6,7 @@ from flask import jsonify, request
 from sqlalchemy import func
 
 from server import app, sqldb
-
-from ..models import DiningPreference, User
+from server.models import DiningPreference, User
 
 
 @app.route('/dining/preferences', methods=['POST'])

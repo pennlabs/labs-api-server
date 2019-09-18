@@ -4,8 +4,7 @@ import os
 import requests
 
 from server import app
-
-from .base import cached_route
+from server.base import cached_route
 
 
 @app.route('/weather', methods=['GET'])

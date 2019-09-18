@@ -6,8 +6,7 @@ from functools import wraps
 from flask import jsonify, request
 
 from server import app, db
-
-from .models import User
+from server.models import User
 
 
 @app.route('/device/register', methods=['POST'])

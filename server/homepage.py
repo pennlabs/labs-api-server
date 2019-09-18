@@ -9,13 +9,12 @@ from penn.base import APIError
 from sqlalchemy import and_, func
 
 from server import app, sqldb
-
-from .account import get_courses_in_N_days, get_todays_courses
-from .calendar3year import pull_todays_calendar
-from .models import Account, DiningPreference, Event, HomeCell, LaundryPreference, StudySpacesBooking, User
-from .news import fetch_frontpage_article
-from .portal.posts import get_posts_for_account
-from .studyspaces.reservations import get_reservations
+from server.account import get_courses_in_N_days, get_todays_courses
+from server.calendar3year import pull_todays_calendar
+from server.models import Account, DiningPreference, Event, HomeCell, LaundryPreference, StudySpacesBooking, User
+from server.news import fetch_frontpage_article
+from server.portal.posts import get_posts_for_account
+from server.studyspaces.reservations import get_reservations
 
 
 utc = pytz.timezone('UTC')

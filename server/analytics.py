@@ -4,8 +4,7 @@ import json
 from flask import jsonify, request
 
 from server import app, sqldb
-
-from .models import Account, AnalyticsEvent, User
+from server.models import Account, AnalyticsEvent, User
 
 
 @app.route('/feed/analytics', methods=['POST'])

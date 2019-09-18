@@ -7,8 +7,7 @@ from sqlalchemy import and_, case, desc, exists, func, or_
 from sqlalchemy.sql import select
 
 from server import app, bcrypt, sqldb
-
-from ..models import Post, PostAccount, PostAccountEmail, PostTester
+from server.models import Post, PostAccount, PostAccountEmail, PostTester
 
 
 @app.route('/portal/account/new', methods=['POST'])

@@ -8,36 +8,35 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from raven.contrib.flask import Sentry
 
-import server.account
-import server.analytics
-import server.athletics
-import server.auth
-import server.buildings
-import server.calendar3year
-import server.dining.balance
-import server.dining.diningRedis
-import server.dining.hours_menus
-import server.dining.preferences
-import server.dining.transactions
-import server.directory
-import server.event
-import server.fitness
-import server.homepage
-import server.laundry
-import server.news
-import server.nso
-import server.pcr
-import server.portal.account
-import server.portal.creation
-import server.portal.posts
-import server.registrar
-import server.studyspaces.availability
-import server.studyspaces.book
-import server.studyspaces.cancel
-import server.studyspaces.deprecated
-import server.studyspaces.reservations
-import server.transit
-import server.weather
+import server.account  # noqa
+import server.analytics  # noqa
+import server.auth  # noqa
+import server.buildings  # noqa
+import server.calendar3year  # noqa
+import server.dining.balance  # noqa
+import server.dining.diningRedis  # noqa
+import server.dining.hours_menus  # noqa
+import server.dining.preferences  # noqa
+import server.dining.transactions  # noqa
+import server.directory  # noqa
+import server.event  # noqa
+import server.fitness  # noqa
+import server.homepage  # noqa
+import server.laundry  # noqa
+import server.news  # noqa
+import server.nso  # noqa
+import server.pcr  # noqa
+import server.portal.account  # noqa
+import server.portal.creation  # noqa
+import server.portal.posts  # noqa
+import server.registrar  # noqa
+import server.studyspaces.availability  # noqa
+import server.studyspaces.book  # noqa
+import server.studyspaces.cancel  # noqa
+import server.studyspaces.deprecated  # noqa
+import server.studyspaces.reservations  # noqa
+import server.transit  # noqa
+import server.weather  # noqa
 from server.models import sqldb
 
 

@@ -6,10 +6,9 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from flask import jsonify, request
 
-from server import app, sqldb
-
-from ..models import Account, DiningBalance
-from ..penndata import wharton
+from server import app
+from server.models import Account, DiningBalance, sqldb
+from server.penndata import wharton
 
 
 @app.route('/dining/balance/v2', methods=['POST'])

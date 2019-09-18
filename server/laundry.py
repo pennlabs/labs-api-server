@@ -5,10 +5,10 @@ from flask import jsonify, request
 from requests.exceptions import HTTPError
 from sqlalchemy import Integer, cast, exists, func
 
-from . import app, sqldb
-from .base import cached_route
-from .models import LaundryPreference, LaundrySnapshot, User
-from .penndata import laundry
+from server import app, sqldb
+from server.base import cached_route
+from server.models import LaundryPreference, LaundrySnapshot, User
+from server.penndata import laundry
 
 
 @app.route('/laundry/halls', methods=['GET'])

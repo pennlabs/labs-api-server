@@ -3,9 +3,8 @@ import datetime
 from flask import jsonify, request
 
 from server import app
-
-from .base import cached_route
-from .penndata import penn_dir
+from server.base import cached_route
+from server.penndata import penn_dir
 
 
 @app.route('/directory/search', methods=['GET'])

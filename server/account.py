@@ -7,9 +7,8 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from server import app, db, sqldb
-
-from .models import (Account, Course, CourseAccount, CourseInstructor,
-                     CourseMeetingTime, Degree, Major, School, SchoolMajorAccount)
+from server.models import (Account, Course, CourseAccount, CourseInstructor,
+                           CourseMeetingTime, Degree, Major, School, SchoolMajorAccount)
 
 
 """

@@ -1,9 +1,8 @@
 import datetime
 
 from server import app
-
-from .base import cached_route
-from .penndata import fitness
+from server.base import cached_route
+from server.penndata import fitness
 
 
 @app.route('/fitness/usage', methods=['GET'])

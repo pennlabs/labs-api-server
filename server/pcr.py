@@ -4,8 +4,7 @@ from collections import defaultdict
 import penncoursereview as pcr
 
 from server import app
-
-from .base import cached_route
+from server.base import cached_route
 
 
 def course_reviews(course_id):

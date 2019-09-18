@@ -10,9 +10,8 @@ from sqlalchemy import and_, case, desc, exists, func, or_
 from sqlalchemy.sql import select
 
 from server import app, bcrypt, s3, sqldb
-
-from ..models import (AnalyticsEvent, Major, Post, PostAccount, PostAccountEmail, PostFilter,
-                      PostStatus, PostTargetEmail, PostTester, School, SchoolMajorAccount)
+from server.models import (AnalyticsEvent, Major, Post, PostAccount, PostAccountEmail, PostFilter,
+                           PostStatus, PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
 @app.route('/portal/posts', methods=['GET'])

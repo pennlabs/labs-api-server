@@ -1,20 +1,16 @@
 import csv
 import datetime
-import re
 import os
-from ..base import cached_route
-from ..penndata import din, dinV2, wharton
+import re
 
 from bs4 import BeautifulSoup
-
 from flask import jsonify, request
 from sqlalchemy import func
 
 from server import app, db, sqldb
-
-from ..base import cached_route
-from ..models import Account, DiningBalance, DiningPreference, DiningTransaction, User
-from ..penndata import din, dinV2, wharton
+from server.base import cached_route
+from server.models import Account, DiningBalance, DiningPreference, DiningTransaction, User
+from server.penndata import din, dinV2, wharton
 
 
 @app.route('/dining/v2/venues', methods=['GET'])
@@ -72,9 +68,6 @@ def retrieve_venues():
             if imageUrlJSON:
                 venue['imageUrl'] = imageUrlJSON.decode('utf8').replace("'", '')
             else:
-<<<<<<< HEAD
-                venue["imageUrl"] = None
-=======
                 venue['imageUrl'] = None
 
             if venue.get('weeklyMenuURL'):
@@ -82,7 +75,6 @@ def retrieve_venues():
 
             if venue.get('dailyMenuURL'):
                 del venue['dailyMenuURL']
->>>>>>> Lint
         return json
 
     now = datetime.datetime.today()
