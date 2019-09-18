@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pipenv run nosetests --with-coverage
+            pipenv run nosetests --with-coverage --cover-package=server
       - run:
           name: Upload code coverage
           command: |
