@@ -8,35 +8,6 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from raven.contrib.flask import Sentry
 
-import server.account  # noqa
-import server.analytics  # noqa
-import server.auth  # noqa
-import server.buildings  # noqa
-import server.calendar3year  # noqa
-import server.dining.balance  # noqa
-import server.dining.diningRedis  # noqa
-import server.dining.hours_menus  # noqa
-import server.dining.preferences  # noqa
-import server.dining.transactions  # noqa
-import server.directory  # noqa
-import server.event  # noqa
-import server.fitness  # noqa
-import server.homepage  # noqa
-import server.laundry  # noqa
-import server.news  # noqa
-import server.nso  # noqa
-import server.pcr  # noqa
-import server.portal.account  # noqa
-import server.portal.creation  # noqa
-import server.portal.posts  # noqa
-import server.registrar  # noqa
-import server.studyspaces.availability  # noqa
-import server.studyspaces.book  # noqa
-import server.studyspaces.cancel  # noqa
-import server.studyspaces.deprecated  # noqa
-import server.studyspaces.reservations  # noqa
-import server.transit  # noqa
-import server.weather  # noqa
 from server.models import sqldb
 
 
@@ -70,6 +41,36 @@ with app.app_context():
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
 
+
+import server.account  # noqa
+import server.analytics  # noqa
+import server.auth  # noqa
+import server.buildings  # noqa
+import server.calendar3year  # noqa
+import server.dining.balance  # noqa
+import server.dining.diningRedis  # noqa
+import server.dining.hours_menus  # noqa
+import server.dining.preferences  # noqa
+import server.dining.transactions  # noqa
+import server.directory  # noqa
+import server.event  # noqa
+import server.fitness  # noqa
+import server.homepage  # noqa
+import server.laundry  # noqa
+import server.news  # noqa
+import server.nso  # noqa
+import server.pcr  # noqa
+import server.portal.account  # noqa
+import server.portal.creation  # noqa
+import server.portal.posts  # noqa
+import server.registrar  # noqa
+import server.studyspaces.availability  # noqa
+import server.studyspaces.book  # noqa
+import server.studyspaces.cancel  # noqa
+import server.studyspaces.deprecated  # noqa
+import server.studyspaces.reservations  # noqa
+import server.transit  # noqa
+import server.weather  # noqa
 
 if __name__ == '__main__':
     app.run(debug=True)
