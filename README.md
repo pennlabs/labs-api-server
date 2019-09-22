@@ -13,9 +13,9 @@ Setup
 * Install mysql
     * Mac OS X: `brew install mysql` and [these instructions](https://solitum.net/openssl-os-x-el-capitan-and-brew/)
     * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
-* Create new virtualenv
-* Install requirements using `pip install -r requirements.txt`
-* Run mobile API server with `python runserver.py`
+* Install pipenv: `pip install --user --upgrade pipenv`
+* Install requirements using `pipenv install -d`
+* Run mobile API server with `pipenv run runserver.py`
 
 ## Buildings
 
