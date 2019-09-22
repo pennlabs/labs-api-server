@@ -2,6 +2,7 @@ from server import app, sqldb
 import datetime
 import csv
 import re
+import pandas as pd
 from flask import jsonify, request
 from ..penndata import wharton
 from ..models import Account, DiningBalance
@@ -97,3 +98,28 @@ def get_dining_balance():
         }})
     else:
         return jsonify({'balance': None})
+
+
+@app.route('/dining/balances', methods=['GET'])
+def get_average_balances_by_day():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+    dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+    balance_array = []
+
+    if dining_balance:
+        for balance in dining_balance:
+            balance_array.append({
+                'dining_dollars': balance.dining_dollars,
+                'swipes': balance.swipes,
+                'guest_swipes': balance.guest_swipes,
+                'timestamp': balance.created_at.strftime("%Y-%m-%d")
+            })
+
+        df = pd.DataFrame(balance_array).groupby('timestamp').agg(lambda x: x.mean()).reset_index()
+        return jsonify({'balance': df.to_dict('records')})
+
+    return jsonify({'balance': None})
