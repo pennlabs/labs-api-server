@@ -37,7 +37,8 @@ jobs:
       - run:
           name: Run tests
           command: |
-            pipenv run nosetests --with-coverage --cover-package=server
+            mkdir test-results
+            pipenv run nose2 -c setup.cfg --with-coverage --plugin nose2.plugins.junitxml
       - run:
           name: Upload code coverage
           command: |
