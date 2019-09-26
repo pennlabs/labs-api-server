@@ -21,7 +21,8 @@ def pull_calendar(d):
         event_date = datetime.datetime.strptime(start, '%Y-%m-%d').date()
         time_diff = event_date - d
         if time_diff.total_seconds() > 0 and time_diff.total_seconds() <= 1209600:
-            event['name'] = re.split('Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday', event['name'])[0].strip()
+            event['name'] = re.split('Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday',
+                                     event['name'])[0].strip()
             if 'Advance Registration' in event['name']:
                 event['name'] = 'Advance Registration'
             within_range.append(event)

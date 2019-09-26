@@ -36,7 +36,8 @@ def save_dining_dollar_transactions():
             else:
                 date = datetime.datetime.strptime(row[0], '%m/%d/%Y %I:%M%p')
                 if last_transaction is None or date > last_transaction.date:
-                    transaction = DiningTransaction(account_id=account.id, date=date, description=row[1], amount=float(row[2]), balance=float(row[3]))
+                    transaction = DiningTransaction(account_id=account.id, date=date, description=row[1],
+                                                    amount=float(row[2]), balance=float(row[3]))
                     sqldb.session.add(transaction)
     sqldb.session.commit()
 

@@ -161,7 +161,8 @@ def save_data():
     # check if we already have data for this minute
     # if we do, skip
     with app.app_context():
-        if sqldb.session.query(exists().where((LaundrySnapshot.date == date) & (LaundrySnapshot.time == time))).scalar():
+        if sqldb.session.query(exists().where((LaundrySnapshot.date == date)
+                                              & (LaundrySnapshot.time == time))).scalar():
             return
 
         # make a dict for hall name -> id
@@ -229,7 +230,8 @@ def get_laundry_status():
         if laundry.check_is_working():
             return {'is_working': True, 'error_msg': None}
         else:
-            return {'is_working': False, 'error_msg': "Penn's laundry server is currently not updating. We hope this will be fixed shortly."}
+            error_msg = "Penn's laundry server is currently not updating. We hope this will be fixed shortly."
+            return {'is_working': False, 'error_msg': error_msg}
 
     td = datetime.timedelta(hours=1)
     return cached_route('laundry:working', td, get_data)

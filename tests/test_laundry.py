@@ -93,7 +93,8 @@ class LaundryApiTests(unittest.TestCase):
             resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
             self.assertEquals(resp['rooms'], [])
 
-            c.post('/laundry/preferences', headers={'X-Device-ID': 'testing'}, data={'rooms': '1,2,3', 'platform': 'Android'})
+            c.post('/laundry/preferences', headers={'X-Device-ID': 'testing'},
+                   data={'rooms': '1,2,3', 'platform': 'Android'})
 
             resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
             self.assertEquals(resp['rooms'], [1, 2, 3])

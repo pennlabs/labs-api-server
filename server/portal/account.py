@@ -40,7 +40,8 @@ def login():
         return jsonify({'error': 'Parameter is missing'}), 400
 
     pw_hash = bcrypt.generate_password_hash(password)
-    account = PostAccount.query.filter(PostAccount.email == email and bcrypt.check_password_hash(pw_hash, password)).first()
+    account = PostAccount.query.filter(PostAccount.email == email and bcrypt.check_password_hash(pw_hash,
+                                                                                                 password)).first()
     if account:
         account.sign_in_count = account.sign_in_count + 1
         account.last_sign_in_at = datetime.now()

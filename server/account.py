@@ -340,11 +340,15 @@ def add_courses(account, json_array):
             end_date = None
 
             # Use the most common start and end dates for this term if they are not explicitly defined
-            term_start_end_dates = sqldb.session.query(Course.start_date, Course.end_date, func.count(Course.id).label('count')) \
-                                                .filter_by(term=term) \
-                                                .group_by(Course.start_date, Course.end_date) \
-                                                .order_by('count DESC') \
-                                                .all()
+            term_start_end_dates = sqldb.session.query(
+                Course.start_date,
+                Course.end_date,
+                func.count(Course.id).label('count')
+            ) \
+                .filter_by(term=term) \
+                .group_by(Course.start_date, Course.end_date) \
+                .order_by('count DESC') \
+                .all()
 
             if len(term_start_end_dates) > 0:
                 start_date = term_start_end_dates[0][0]

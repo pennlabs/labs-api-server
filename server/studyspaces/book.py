@@ -86,7 +86,8 @@ def book_room():
                     break
     else:
         contact = {}
-        for arg, field in [('fname', 'firstname'), ('lname', 'lastname'), ('email', 'email'), ('nickname', 'groupname')]:
+        for arg, field in [('fname', 'firstname'), ('lname', 'lastname'),
+                           ('email', 'email'), ('nickname', 'groupname')]:
             try:
                 contact[arg] = request.form[field]
             except KeyError:

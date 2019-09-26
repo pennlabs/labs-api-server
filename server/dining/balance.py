@@ -42,7 +42,8 @@ def parse_and_save_dining_balance():
         return jsonify({'success': False, 'error': 'Something went wrong parsing HTML.'}), 400
 
     total_swipes = swipes + added_swipes
-    dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=total_swipes, guest_swipes=guest_swipes)
+    dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=total_swipes,
+                                   guest_swipes=guest_swipes)
     sqldb.session.add(dining_balance)
     sqldb.session.commit()
 
@@ -66,7 +67,8 @@ def save_dining_balance():
         swipes = int(swipes_str)
         g_swipes = int(guest_swipes_str)
 
-        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=swipes, guest_swipes=g_swipes)
+        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=swipes,
+                                       guest_swipes=g_swipes)
         sqldb.session.add(dining_balance)
         sqldb.session.commit()
 

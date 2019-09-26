@@ -20,14 +20,16 @@ def get_posts():
     posts = Post.query.filter_by(account=account_id).all()
     posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
 
-    qry1 = sqldb.session.query(AnalyticsEvent.post_id.label('id'), func.count(AnalyticsEvent.post_id).label('interactions')) \
+    qry1 = sqldb.session.query(AnalyticsEvent.post_id.label('id'),
+                               func.count(AnalyticsEvent.post_id).label('interactions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == True) \
                         .group_by(AnalyticsEvent.post_id) \
                         .subquery()  # noqa: E712
 
-    qry2 = sqldb.session.query(AnalyticsEvent.post_id.label('id'), func.count(AnalyticsEvent.post_id).label('impressions')) \
+    qry2 = sqldb.session.query(AnalyticsEvent.post_id.label('id'),
+                               func.count(AnalyticsEvent.post_id).label('impressions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
                         .filter(AnalyticsEvent.is_interaction == False) \
@@ -123,7 +125,10 @@ def get_posts_for_account(account):
     post_arr = []
 
     if not account:
-        posts = Post.query.filter(Post.start_date <= now, now <= Post.end_date, Post.filters.is_(False), Post.approved.is_(True)).all()
+        posts = Post.query.filter(Post.start_date <= now,
+                                  now <= Post.end_date,
+                                  Post.filters.is_(False),
+                                  Post.approved.is_(True)).all()
         for post in posts:
             post_json = get_json_for_post(post, False)
             post_arr.append(post_json)
