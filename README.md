@@ -15,9 +15,9 @@ Setup
     * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
 * Install pipenv: `pip install --user --upgrade pipenv`
 * Install requirements using `pipenv install -d`
+* Run `vi .env` to add environment secrets
 * Enter the virtual environment using `pipenv shell`
 * Run mobile API server with `pipenv run runserver.py` or `./runserver.py`
-* Add environment secrets in root directory by running `vi .env` 
 
 ## Buildings
 
