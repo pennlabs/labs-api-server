@@ -17,7 +17,7 @@ Setup
 * Install requirements using `pipenv install -d`
 * Add environment secrets to `.env` in the root directory
 * Enter the virtual environment using `pipenv shell`
-* Run mobile API server with `pipenv run runserver.py` or `./runserver.py`
+* Run mobile API server with`./runserver.py`
 
 ## Buildings
 
