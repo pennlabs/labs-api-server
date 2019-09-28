@@ -1,17 +1,12 @@
-import datetime
 import os
 
-import requests
 from dateutil.parser import parse
 from flask import jsonify, request
-from penn.base import APIError
 
 from server import app, db, sqldb
-from server.base import cached_route
 from server.models import StudySpacesBooking, User
 from server.penndata import studyspaces, wharton
-
-from .reservations import get_reservations
+from server.studyspaces.reservations import get_reservations
 
 
 def get_wharton_sessionid(public=False):

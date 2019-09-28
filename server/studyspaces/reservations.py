@@ -1,14 +1,10 @@
 import datetime
-import os
 
-import requests
-from dateutil.parser import parse
 from flask import jsonify, request
 from penn.base import APIError
 
-from server import app, db, sqldb
-from server.base import cached_route
-from server.models import StudySpacesBooking, User
+from server import app
+from server.models import StudySpacesBooking
 from server.penndata import studyspaces, wharton
 
 

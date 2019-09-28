@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from flask import jsonify, request
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 
 

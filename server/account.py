@@ -1,12 +1,11 @@
 import ast
 import datetime
 
-import requests
 from flask import jsonify, request
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from server import app, db, sqldb
+from server import app, sqldb
 from server.models import (Account, Course, CourseAccount, CourseInstructor,
                            CourseMeetingTime, Degree, Major, School, SchoolMajorAccount)
 

@@ -1,17 +1,11 @@
-import json
-import os
-import sys
-import uuid
-from datetime import date, datetime, timedelta
+from datetime import datetime
 
-import tinify
-from flask import jsonify, redirect, request
-from sqlalchemy import and_, case, desc, exists, func, or_
-from sqlalchemy.sql import select
+from flask import jsonify, request
+from sqlalchemy import and_, desc, func
 
-from server import app, bcrypt, s3, sqldb
-from server.models import (AnalyticsEvent, Major, Post, PostAccount, PostAccountEmail, PostFilter,
-                           PostStatus, PostTargetEmail, PostTester, School, SchoolMajorAccount)
+from server import app, sqldb
+from server.models import (AnalyticsEvent, Post, PostFilter, PostStatus,
+                           PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
 @app.route('/portal/posts', methods=['GET'])
@@ -24,24 +18,24 @@ def get_posts():
                                func.count(AnalyticsEvent.post_id).label('interactions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                        .filter(AnalyticsEvent.is_interaction == True) \
+                        .filter(AnalyticsEvent.is_interaction is True) \
                         .group_by(AnalyticsEvent.post_id) \
-                        .subquery()  # noqa: E712
+                        .subquery()
 
     qry2 = sqldb.session.query(AnalyticsEvent.post_id.label('id'),
                                func.count(AnalyticsEvent.post_id).label('impressions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                        .filter(AnalyticsEvent.is_interaction == False) \
+                        .filter(AnalyticsEvent.is_interaction is False) \
                         .group_by(AnalyticsEvent.post_id) \
-                        .subquery()  # noqa: E712
+                        .subquery()
 
     qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label('id'), AnalyticsEvent.user) \
                             .filter(AnalyticsEvent.type == 'post') \
                             .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                            .filter(AnalyticsEvent.is_interaction == False) \
+                            .filter(AnalyticsEvent.is_interaction is False) \
                             .group_by(AnalyticsEvent.post_id, AnalyticsEvent.user) \
-                            .subquery()  # noqa: E712
+                            .subquery()
 
     qry3 = sqldb.session.query(qry3_sub.c.id, func.count(qry3_sub.c.user).label('unique_impr')) \
                         .select_from(qry3_sub) \

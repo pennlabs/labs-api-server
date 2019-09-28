@@ -1,7 +1,5 @@
 import datetime
-import json
 import os
-from os import getenv
 
 import pytz
 from flask import jsonify, request

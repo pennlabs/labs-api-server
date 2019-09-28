@@ -1,9 +1,7 @@
 import csv
 import datetime
 
-from bs4 import BeautifulSoup
 from flask import jsonify, request
-from sqlalchemy import func
 
 from server import app, sqldb
 from server.models import Account, DiningTransaction

@@ -9,7 +9,5 @@ import sys
 import server
 
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # noqa
-
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 server.laundry.save_data()

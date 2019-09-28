@@ -1,16 +1,8 @@
-import csv
 import datetime
-import os
-import re
 
-from bs4 import BeautifulSoup
-from flask import jsonify, request
-from sqlalchemy import func
-
-from server import app, db, sqldb
+from server import app, db
 from server.base import cached_route
-from server.models import Account, DiningBalance, DiningPreference, DiningTransaction, User
-from server.penndata import din, dinV2, wharton
+from server.penndata import din, dinV2
 
 
 @app.route('/dining/v2/venues', methods=['GET'])

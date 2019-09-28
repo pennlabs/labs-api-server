@@ -1,17 +1,10 @@
-import datetime
-import os
-
-import requests
-from dateutil.parser import parse
 from flask import jsonify, request
 from penn.base import APIError
 
-from server import app, db, sqldb
-from server.base import cached_route
+from server import app, sqldb
 from server.models import StudySpacesBooking, User
 from server.penndata import studyspaces, wharton
-
-from .book import get_wharton_sessionid, save_booking, save_wharton_sessionid
+from server.studyspaces.book import save_booking, save_wharton_sessionid
 
 
 @app.route('/studyspaces/cancel', methods=['POST'])

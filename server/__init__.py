@@ -41,7 +41,6 @@ with app.app_context():
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
 
-
 import server.account  # noqa
 import server.analytics  # noqa
 import server.auth  # noqa
