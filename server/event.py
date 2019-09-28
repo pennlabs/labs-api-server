@@ -1,9 +1,9 @@
 import pytz
-
 from flask import jsonify
 
-from . import app
-from .models import Event
+from server import app
+from server.models import Event
+
 
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')

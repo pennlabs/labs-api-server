@@ -1,0 +1,46 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+mock = "*"
+nose2 = {extras = ["coverage_plugin"],version = "*"}
+flake8 = "*"
+flake8-isort = "*"
+flake8-quotes = "*"
+coveralls = "*"
+
+[packages]
+boto3 = "*"
+beautifulsoup4 = "*"
+blinker = "*"
+click = "*"
+funcsigs = "*"
+html5lib = "*"
+itsdangerous = "*"
+mysqlclient = "*"
+nameparser = "*"
+pandas = "*"
+pbr = "*"
+penncoursereview = "*"
+python-dateutil = "*"
+pytz = "*"
+raven = "*"
+redis = "*"
+requests = "*"
+six = "*"
+tinify = "*"
+tzlocal = "*"
+Flask-Bcrypt = "*"
+Flask = "*"
+Flask-Cors = "*"
+Flask-SQLAlchemy = "*"
+Jinja2 = "*"
+MarkupSafe = "*"
+PennSDK = "*"
+SQLAlchemy = "*"
+Werkzeug = "*"
+
+[requires]
+python_version = "3"

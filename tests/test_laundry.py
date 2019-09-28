@@ -1,10 +1,11 @@
-import unittest
-import mock
-import server
-import json
 import datetime
+import json
+import unittest
 
-from server.models import sqldb, LaundrySnapshot
+import mock
+
+import server
+from server.models import LaundrySnapshot, sqldb
 
 
 class LaundryApiTests(unittest.TestCase):
@@ -39,14 +40,14 @@ class LaundryApiTests(unittest.TestCase):
             sqldb.session.commit()
 
     def fakeLaundryGet(url, *args, **kwargs):
-        if "suds.kite.upenn.edu" in url:
-            with open("tests/laundry_snapshot.html", "rb") as f:
+        if 'suds.kite.upenn.edu' in url:
+            with open('tests/laundry_snapshot.html', 'rb') as f:
                 m = mock.MagicMock(content=f.read())
             return m
         else:
             raise NotImplementedError
 
-    @mock.patch("penn.laundry.requests.get", fakeLaundryGet)
+    @mock.patch('penn.laundry.requests.get', fakeLaundryGet)
     def testLaundryAllHalls(self):
         with server.app.test_request_context():
             res = json.loads(server.laundry.all_halls().data.decode('utf8'))[
@@ -60,7 +61,7 @@ class LaundryApiTests(unittest.TestCase):
                     self.assertTrue(info[t]['out_of_order'] >= 0)
                     self.assertTrue(info[t]['open'] >= 0)
 
-    @mock.patch("requests.get", fakeLaundryGet)
+    @mock.patch('requests.get', fakeLaundryGet)
     def testLaundryOneHall(self):
         with server.app.test_request_context():
             res = json.loads(server.laundry.hall(26).data.decode('utf8'))
@@ -89,10 +90,11 @@ class LaundryApiTests(unittest.TestCase):
 
     def testLaundryPreferences(self):
         with server.app.test_client() as c:
-            resp = json.loads(c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
-            self.assertEquals(resp["rooms"], [])
+            resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
+            self.assertEquals(resp['rooms'], [])
 
-            c.post("/laundry/preferences", headers={"X-Device-ID": "testing"}, data={"rooms": "1,2,3", "platform": "Android"})
+            c.post('/laundry/preferences', headers={'X-Device-ID': 'testing'},
+                   data={'rooms': '1,2,3', 'platform': 'Android'})
 
-            resp = json.loads(c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode("utf8"))
-            self.assertEquals(resp["rooms"], [1, 2, 3])
+            resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
+            self.assertEquals(resp['rooms'], [1, 2, 3])

@@ -1,10 +1,12 @@
-from flask import request
-from server import app
-import string
 import datetime
 import re
-from .base import cached_route
-from .penndata import depts, reg
+import string
+
+from flask import request
+
+from server import app
+from server.base import cached_route
+from server.penndata import depts, reg
 
 
 def is_dept(keyword):
@@ -32,10 +34,10 @@ def get_serializable_course(course):
 def search_course(course):
     params = dict()
     if len(course.get('dept', '')) > 0:
-        id_param = ""
+        id_param = ''
         id_param += course.get('dept').lower()
         if len(course.get('courseNumber', '')) > 0:
-            id_param += "-" + course.get('courseNumber').lower()
+            id_param += '-' + course.get('courseNumber').lower()
             if len(course.get('sectionNumber', '')) > 0:
                 id_param += course.get('sectionNumber').lower()
         params['course_id'] = id_param
@@ -46,7 +48,7 @@ def search_course(course):
     if len(params) == 0:
         return None
     final_courses = reg.search(params)
-    return {"courses": list(final_courses)}
+    return {'courses': list(final_courses)}
 
 
 def get_type_search(search_query):
@@ -60,7 +62,7 @@ def get_type_search(search_query):
                          search_query)
 
     def repl(matchobj):
-        return matchobj.group(0)[0] + " " + matchobj.group(0)[1]
+        return matchobj.group(0)[0] + ' ' + matchobj.group(0)[1]
 
     search_presplit = re.sub('(\\d[a-zA-z]|[a-zA-z]\\d)', repl, search_punc)
     split = search_presplit.split()
@@ -85,7 +87,7 @@ def get_type_search(search_query):
                 if len(course['desc_search']) == 0:
                     course['desc_search'] = s
                 else:
-                    course['desc_search'] += " " + s
+                    course['desc_search'] += ' ' + s
     return course
 
 
@@ -96,7 +98,7 @@ def search():
     def get_data():
         query_results = search_course(get_type_search(search_query))
         if query_results is None:
-            return {"error": "The search query could not be processed."}
+            return {'error': 'The search query could not be processed.'}
         else:
             return query_results
 
@@ -113,8 +115,8 @@ def search_instructor():
             'instructor': query
         })
         if results is None:
-            return {"error": "The search query could not be processed."}
+            return {'error': 'The search query could not be processed.'}
         else:
-            return {"courses": list(results)}
+            return {'courses': list(results)}
 
     return cached_route('registrar_query_instructor:%s' % query, datetime.timedelta(days=1), get_data)

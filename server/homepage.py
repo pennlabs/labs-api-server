@@ -1,18 +1,19 @@
-from flask import request, jsonify
-from server import app, sqldb
-from os import getenv
-from .models import User, DiningPreference, LaundryPreference, HomeCell, Event, Account, StudySpacesBooking
-from .calendar3year import pull_todays_calendar
-from sqlalchemy import func, and_
-from .news import fetch_frontpage_article
-from .account import get_todays_courses, get_courses_in_N_days
-from .portal.posts import get_posts_for_account
-from .studyspaces.reservations import get_reservations
-from penn.base import APIError
-import json
-import pytz
 import datetime
 import os
+
+import pytz
+from flask import jsonify, request
+from penn.base import APIError
+from sqlalchemy import and_, func
+
+from server import app, sqldb
+from server.account import get_courses_in_N_days, get_todays_courses
+from server.calendar3year import pull_todays_calendar
+from server.models import Account, DiningPreference, Event, HomeCell, LaundryPreference, StudySpacesBooking, User
+from server.news import fetch_frontpage_article
+from server.portal.posts import get_posts_for_account
+from server.studyspaces.reservations import get_reservations
+
 
 utc = pytz.timezone('UTC')
 eastern = pytz.timezone('US/Eastern')
@@ -21,11 +22,11 @@ eastern = pytz.timezone('US/Eastern')
 @app.route('/appversion/iOS', methods=['POST'])
 def update_app_version():
     secret = os.environ.get('AUTH_SECRET')
-    auth_secret = request.form.get("auth_secret")
+    auth_secret = request.form.get('auth_secret')
     if auth_secret is None:
-        return jsonify({"error": "Auth secret is not provided."}), 400
+        return jsonify({'error': 'Auth secret is not provided.'}), 400
     if not auth_secret == secret:
-        return jsonify({"error": "Auth secret is not correct."}), 400
+        return jsonify({'error': 'Auth secret is not correct.'}), 400
 
     version = request.form.get('version')
     if version is None:
@@ -62,12 +63,12 @@ def get_homepage():
 
     cells = []
 
-    sessionid = request.args.get("sessionid")
+    sessionid = request.args.get('sessionid')
     reservations_cell = get_reservations_cell(user, sessionid)
     if reservations_cell:
         cells.append(reservations_cell)
 
-    version = request.args.get("version")
+    version = request.args.get('version')
 
     if account and account.is_student():
         courses = get_courses_cell(account)
@@ -78,7 +79,7 @@ def get_homepage():
     dining = get_dining_cell(user)
     cells.extend([dining, laundry])
 
-    if version and version >= "5.1.1":
+    if version and version >= '5.1.1':
         gsr_locations = get_gsr_locations_cell(user, account)
         cells.append(gsr_locations)
 
@@ -106,7 +107,7 @@ def get_homepage():
 
     cells.sort(key=lambda x: x.weight, reverse=True)
 
-    response = jsonify({"cells": [x.getCell() for x in cells]})
+    response = jsonify({'cells': [x.getCell() for x in cells]})
     response.status_code = 200
     return response
 
@@ -122,8 +123,8 @@ def get_dining_cell(user):
         venue_ids.extend(defaults_ids)
         venue_ids = list(set(venue_ids))[:3]
 
-    info = {"venues": venue_ids}
-    return HomeCell("dining", info, 100)
+    info = {'venues': venue_ids}
+    return HomeCell('dining', info, 100)
 
 
 def get_laundry_cells(user):
@@ -135,7 +136,7 @@ def get_laundry_cells(user):
     if not room_ids:
         room_ids.append(0)
 
-    return [HomeCell("laundry", {"room_id": x}) for x in room_ids]
+    return [HomeCell('laundry', {'room_id': x}) for x in room_ids]
 
 
 def get_top_laundry_cell(user):
@@ -143,22 +144,23 @@ def get_top_laundry_cell(user):
     top_preference = LaundryPreference.query.filter_by(user_id=user.id).first()
     # If no top choice, select bishop white
     if top_preference:
-        return HomeCell("laundry", {"room_id": top_preference.room_id}, 5)
-    return HomeCell("laundry", {"room_id": 0}, 5)
+        return HomeCell('laundry', {'room_id': top_preference.room_id}, 5)
+    return HomeCell('laundry', {'room_id': 0}, 5)
 
 
 def get_gsr_locations_cell(user, account):
     # returns a gsr cell with list of locations
     # if student is a Wharton student, show at the top
     top_gsrs_query = sqldb.session.query(StudySpacesBooking.lid) \
-                                  .filter(and_(StudySpacesBooking.user == user.id, StudySpacesBooking.lid.isnot(None))) \
+                                  .filter(and_(StudySpacesBooking.user == user.id,
+                                               StudySpacesBooking.lid.isnot(None))) \
                                   .group_by(StudySpacesBooking.lid) \
                                   .order_by(func.count(StudySpacesBooking.lid).desc()) \
                                   .limit(2) \
                                   .all()
     preferences = [x for (x,) in top_gsrs_query]
 
-    showHuntsman = account is None or account.email is None or "wharton" in account.email
+    showHuntsman = account is None or account.email is None or 'wharton' in account.email
     if showHuntsman:
         default_gids = [1, 1086]
         weighting = 300
@@ -173,14 +175,14 @@ def get_gsr_locations_cell(user, account):
         return [x for x in seq if not (x in seen or seen_add(x))]
 
     gids = f7(preferences + default_gids)[:2]
-    return HomeCell("gsr-locations", gids, weighting)
+    return HomeCell('gsr-locations', gids, weighting)
 
 
 def get_university_event_cell():
     # returns a university notification cell
     calendar = pull_todays_calendar()
     if calendar:
-        return HomeCell("calendar", calendar, 40)
+        return HomeCell('calendar', calendar, 40)
     else:
         return None
 
@@ -189,7 +191,7 @@ def get_news_cell():
     # returns a news cell
     article = fetch_frontpage_article()
     if article:
-        return HomeCell("news", article, 50)
+        return HomeCell('news', article, 50)
     else:
         return None
 
@@ -209,7 +211,7 @@ def get_event_cell():
             'website': event.website,
             'facebook': event.facebook
         }
-        return HomeCell("event", info)
+        return HomeCell('event', info)
     else:
         return None
 
@@ -224,13 +226,13 @@ def get_feature_announcement_cell():
 
     info = {
         'source': 'Spring Fling',
-        'title': "Tap to view the Fling schedule, performers, and more!",
+        'title': 'Tap to view the Fling schedule, performers, and more!',
         'description': None,
-        'timestamp': "Saturday 4/13",
-        'image_url': "ADD IMAGE HERE",
-        'feature': "Spring Fling",
+        'timestamp': 'Saturday 4/13',
+        'image_url': 'ADD IMAGE HERE',
+        'feature': 'Spring Fling',
     }
-    return HomeCell("feature", info, 2000)
+    return HomeCell('feature', info, 2000)
 
 
 def get_courses_cell(account):
@@ -239,23 +241,23 @@ def get_courses_cell(account):
 
     # Return today's courses if last course has not yet ended
     now = datetime.datetime.now()
-    weekday = int(now.strftime("%w"))
+    weekday = int(now.strftime('%w'))
     if courses:
         for course in courses:
-            end_time = datetime.datetime.strptime(course["end_time"], "%I:%M %p")
+            end_time = datetime.datetime.strptime(course['end_time'], '%I:%M %p')
             if now.hour < end_time.hour or (now.hour == end_time.hour and now.minute < end_time.minute):
-                return HomeCell("courses", {"weekday": "Today", "courses": courses}, 200)
+                return HomeCell('courses', {'weekday': 'Today', 'courses': courses}, 200)
     elif weekday == 6:
         # Return Monday's courses if today is Saturday
         courses = get_courses_in_N_days(account, 2)
-        return HomeCell("courses", {"weekday": "Monday", "courses": courses}, 30)
+        return HomeCell('courses', {'weekday': 'Monday', 'courses': courses}, 30)
     elif weekday != 0:
         # Return empty cell if there are no courses today and today isn't Saturday or Sunday
-        return HomeCell("courses", {"weekday": "Today", "courses": []}, 30)
+        return HomeCell('courses', {'weekday': 'Today', 'courses': []}, 30)
 
     # Return tomorrow's courses if today's last course has ended
     courses = get_courses_in_N_days(account, 1)
-    return HomeCell("courses", {"weekday": "Tomorrow", "courses": courses}, 30)
+    return HomeCell('courses', {'weekday': 'Tomorrow', 'courses': courses}, 30)
 
 
 def get_reservations_cell(user, sessionid):
@@ -264,7 +266,7 @@ def get_reservations_cell(user, sessionid):
     try:
         reservations = get_reservations(user.email, sessionid, 1, 2)
         if reservations:
-            return HomeCell("reservations", reservations, 1000)
+            return HomeCell('reservations', reservations, 1000)
         else:
             return None
     except APIError:
@@ -281,4 +283,4 @@ def get_post_cells(account):
 
 
 def get_version_cell(version):
-    return HomeCell("new-version-released", None, 10000)
+    return HomeCell('new-version-released', None, 10000)

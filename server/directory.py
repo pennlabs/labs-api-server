@@ -1,15 +1,17 @@
-from flask import request, jsonify
-from server import app
 import datetime
-from .base import cached_route
-from .penndata import penn_dir
+
+from flask import jsonify, request
+
+from server import app
+from server.base import cached_route
+from server.penndata import penn_dir
 
 
 @app.route('/directory/search', methods=['GET'])
 def detail_search():
     if 'name' not in request.args:
         return jsonify({
-            "error": "Please specify search parameters in the query string"
+            'error': 'Please specify search parameters in the query string'
         })
 
     name = request.args['name']

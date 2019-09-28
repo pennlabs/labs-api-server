@@ -3,6 +3,7 @@ venv
 .ropeproject
 penn/
 penn
+.env
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

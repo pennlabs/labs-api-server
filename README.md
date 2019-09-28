@@ -1,7 +1,8 @@
 Labs API Server
 ===============
 
-[![Build Status](https://travis-ci.org/pennlabs/labs-api-server.svg?branch=master)](https://travis-ci.org/pennlabs/labs-api-server)
+[![CircleCI](https://circleci.com/gh/pennlabs/labs-api-server.svg?style=shield)](https://circleci.com/gh/pennlabs/labs-api-server)
+[![Coverage Status](https://coveralls.io/repos/github/pennlabs/labs-api-server/badge.svg?branch=master)](https://coveralls.io/github/pennlabs/labs-api-server?branch=master)
 
 Redis-backed caching server for the Open Data APIs.
 Intended for internal use at Penn Labs to speed up queries to Open Data.
@@ -12,9 +13,11 @@ Setup
 * Install mysql
     * Mac OS X: `brew install mysql` and [these instructions](https://solitum.net/openssl-os-x-el-capitan-and-brew/)
     * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
-* Create new virtualenv
-* Install requirements using `pip install -r requirements.txt`
-* Run mobile API server with `python runserver.py`
+* Install pipenv: `pip install --user --upgrade pipenv`
+* Install requirements using `pipenv install -d`
+* Add environment secrets to `.env` in the root directory
+* Enter the virtual environment using `pipenv shell`
+* Run mobile API server with`./runserver.py`
 
 ## Buildings
 

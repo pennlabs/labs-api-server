@@ -1,10 +1,8 @@
-from server import app, sqldb
-import datetime
-import csv
-import re
 from flask import jsonify, request
-from ..models import User, DiningPreference
 from sqlalchemy import func
+
+from server import app, sqldb
+from server.models import DiningPreference, User
 
 
 @app.route('/dining/preferences', methods=['POST'])
@@ -12,7 +10,7 @@ def save_dining_preferences():
     try:
         user = User.get_or_create()
     except ValueError as e:
-        return jsonify({"success": False, "error": str(e)})
+        return jsonify({'success': False, 'error': str(e)})
 
     venues = request.form.get('venues')
 
@@ -20,7 +18,7 @@ def save_dining_preferences():
     DiningPreference.query.filter_by(user_id=user.id).delete()
 
     if venues:
-        venue_ids = [int(x) for x in venues.split(",")]
+        venue_ids = [int(x) for x in venues.split(',')]
 
         for venue_id in venue_ids:
             dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)

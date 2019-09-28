@@ -1,14 +1,16 @@
-from flask import request, json, jsonify
-from server import app, db
 import datetime
-from .base import cached_route
-from .penndata import map_search
+
+from flask import json, jsonify, request
+
+from server import app, db
+from server.base import cached_route
+from server.penndata import map_search
 
 
 @app.route('/buildings/<building_code>', methods=['GET'])
 def building(building_code):
-    if db.exists("buildings:%s" % (building_code)):
-        building_info = db.get("buildings:%s" % (building_code)).decode('utf8')
+    if db.exists('buildings:%s' % (building_code)):
+        building_info = db.get('buildings:%s' % (building_code)).decode('utf8')
         return jsonify(json.loads(building_info))
     else:
         return None
@@ -22,7 +24,7 @@ def building_search():
     def get_data():
         data = map_search.search(search_query)
         if data is None:
-            return {"Error": "The search query could not be processed"}
+            return {'Error': 'The search query could not be processed'}
         else:
             return data
 
