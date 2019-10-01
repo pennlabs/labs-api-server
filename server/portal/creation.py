@@ -48,6 +48,17 @@ Example: JSON Encoding
 """
 
 
+"""
+Endpoint: /portal/post/new
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/json
+Parameters: account_id, source, title, subtitle, time_label, post_url, image_url, filters, testers,
+            emails, start_date, end_date, comments
+
+Creates new post
+If successful, returns post ID
+"""
 @app.route('/portal/post/new', methods=['POST'])
 def create_post():
     data = request.get_json()
@@ -93,6 +104,17 @@ def create_post():
     return jsonify({'post_id': post.id})
 
 
+"""
+Endpoint: /portal/post/update
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/json
+Parameters: account_id, post_id, source, title, subtitle, time_label, post_url, image_url, filters,
+            testers, emails, start_date, end_date, comments
+
+Modifies existing post
+If successful, returns post ID
+"""
 @app.route('/portal/post/update', methods=['POST'])
 def update_post():
     data = request.get_json()
@@ -144,6 +166,16 @@ def update_post():
     return jsonify({'post_id': post.id})
 
 
+"""
+Endpoint: /portal/post/image
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: multipart/form-data
+Parameters: account_id, image
+
+Uploads image to server
+If successful, returns image URL
+"""
 @app.route('/portal/post/image', methods=['POST'])
 def save_image():
     if 'image' not in request.files:
@@ -155,7 +187,7 @@ def save_image():
 
     # Validate account
     try:
-        account_id = request.form.get('account')
+        account_id = request.form.get('account_id')
         account = PostAccount.get_account(account_id)
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
@@ -176,6 +208,16 @@ def save_image():
     return jsonify({'image_url': aws_url})
 
 
+"""
+Endpoint: /portal/post/approve
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/x-www-form-urlencoded 
+Parameters: account_id, post_id, approved, msg
+
+Approve post for view
+If successful, returns post ID
+"""
 @app.route('/portal/post/approve', methods=['POST'])
 def approve_post():
     try:
@@ -190,14 +232,14 @@ def approve_post():
     if account.email != 'pennappslabs@gmail.com':
         return jsonify({'error': 'This account does not have permission to issue post approval decisions.'}), 400
 
-    approved = bool(account.form.get('approved'))
+    approved = bool(request.form.get('approved'))
     if approved:
         post.approved = True
         update_status(post, 'approved', None)
     else:
         # TODO: Send rejection email
         post.approved = False
-        msg = account.form.get('msg')
+        msg = request.form.get('msg')
         if not msg:
             return jsonify({'error': 'Denied posts must include a reason'}), 400
         update_status(post, 'rejected', msg)
@@ -205,6 +247,13 @@ def approve_post():
     return jsonify({'post_id': post.id})
 
 
+"""
+Endpoint: /portal/filters
+HTTP Methods: GET
+Response Formats: JSON
+
+Returns post filters
+"""
 @app.route('/portal/filters', methods=['GET'])
 def get_filters():
     filters_by_type = {}

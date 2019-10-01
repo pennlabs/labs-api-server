@@ -8,9 +8,17 @@ from server.models import (AnalyticsEvent, Post, PostFilter, PostStatus,
                            PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
+"""
+Endpoint: /portal/posts
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account_id
+
+Returns list of posts
+"""
 @app.route('/portal/posts', methods=['GET'])
 def get_posts():
-    account_id = request.args.get('account')
+    account_id = request.args.get('account_id')
     posts = Post.query.filter_by(account=account_id).all()
     posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
 
@@ -72,9 +80,17 @@ def get_posts():
     return jsonify({'posts': json_arr})
 
 
+"""
+Endpoint: /portal/posts/<post_id>
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account_id
+
+Returns post information by post ID
+"""
 @app.route('/portal/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
-    account_id = request.args.get('account')
+    account_id = request.args.get('account_id')
     post = Post.query.filter_by(id=post_id, account=account_id).first()
     if not post:
         return jsonify({'error': 'Post not found.'}), 400
