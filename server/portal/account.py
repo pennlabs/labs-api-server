@@ -12,7 +12,7 @@ from server.models import Post, PostAccount, PostAccountEmail, PostTester
 Endpoint: /portal/account/new
 HTTP Methods: POST
 Response Formats: JSON
-Content-Type: application/x-www-form-urlencoded 
+Content-Type: application/x-www-form-urlencoded
 Parameters: name, email, password
 
 Creates new account
@@ -42,7 +42,7 @@ def create_account():
 Endpoint: /portal/account/login
 HTTP Methods: POST
 Response Formats: JSON
-Content-Type: application/x-www-form-urlencoded 
+Content-Type: application/x-www-form-urlencoded
 Parameters: email, password
 
 Logins to existing account
@@ -57,9 +57,9 @@ def login():
         return jsonify({'error': 'Parameter is missing'}), 400
 
     account = PostAccount.query.filter(PostAccount.email == email).first()
-    pw_hash = bcrypt.check_password_hash(account.encrypted_password, password)
+    is_correct_password = bcrypt.check_password_hash(account.encrypted_password, password)
 
-    if account and pw_hash:
+    if account and is_correct_password:
         account.sign_in_count = account.sign_in_count + 1
         account.last_sign_in_at = datetime.now()
         sqldb.session.commit()
@@ -98,10 +98,11 @@ def get_account_info():
 Endpoint: /portal/account/reset/request
 HTTP Methods: POST
 Response Formats: JSON
-Content-Type: application/x-www-form-urlencoded 
+Content-Type: application/x-www-form-urlencoded
 Parameters: email
 
 Request password reset token
+Sends email with link with reset token to the account's email
 """
 @app.route('/portal/account/reset/request', methods=['POST'])
 def request_account_password_reset_token():
@@ -144,7 +145,7 @@ def verify_account_password_reset():
 Endpoint: /portal/account/reset
 HTTP Methods: POST
 Response Formats: JSON
-Content-Type: application/x-www-form-urlencoded 
+Content-Type: application/x-www-form-urlencoded
 Parameters: token, password
 
 Reset password

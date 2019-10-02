@@ -171,7 +171,7 @@ Endpoint: /portal/post/image
 HTTP Methods: POST
 Response Formats: JSON
 Content-Type: multipart/form-data
-Parameters: account_id, image
+Parameters: account, image
 
 Uploads image to server
 If successful, returns image URL
@@ -187,7 +187,7 @@ def save_image():
 
     # Validate account
     try:
-        account_id = request.form.get('account_id')
+        account_id = request.form.get('account')
         account = PostAccount.get_account(account_id)
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
@@ -212,7 +212,7 @@ def save_image():
 Endpoint: /portal/post/approve
 HTTP Methods: POST
 Response Formats: JSON
-Content-Type: application/x-www-form-urlencoded 
+Content-Type: application/x-www-form-urlencoded
 Parameters: account_id, post_id, approved, msg
 
 Approve post for view
