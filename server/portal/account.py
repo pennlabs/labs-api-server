@@ -8,6 +8,16 @@ from server import app, bcrypt, sqldb
 from server.models import Post, PostAccount, PostAccountEmail, PostTester
 
 
+"""
+Endpoint: /portal/account/new
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/x-www-form-urlencoded
+Parameters: name, email, password
+
+Creates new account
+If successful, returns account ID
+"""
 @app.route('/portal/account/new', methods=['POST'])
 def create_account():
     name = request.form.get('name')
@@ -28,7 +38,16 @@ def create_account():
     return jsonify({'account_id': account.id})
 
 
-# Login and retrieve account ID
+"""
+Endpoint: /portal/account/login
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/x-www-form-urlencoded
+Parameters: email, password
+
+Logins to existing account
+If successful, returns account ID
+"""
 @app.route('/portal/account/login', methods=['POST'])
 def login():
     email = request.form.get('email')
@@ -37,10 +56,10 @@ def login():
     if any(x is None for x in [email, password]):
         return jsonify({'error': 'Parameter is missing'}), 400
 
-    pw_hash = bcrypt.generate_password_hash(password)
-    account = PostAccount.query.filter(PostAccount.email == email and bcrypt.check_password_hash(pw_hash,
-                                                                                                 password)).first()
-    if account:
+    account = PostAccount.query.filter(PostAccount.email == email).first()
+    is_correct_password = bcrypt.check_password_hash(account.encrypted_password, password)
+
+    if account and is_correct_password:
         account.sign_in_count = account.sign_in_count + 1
         account.last_sign_in_at = datetime.now()
         sqldb.session.commit()
@@ -49,7 +68,14 @@ def login():
         return jsonify({'error': 'Unable to authenticate'}), 400
 
 
-# Get all relevant information for an account
+"""
+Endpoint: /portal/account
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account_id
+
+Get all relevant information for an account
+"""
 @app.route('/portal/account', methods=['GET'])
 def get_account_info():
     try:
@@ -68,7 +94,16 @@ def get_account_info():
     return jsonify({'account': account_json})
 
 
-# Request password reset
+"""
+Endpoint: /portal/account/reset/request
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/x-www-form-urlencoded
+Parameters: email
+
+Request password reset token
+Sends email with link with reset token to the account's email
+"""
 @app.route('/portal/account/reset/request', methods=['POST'])
 def request_account_password_reset_token():
     email = request.form.get('email')
@@ -85,7 +120,14 @@ def request_account_password_reset_token():
     return jsonify({'msg': 'An email has been sent to reset your password.'})
 
 
-# Verify a reset password token
+"""
+Endpoint: /portal/account/reset
+HTTP Methods: GET
+Response Formats: JSON, HTML
+Parameters: token
+
+Verify a reset password token
+"""
 @app.route('/portal/account/reset', methods=['GET'])
 def verify_account_password_reset():
     token = request.args.get('token')
@@ -99,7 +141,15 @@ def verify_account_password_reset():
         return redirect('https://pennlabs.org?token={}'.format(token), code=302)
 
 
-# Reset password
+"""
+Endpoint: /portal/account/reset
+HTTP Methods: POST
+Response Formats: JSON
+Content-Type: application/x-www-form-urlencoded
+Parameters: token, password
+
+Reset password
+"""
 @app.route('/portal/account/reset', methods=['POST'])
 def reset_account_password():
     token = request.form.get('token')
@@ -117,7 +167,14 @@ def reset_account_password():
     return jsonify({'msg': 'Your password has been reset.'})
 
 
-# Verifies a test email for an account and adds that test email to all upcoming posts
+"""
+Endpoint: /portal/email/verify
+HTTP Methods: GET
+Response Formats: JSON, HTML
+Parameters: token, account_email
+
+Verifies a test email for an account and adds that test email to all upcoming posts
+"""
 @app.route('/portal/email/verify', methods=['GET'])
 def verify_account_email_token():
     token = request.args.get('token')

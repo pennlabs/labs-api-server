@@ -8,6 +8,14 @@ from server.models import (AnalyticsEvent, Post, PostFilter, PostStatus,
                            PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
+"""
+Endpoint: /portal/posts
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account
+
+Returns list of posts
+"""
 @app.route('/portal/posts', methods=['GET'])
 def get_posts():
     account_id = request.args.get('account')
@@ -72,6 +80,14 @@ def get_posts():
     return jsonify({'posts': json_arr})
 
 
+"""
+Endpoint: /portal/posts/<post_id>
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account
+
+Returns post information by post ID
+"""
 @app.route('/portal/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
     account_id = request.args.get('account')
