@@ -15,6 +15,7 @@ Example: JSON Encoding
 {
     'account_id': '7900fffd-0223-4381-a61d-9a16a24ca4b7',
     'image_url': 'https://i.imgur.com/CmhAG25.jpg',
+    'image_url_cropped': 'https://i.imgur.com/CmhAG25.jpg',
     'post_url': 'https://pennlabs.org/',
     'source': 'Penn Labs',
     'subtitle': 'A small subtitle',
@@ -54,7 +55,7 @@ HTTP Methods: POST
 Response Formats: JSON
 Content-Type: application/json
 Parameters: account_id, source, title, subtitle, time_label, post_url, image_url, filters, testers,
-            emails, start_date, end_date, comments
+            emails, start_date, end_date, comments, image_url_cropped
 
 Creates new post
 If successful, returns post ID
@@ -75,6 +76,7 @@ def create_post():
     time_label = data.get('time_label')
     post_url = data.get('post_url')
     image_url = data.get('image_url')
+    image_url_cropped = data.get('image_url_cropped')
     filters = list(data.get('filters'))
     testers = list(data.get('testers'))
     emails = list(data.get('emails'))
@@ -89,8 +91,8 @@ def create_post():
     end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
 
     post = Post(account=account.id, source=source, title=title, subtitle=subtitle, time_label=time_label,
-                post_url=post_url, image_url=image_url, start_date=start_date, end_date=end_date,
-                filters=(True if filters else False), testers=(True if testers else False),
+                post_url=post_url, image_url=image_url, image_url_cropped=image_url_cropped, start_date=start_date,
+                end_date=end_date, filters=(True if filters else False), testers=(True if testers else False),
                 emails=(True if emails else False)
                 )
     sqldb.session.add(post)
@@ -110,7 +112,7 @@ HTTP Methods: POST
 Response Formats: JSON
 Content-Type: application/json
 Parameters: account_id, post_id, source, title, subtitle, time_label, post_url, image_url, filters,
-            testers, emails, start_date, end_date, comments
+            testers, emails, start_date, end_date, comments, image_url_cropped
 
 Modifies existing post
 If successful, returns post ID
@@ -131,6 +133,7 @@ def update_post():
         return jsonify({'error': 'Account not authorized to update this post.'}), 400
 
     image_url = data.get('image_url')
+    image_url_cropped = data.get('image_url_cropped')
     start_date_str = data.get('start_date')
     end_date_str = data.get('end_date')
 
@@ -143,6 +146,7 @@ def update_post():
     post.time_label = data.get('time_label')
     post.post_url = data.get('post_url')
     post.image_url = image_url
+    post.image_url_cropped = image_url_cropped
 
     post.start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M:%S')
     post.end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M:%S')
@@ -196,8 +200,8 @@ def save_image():
     #     s3.upload_fileobj(file, 'penn.mobile.portal/images/{}'.format(account.name), file.filename)
 
     source_data = file.read()
-    resized_image = tinify.from_buffer(source_data).resize(method='cover', width=600, height=300)
-    aws_url = resized_image.store(
+    #resized_image = tinify.from_buffer(source_data).resize(method='cover', width=600, height=300)
+    aws_url = source_data.store(
         service='s3',
         aws_access_key_id=os.environ.get('AWS_KEY'),
         aws_secret_access_key=os.environ.get('AWS_SECRET'),
