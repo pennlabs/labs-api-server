@@ -251,6 +251,7 @@ class Post(sqldb.Model):
     time_label = sqldb.Column(sqldb.Text, nullable=True)
     post_url = sqldb.Column(sqldb.Text, nullable=True)
     image_url = sqldb.Column(sqldb.Text, nullable=False)
+    image_url_cropped = sqldb.Column(sqldb.Text, nullable=False)
     filters = sqldb.Column(sqldb.Boolean, default=False)
     start_date = sqldb.Column(sqldb.DateTime, nullable=False)
     end_date = sqldb.Column(sqldb.DateTime, nullable=False)

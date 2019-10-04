@@ -86,7 +86,7 @@ HTTP Methods: GET
 Response Formats: JSON
 Parameters: account
 
-Returns post information by post ID
+Returns post information by post ID for an account
 """
 @app.route('/portal/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
@@ -107,6 +107,7 @@ def get_post_json(post):
         'subtitle': post.subtitle,
         'time_label': post.time_label,
         'image_url': post.image_url,
+        'image_url_cropped': post.image_url_cropped,
         'post_url': post.post_url,
         'start_date': datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
         'end_date': datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
@@ -279,6 +280,7 @@ def get_json_for_post(post, test):
         'subtitle': post.subtitle,
         'time_label': post.time_label,
         'image_url': post.image_url,
+        'image_url_cropped': post.image_url_cropped,
         'post_url': post.post_url,
         'post_id': post.id,
         'test': test

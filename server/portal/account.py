@@ -101,7 +101,7 @@ Response Formats: JSON
 Content-Type: application/x-www-form-urlencoded
 Parameters: email
 
-Request password reset token
+Add password reset token to account
 Sends email with link with reset token to the account's email
 """
 @app.route('/portal/account/reset/request', methods=['POST'])
@@ -148,21 +148,26 @@ Response Formats: JSON
 Content-Type: application/x-www-form-urlencoded
 Parameters: token, password
 
-Reset password
+Reset password and remove password reset token from account
 """
 @app.route('/portal/account/reset', methods=['POST'])
 def reset_account_password():
     token = request.form.get('token')
     password = request.form.get('password')
     encrypted_password = bcrypt.generate_password_hash(password)
+    now = datetime.now()
     account = PostAccount.query.filter_by(reset_password_token=token).first()
     if not account:
         return jsonify({'error': 'Invalid auth token. Please try again.'})
+    elif account.reset_password_token_sent_at and account.reset_password_token_sent_at + timedelta(minutes=30) < now:
+        return jsonify({'error': 'This token has expired.'})
     elif not encrypted_password:
         return jsonify({'error': 'Invalid password. Please try again.'})
 
     account.encrypted_password = encrypted_password
     account.updated_at = datetime.now()
+    account.reset_password_token = None
+    account.reset_password_token_sent_at = None
     sqldb.session.commit()
     return jsonify({'msg': 'Your password has been reset.'})
 
