@@ -200,7 +200,7 @@ def save_image():
     #     s3.upload_fileobj(file, 'penn.mobile.portal/images/{}'.format(account.name), file.filename)
 
     source_data = file.read()
-    read_image = tinify.from_buffer(source_data)#.resize(method='cover', width=600, height=300)
+    read_image = tinify.from_buffer(source_data)  # .resize(method='cover', width=600, height=300)
     aws_url = read_image.store(
         service='s3',
         aws_access_key_id=os.environ.get('AWS_KEY'),
