@@ -1,7 +1,7 @@
+import datetime
 import pandas as pd
 from bs4 import BeautifulSoup
 from flask import jsonify, request
-from datetime import datetime, date
 
 from server import app
 from server.models import Account, DiningBalance, sqldb
@@ -112,9 +112,10 @@ def get_average_balances_by_day():
     end_date_str = request.args.get('end_date')
 
     if start_date_str and end_date_str:
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-        dining_balance = DiningBalance.query.filter_by(account_id=account.id).filter(DiningBalance.created_at>=start_date, DiningBalance.created_at<=end_date)
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
+            .filter(DiningBalance.created_at >= start_date, DiningBalance.created_at <= end_date)
     else:
         dining_balance = DiningBalance.query.filter_by(account_id=account.id)
 
