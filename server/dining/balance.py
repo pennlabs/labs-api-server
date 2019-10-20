@@ -134,3 +134,62 @@ def get_average_balances_by_day():
         return jsonify({'balance': df.to_dict('records')})
 
     return jsonify({'balance': None})
+
+
+@app.route('/dining/projection', methods=['GET'])
+def get_dining_projection():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+    dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+
+    balance_array = []
+    if dining_balance:
+        for balance in dining_balance:
+            balance_array.append({
+                'dining_dollars': balance.dining_dollars,
+                'swipes': balance.swipes,
+                'timestamp': balance.created_at.strftime('%Y-%m-%d')
+            })
+
+        df = pd.DataFrame(balance_array).groupby('timestamp').agg(lambda x: x.mean()).reset_index()
+
+        if df.iloc[-1, 0] == 0.0 and df.iloc[-1, 1] == 0.0:
+            return jsonify({
+                'projection': {
+                    'swipes': 0,
+                    'dining_dollars': 0
+                }
+            })
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d')
+
+        last_day_before_sem = df[(df['dining_dollars'] == 0) & (df['swipes'] == 0)]
+        if last_day_before_sem.any().any():
+            last_zero_timestamp = last_day_before_sem.tail(1).iloc[0]['timestamp']
+            df = df[df['timestamp'] > last_zero_timestamp]
+            print(df)
+
+        num_days = abs((df.tail(1).iloc[0]['timestamp'] - df.head(1).iloc[0]['timestamp']).days) + 1
+        print('days')
+        print(num_days)
+        num_swipes = df.head(1).iloc[0]['swipes'] - df.tail(1).iloc[0]['swipes']
+        print('swipes')
+        print(num_swipes)
+        num_dollars = df.head(1).iloc[0]['dining_dollars'] - df.tail(1).iloc[0]['dining_dollars']
+        print('dollars')
+        print(num_dollars)
+
+        swipe_days_left = df.tail(1).iloc[0]['swipes'] / (num_swipes / num_days)
+        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / (num_dollars / num_days)
+
+        return jsonify({
+            'projection': {
+                'swipes_day_left': swipe_days_left,
+                'dining_dollars_day_left': dollars_days_left
+            }
+        })
+
+    return jsonify({'balance': None})
