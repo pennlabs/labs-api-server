@@ -146,18 +146,18 @@ def update_courses_endpoint():
 @app.route('/account/courses', methods=['GET'])
 def get_courses_endpoint():
     """ Get the courses associated with the account """
-    account_id = request.args.get('account_id')
-    date = request.args.get('date')
-    weekday = request.args.get('weekday')
-    if account_id is None:
-        return jsonify({'error': 'Missing account_id field.'}), 400
-
-    account = Account.query.filter_by(id=account_id).first()
-    if account is None:
-        return jsonify({'error': 'Account not found.'}), 400
-
-    courses = get_courses(account, date, weekday, weekday is None)
-    return jsonify({'courses': courses})
+#     account_id = request.args.get('account_id')
+#     date = request.args.get('date')
+#     weekday = request.args.get('weekday')
+#     if account_id is None:
+#         return jsonify({'error': 'Missing account_id field.'}), 400
+#
+#     account = Account.query.filter_by(id=account_id).first()
+#     if account is None:
+#         return jsonify({'error': 'Account not found.'}), 400
+#
+#     courses = get_courses(account, date, weekday, weekday is None)
+    return jsonify({'courses': []})
 
 
 def get_account(json):
