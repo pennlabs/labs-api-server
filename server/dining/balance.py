@@ -175,13 +175,13 @@ def get_dining_projection():
         num_swipes = df.head(1).iloc[0]['swipes'] - df.tail(1).iloc[0]['swipes']
         num_dollars = df.head(1).iloc[0]['dining_dollars'] - df.tail(1).iloc[0]['dining_dollars']
 
-        swipe_days_left = df.tail(1).iloc[0]['swipes'] / (num_swipes / num_days)
-        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / (num_dollars / num_days)
+        swipe_days_left = df.tail(1).iloc[0]['swipes'] / (num_swipes / num_days) if num_swipes else 0.0
+        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / (num_dollars / num_days) if num_dollars else 0.0
 
         return jsonify({
             'projection': {
-                'swipes_day_left': swipe_days_left,
-                'dining_dollars_day_left': dollars_days_left
+                'swipes_day_left': swipe_days_left or 0.0,
+                'dining_dollars_day_left': dollars_days_left or 0.0
             }
         })
 
