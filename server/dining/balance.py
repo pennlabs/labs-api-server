@@ -172,8 +172,10 @@ def get_dining_projection():
         if df.iloc[-1, 0] == 0.0 and df.iloc[-1, 1] == 0.0:
             return jsonify({
                 'projection': {
-                    'swipes_day_left': 0,
-                    'dining_dollars_day_left': 0
+                    'swipes_day_left': 0.0,
+                    'dining_dollars_day_left': 0.0,
+                    'swipes_left_on_date': 0.0,
+                    'dollars_left_on_date': 0.0
                 }
             })
 
@@ -183,6 +185,9 @@ def get_dining_projection():
         if last_day_before_sem.any().any():
             last_zero_timestamp = last_day_before_sem.tail(1).iloc[0]['timestamp']
             df = df[df['timestamp'] > last_zero_timestamp]
+
+        if len(df.index) <= 5:
+            return jsonify({'success': False, 'error': 'Insufficient previous transactions'}), 501
 
         num_days = abs((df.tail(1).iloc[0]['timestamp'] - df.head(1).iloc[0]['timestamp']).days) + 1
         num_swipes = df.head(1).iloc[0]['swipes'] - df.tail(1).iloc[0]['swipes']
