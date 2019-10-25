@@ -58,7 +58,7 @@ def retrieve_venues():
 
             imageUrlJSON = db.get('venue:%s' % (str(venue['id'])))
             if imageUrlJSON:
-                venue['imageURL'] = imageUrlJSON.decode('utf8').replace("'", '')
+                venue['imageURL'] = imageUrlJSON.decode('utf8').replace('\"', '')
             else:
                 venue['imageURL'] = None
         return json
