@@ -144,6 +144,19 @@ def get_dining_projection():
         return jsonify({'success': False, 'error': str(e)}), 400
 
     dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+    date = request.args.get('date')
+
+    if date:
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+    else:
+        today = datetime.date.today()
+        month = int(today.strftime('%m'))
+        if month <= 5:
+            date = today.replace(month=5, day=5)
+        elif month <= 8:
+            date = today.replace(month=8, day=20)
+        else:
+            date = today.replace(month=12, day=15)
 
     balance_array = []
     if dining_balance:
@@ -174,14 +187,27 @@ def get_dining_projection():
         num_days = abs((df.tail(1).iloc[0]['timestamp'] - df.head(1).iloc[0]['timestamp']).days) + 1
         num_swipes = df.head(1).iloc[0]['swipes'] - df.tail(1).iloc[0]['swipes']
         num_dollars = df.head(1).iloc[0]['dining_dollars'] - df.tail(1).iloc[0]['dining_dollars']
+        swipes_per_day = num_swipes / num_days
+        dollars_per_day = num_dollars / num_days
 
-        swipe_days_left = df.tail(1).iloc[0]['swipes'] / (num_swipes / num_days) if num_swipes else 0.0
-        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / (num_dollars / num_days) if num_dollars else 0.0
+        swipe_days_left = df.tail(1).iloc[0]['swipes'] / swipes_per_day if num_swipes else 0.0
+        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / dollars_per_day if num_dollars else 0.0
+
+        day_difference = abs((date - datetime.date.today()).days) + 1
+        swipes_left = df.tail(1).iloc[0]['swipes'] - (swipes_per_day * day_difference) if num_swipes else 0.0
+        dollars_left = df.tail(1).iloc[0]['dining_dollars'] - (dollars_per_day * day_difference) if num_dollars else 0.0
+
+        if swipes_left <= 0:
+            swipes_left = 0.0
+        if dollars_left <= 0:
+            dollars_left = 0.0
 
         return jsonify({
             'projection': {
-                'swipes_day_left': swipe_days_left or 0.0,
-                'dining_dollars_day_left': dollars_days_left or 0.0
+                'swipes_day_left': swipe_days_left,
+                'dining_dollars_day_left': dollars_days_left,
+                'swipes_left_on_date': swipes_left,
+                'dollars_left_on_date': dollars_left
             }
         })
 
