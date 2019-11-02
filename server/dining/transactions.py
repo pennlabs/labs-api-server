@@ -50,8 +50,8 @@ def get_dining_dollar_transactions():
         return jsonify({'success': False, 'error': str(e)}), 400
 
     transactions = sqldb.session.query(DiningTransaction) \
-                                    .filter_by(account_id=account.id) \
-                                    .order_by(DiningTransaction.date.desc())
+                                .filter_by(account_id=account.id) \
+                                .order_by(DiningTransaction.date.desc())
 
     results = []
 
