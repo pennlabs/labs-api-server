@@ -40,3 +40,28 @@ def save_dining_dollar_transactions():
     sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
+
+
+@app.route('/dining/transactions', methods=['GET'])
+def get_dining_dollar_transactions():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+    transactions = sqldb.session.query(DiningTransaction) \
+                                .filter_by(account_id=account.id) \
+                                .order_by(DiningTransaction.date.desc())
+
+    results = []
+
+    for transaction in transactions:
+        date = datetime.datetime.strftime(transaction.date, '%Y-%m-%dT%H:%M:%S')
+        results.append({
+            'date': date,
+            'description': transaction.description,
+            'amount': transaction.amount,
+            'balance': transaction.balance,
+        })
+
+    return jsonify({'results': results})
