@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 from bs4 import BeautifulSoup
 from flask import jsonify, request
@@ -107,9 +109,18 @@ def get_average_balances_by_day():
     except ValueError as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
-    dining_balance = DiningBalance.query.filter_by(account_id=account.id)
-    balance_array = []
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
 
+    if start_date_str and end_date_str:
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
+            .filter(DiningBalance.created_at >= start_date, DiningBalance.created_at <= end_date)
+    else:
+        dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+
+    balance_array = []
     if dining_balance:
         for balance in dining_balance:
             balance_array.append({
@@ -123,3 +134,86 @@ def get_average_balances_by_day():
         return jsonify({'balance': df.to_dict('records')})
 
     return jsonify({'balance': None})
+
+
+@app.route('/dining/projection', methods=['GET'])
+def get_dining_projection():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+    dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+    date = request.args.get('date')
+
+    if date:
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+    else:
+        today = datetime.date.today()
+        month = int(today.strftime('%m'))
+        if month <= 5:
+            date = today.replace(month=5, day=5)
+        elif month <= 8:
+            date = today.replace(month=8, day=20)
+        else:
+            date = today.replace(month=12, day=15)
+
+    balance_array = []
+    if dining_balance:
+        for balance in dining_balance:
+            balance_array.append({
+                'dining_dollars': balance.dining_dollars,
+                'swipes': balance.swipes,
+                'timestamp': balance.created_at.strftime('%Y-%m-%d')
+            })
+
+        df = pd.DataFrame(balance_array).groupby('timestamp').agg(lambda x: x.mean()).reset_index()
+
+        if df.iloc[-1, 0] == 0.0 and df.iloc[-1, 1] == 0.0:
+            return jsonify({
+                'projection': {
+                    'swipes_day_left': 0.0,
+                    'dining_dollars_day_left': 0.0,
+                    'swipes_left_on_date': 0.0,
+                    'dollars_left_on_date': 0.0
+                }
+            })
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d')
+
+        last_day_before_sem = df[(df['dining_dollars'] == 0) & (df['swipes'] == 0)]
+        if last_day_before_sem.any().any():
+            last_zero_timestamp = last_day_before_sem.tail(1).iloc[0]['timestamp']
+            df = df[df['timestamp'] > last_zero_timestamp]
+
+        if len(df.index) <= 5:
+            return jsonify({'success': False, 'error': 'Insufficient previous transactions'}), 501
+
+        num_days = abs((df.tail(1).iloc[0]['timestamp'] - df.head(1).iloc[0]['timestamp']).days) + 1
+        num_swipes = df.head(1).iloc[0]['swipes'] - df.tail(1).iloc[0]['swipes']
+        num_dollars = df.head(1).iloc[0]['dining_dollars'] - df.tail(1).iloc[0]['dining_dollars']
+        swipes_per_day = num_swipes / num_days
+        dollars_per_day = num_dollars / num_days
+
+        swipe_days_left = df.tail(1).iloc[0]['swipes'] / swipes_per_day if num_swipes else 0.0
+        dollars_days_left = df.tail(1).iloc[0]['dining_dollars'] / dollars_per_day if num_dollars else 0.0
+
+        day_difference = abs((date - datetime.date.today()).days) + 1
+        swipes_left = df.tail(1).iloc[0]['swipes'] - (swipes_per_day * day_difference) if num_swipes else 0.0
+        dollars_left = df.tail(1).iloc[0]['dining_dollars'] - (dollars_per_day * day_difference) if num_dollars else 0.0
+
+        if swipes_left <= 0:
+            swipes_left = 0.0
+        if dollars_left <= 0:
+            dollars_left = 0.0
+
+        return jsonify({
+            'projection': {
+                'swipes_day_left': swipe_days_left,
+                'dining_dollars_day_left': dollars_days_left,
+                'swipes_left_on_date': swipes_left,
+                'dollars_left_on_date': dollars_left
+            }
+        })
+
+    return jsonify({'projection': None})
