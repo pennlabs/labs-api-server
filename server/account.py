@@ -123,24 +123,25 @@ def register_account_endpoint():
 @app.route('/account/courses', methods=['POST'])
 def update_courses_endpoint():
     """ Add/Update the courses associated with the account """
-    json = request.get_json()
-    if json:
-        try:
-            account_id = json['account_id']
-            account = Account.query.filter_by(id=account_id).first()
+    # json = request.get_json()
+    # if json:
+    #     try:
+    #         account_id = json['account_id']
+    #         account = Account.query.filter_by(id=account_id).first()
 
-            if account is None:
-                return jsonify({'error': 'Account not found.'}), 400
+    #         if account is None:
+    #             return jsonify({'error': 'Account not found.'}), 400
 
-            courses = json.get('courses')
-            if courses:
-                add_courses(account, courses)
+    #         courses = json.get('courses')
+    #         if courses:
+    #             add_courses(account, courses)
 
-            return jsonify({'success': True})
-        except KeyError as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return jsonify({'error': 'JSON not passed'}), 400
+    #         return jsonify({'success': True})
+    #     except KeyError as e:
+    #         return jsonify({'error': str(e)}), 400
+    # else:
+    #     return jsonify({'error': 'JSON not passed'}), 400
+    return jsonify({'success': True})
 
 
 @app.route('/account/courses', methods=['GET'])
