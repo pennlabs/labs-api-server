@@ -67,24 +67,24 @@ class DiningApiTests(unittest.TestCase):
             swipes = 20
             date = datetime.datetime.strptime('2018-09-01', '%Y-%m-%d')
             account = Account(
-                id = "12345",
-                first = "Carin",
-                last = "Gan",
-                pennkey = "12345",
-                email = "caringan@penn.edu",
-                image_url = "test",
-                created_at = datetime.datetime.strptime('2018-08-01', '%Y-%m-%d')
+                id='12345',
+                first='Carin',
+                last='Gan',
+                pennkey='12345',
+                email='caringan@penn.edu',
+                image_url='test',
+                created_at=datetime.datetime.strptime('2018-08-01', '%Y-%m-%d')
             )
             sqldb.session.add(account)
             sqldb.session.commit()
             for x in range(0, 11):
                 date = date + datetime.timedelta(days=7)
                 item = DiningBalance(
-                    account_id="12345",
+                    account_id='12345',
                     dining_dollars=dollars,
                     swipes=swipes,
                     guest_swipes=1,
-                    created_at= date
+                    created_at=date
                 )
                 sqldb.session.add(item)
                 dollars -= 10
@@ -103,7 +103,8 @@ class DiningApiTests(unittest.TestCase):
 
     def testDiningBalancesWithParam(self):
         with server.app.test_client() as c:
-            res = json.loads(c.get('/dining/balances?start_date=2018-09-08&end_date=2018-09-30', headers={'X-Account-ID': '12345'}).data.decode('utf8'))
+            res = json.loads(c.get('/dining/balances?start_date=2018-09-08&end_date=2018-09-30',
+                             headers={'X-Account-ID': '12345'}).data.decode('utf8'))
             self.assertEquals(len(res['balance']), 4)
             self.assertEquals(res['balance'][3]['dining_dollars'], 170)
             self.assertEquals(res['balance'][3]['swipes'], 17)
@@ -111,8 +112,7 @@ class DiningApiTests(unittest.TestCase):
 
     def testDiningProjection(self):
         with server.app.test_client() as c:
-            res = json.loads(c.get('/dining/projection?date=2018-11-17', headers={'X-Account-ID': '12345'}).data.decode('utf8'))
+            res = json.loads(c.get('/dining/projection?date=2018-11-17',
+                             headers={'X-Account-ID': '12345'}).data.decode('utf8'))
             self.assertEquals(res['projection']['dining_dollars_day_left'], 71)
             self.assertEquals(res['projection']['swipes_day_left'], 71)
-                       
-
