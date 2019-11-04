@@ -70,10 +70,10 @@ def get_homepage():
 
     version = request.args.get('version')
 
-    if account and account.is_student():
-        courses = get_courses_cell(account)
-        if courses:
-            cells.append(courses)
+    # if account and account.is_student():
+    #     courses = get_courses_cell(account)
+    #     if courses:
+    #         cells.append(courses)
 
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
