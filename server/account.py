@@ -1,8 +1,8 @@
-import ast
+# import ast
 import datetime
 
 from flask import jsonify, request
-from sqlalchemy import func
+# from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
@@ -123,24 +123,25 @@ def register_account_endpoint():
 @app.route('/account/courses', methods=['POST'])
 def update_courses_endpoint():
     """ Add/Update the courses associated with the account """
-    json = request.get_json()
-    if json:
-        try:
-            account_id = json['account_id']
-            account = Account.query.filter_by(id=account_id).first()
+    # json = request.get_json()
+    # if json:
+    #     try:
+    #         account_id = json['account_id']
+    #         account = Account.query.filter_by(id=account_id).first()
 
-            if account is None:
-                return jsonify({'error': 'Account not found.'}), 400
+    #         if account is None:
+    #             return jsonify({'error': 'Account not found.'}), 400
 
-            courses = json.get('courses')
-            if courses:
-                add_courses(account, courses)
+    #         courses = json.get('courses')
+    #         if courses:
+    #             add_courses(account, courses)
 
-            return jsonify({'success': True})
-        except KeyError as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return jsonify({'error': 'JSON not passed'}), 400
+    #         return jsonify({'success': True})
+    #     except KeyError as e:
+    #         return jsonify({'error': str(e)}), 400
+    # else:
+    #     return jsonify({'error': 'JSON not passed'}), 400
+    return jsonify({'success': True})
 
 
 @app.route('/account/courses', methods=['GET'])
@@ -302,113 +303,114 @@ def add_schools_and_majors(account, json_array):
 
 
 def add_courses(account, json_array):
-    courses_in_db = []
-    courses_not_in_db = []
-    course_instructors = {}
-    course_meetings_times = {}
-    for json in json_array:
-        term = json.get('term')
-        name = json.get('name')
-        dept = json.get('dept')
-        code = json.get('code')
-        section = json.get('section')
-        building = json.get('building')
-        room = json.get('room')
-        weekdays = json.get('weekdays')
-        start_date_str = json.get('start_date')
-        end_date_str = json.get('end_date')
-        start_time = json.get('start_time')
-        end_time = json.get('end_time')
-        instructors = json.get('instructors')
-        meeting_times = json.get('meeting_times')
+    pass
+    # courses_in_db = []
+    # courses_not_in_db = []
+    # course_instructors = {}
+    # course_meetings_times = {}
+    # for json in json_array:
+    #     term = json.get('term')
+    #     name = json.get('name')
+    #     dept = json.get('dept')
+    #     code = json.get('code')
+    #     section = json.get('section')
+    #     building = json.get('building')
+    #     room = json.get('room')
+    #     weekdays = json.get('weekdays')
+    #     start_date_str = json.get('start_date')
+    #     end_date_str = json.get('end_date')
+    #     start_time = json.get('start_time')
+    #     end_time = json.get('end_time')
+    #     instructors = json.get('instructors')
+    #     meeting_times = json.get('meeting_times')
 
-        try:
-            meeting_times = ast.literal_eval(str(meeting_times))
-        except ValueError:
-            pass
+    #     try:
+    #         meeting_times = ast.literal_eval(str(meeting_times))
+    #     except ValueError:
+    #         pass
 
-        parameters = [term, name, dept, code, section, weekdays, start_time, end_time, instructors]
-        if any(x is None for x in parameters):
-            raise KeyError('Course parameter is missing')
+    #     parameters = [term, name, dept, code, section, weekdays, start_time, end_time, instructors]
+    #     if any(x is None for x in parameters):
+    #         raise KeyError('Course parameter is missing')
 
-        if start_date_str and end_date_str:
-            start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
-        else:
-            start_date = None
-            end_date = None
+    #     if start_date_str and end_date_str:
+    #         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    #         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+    #     else:
+    #         start_date = None
+    #         end_date = None
 
-            # Use the most common start and end dates for this term if they are not explicitly defined
-            term_start_end_dates = sqldb.session.query(
-                Course.start_date,
-                Course.end_date,
-                func.count(Course.id).label('count')
-            ) \
-                .filter_by(term=term) \
-                .group_by(Course.start_date, Course.end_date) \
-                .order_by('count DESC') \
-                .all()
+    #         # Use the most common start and end dates for this term if they are not explicitly defined
+    #         term_start_end_dates = sqldb.session.query(
+    #             Course.start_date,
+    #             Course.end_date,
+    #             func.count(Course.id).label('count')
+    #         ) \
+    #             .filter_by(term=term) \
+    #             .group_by(Course.start_date, Course.end_date) \
+    #             .order_by('count DESC') \
+    #             .all()
 
-            if len(term_start_end_dates) > 0:
-                start_date = term_start_end_dates[0][0]
-                end_date = term_start_end_dates[0][1]
+    #         if len(term_start_end_dates) > 0:
+    #             start_date = term_start_end_dates[0][0]
+    #             end_date = term_start_end_dates[0][1]
 
-        course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
-        if course:
-            # If start/end date field was null or different, add the start/end date
-            if course.start_date != start_date or course.end_date != end_date or course.building != building or (
-               course.room != room):
-                course.start_date = start_date
-                course.end_date = end_date
-                course.building = building
-                course.room = room
-                sqldb.session.commit()
-            courses_in_db.append(course)
-        if course is None:
-            identifier = '{}{}{}{}'.format(term, dept, code, section)
-            course_instructors[identifier] = instructors
-            course_meetings_times[identifier] = meeting_times
-            course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
-                            weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
-                            end_time=end_time)
-            sqldb.session.add(course)
-            sqldb.session.commit()
+    #     course = Course.query.filter_by(dept=dept, code=code, section=section, term=term).first()
+    #     if course:
+    #         # If start/end date field was null or different, add the start/end date
+    #         if course.start_date != start_date or course.end_date != end_date or course.building != building or (
+    #            course.room != room):
+    #             course.start_date = start_date
+    #             course.end_date = end_date
+    #             course.building = building
+    #             course.room = room
+    #             sqldb.session.commit()
+    #         courses_in_db.append(course)
+    #     if course is None:
+    #         identifier = '{}{}{}{}'.format(term, dept, code, section)
+    #         course_instructors[identifier] = instructors
+    #         course_meetings_times[identifier] = meeting_times
+    #         course = Course(term=term, name=name, dept=dept, code=code, section=section, building=building, room=room,
+    #                         weekdays=weekdays, start_date=start_date, end_date=end_date, start_time=start_time,
+    #                         end_time=end_time)
+    #         sqldb.session.add(course)
+    #         sqldb.session.commit()
 
-            courses_not_in_db.append(course)
+    #         courses_not_in_db.append(course)
 
-    if courses_not_in_db:
-        for course in courses_not_in_db:
-            identifier = '{}{}{}{}'.format(course.term, course.dept, course.code, course.section)
-            instructors = course_instructors.get(identifier)
-            if instructors:
-                for instructor in instructors:
-                    cp = CourseInstructor(course_id=course.id, name=instructor)
-                    sqldb.session.add(cp)
-            meeting_times = course_meetings_times.get(identifier)
-            add_meeting_times(course, meeting_times)
-        courses_in_db.extend(courses_not_in_db)
+    # if courses_not_in_db:
+    #     for course in courses_not_in_db:
+    #         identifier = '{}{}{}{}'.format(course.term, course.dept, course.code, course.section)
+    #         instructors = course_instructors.get(identifier)
+    #         if instructors:
+    #             for instructor in instructors:
+    #                 cp = CourseInstructor(course_id=course.id, name=instructor)
+    #                 sqldb.session.add(cp)
+    #         meeting_times = course_meetings_times.get(identifier)
+    #         add_meeting_times(course, meeting_times)
+    #     courses_in_db.extend(courses_not_in_db)
 
-    if courses_in_db:
-        # Delete all courses associated with this account for this term
-        terms = set([x.term for x in courses_in_db])
-        for term in terms:
-            query = sqldb.session.query(CourseAccount, Course).join(Course) \
-                .filter(CourseAccount.account_id == account.id) \
-                .filter(Course.term == term)
-            for ca, course in query:
-                sqldb.session.delete(ca)
+    # if courses_in_db:
+    #     # Delete all courses associated with this account for this term
+    #     terms = set([x.term for x in courses_in_db])
+    #     for term in terms:
+    #         query = sqldb.session.query(CourseAccount, Course).join(Course) \
+    #             .filter(CourseAccount.account_id == account.id) \
+    #             .filter(Course.term == term)
+    #         for ca, course in query:
+    #             sqldb.session.delete(ca)
 
-        # Just in case, delete any course accounts with same account id and course id
-        for course in courses_in_db:
-            ca = CourseAccount.query.filter_by(account_id=account.id, course_id=course.id).first()
-            if ca:
-                sqldb.session.delete(ca)
-        sqldb.session.commit()
+    #     # Just in case, delete any course accounts with same account id and course id
+    #     for course in courses_in_db:
+    #         ca = CourseAccount.query.filter_by(account_id=account.id, course_id=course.id).first()
+    #         if ca:
+    #             sqldb.session.delete(ca)
+    #     sqldb.session.commit()
 
-        for course in courses_in_db:
-            ca = CourseAccount(account_id=account.id, course_id=course.id)
-            sqldb.session.add(ca)
-        sqldb.session.commit()
+    #     for course in courses_in_db:
+    #         ca = CourseAccount(account_id=account.id, course_id=course.id)
+    #         sqldb.session.add(ca)
+    #     sqldb.session.commit()
 
 
 def add_meeting_times(course, meeting_times_json):
