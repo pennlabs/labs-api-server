@@ -26,7 +26,7 @@ def get_posts():
                                func.count(AnalyticsEvent.post_id).label('interactions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                        .filter(AnalyticsEvent.is_interaction is True) \
+                        .filter(AnalyticsEvent.is_interaction) \
                         .group_by(AnalyticsEvent.post_id) \
                         .subquery()
 
@@ -34,14 +34,14 @@ def get_posts():
                                func.count(AnalyticsEvent.post_id).label('impressions')) \
                         .filter(AnalyticsEvent.type == 'post') \
                         .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                        .filter(AnalyticsEvent.is_interaction is False) \
+                        .filter(AnalyticsEvent.is_interaction == 0) \
                         .group_by(AnalyticsEvent.post_id) \
                         .subquery()
 
     qry3_sub = sqldb.session.query(AnalyticsEvent.post_id.label('id'), AnalyticsEvent.user) \
                             .filter(AnalyticsEvent.type == 'post') \
                             .filter(AnalyticsEvent.post_id.in_(posts_query)) \
-                            .filter(AnalyticsEvent.is_interaction is False) \
+                            .filter(AnalyticsEvent.is_interaction == 0) \
                             .group_by(AnalyticsEvent.post_id, AnalyticsEvent.user) \
                             .subquery()
 
@@ -50,14 +50,14 @@ def get_posts():
                         .group_by(qry3_sub.c.id) \
                         .subquery()
 
-    analytic_qry = sqldb.session.query(qry1.c.id, qry1.c.interactions, qry2.c.impressions, qry3.c.unique_impr) \
+    analytics_qry = sqldb.session.query(qry1.c.id, qry1.c.interactions, qry2.c.impressions, qry3.c.unique_impr) \
                                 .select_from(qry1) \
                                 .join(qry2, qry1.c.id == qry2.c.id) \
                                 .join(qry3, and_(qry1.c.id == qry2.c.id, qry2.c.id == qry3.c.id)) \
                                 .all()
 
     analytics_by_post = {}
-    for post_id, interactions, impressions, unique_impr in analytic_qry:
+    for post_id, interactions, impressions, unique_impr in analytics_qry:
         analytics_by_post[post_id] = (interactions, impressions, unique_impr)
 
     json_arr = []
