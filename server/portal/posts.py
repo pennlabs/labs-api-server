@@ -51,10 +51,10 @@ def get_posts():
                         .subquery()
 
     analytics_qry = sqldb.session.query(qry1.c.id, qry1.c.interactions, qry2.c.impressions, qry3.c.unique_impr) \
-                                .select_from(qry1) \
-                                .join(qry2, qry1.c.id == qry2.c.id) \
-                                .join(qry3, and_(qry1.c.id == qry2.c.id, qry2.c.id == qry3.c.id)) \
-                                .all()
+                                 .select_from(qry1) \
+                                 .join(qry2, qry1.c.id == qry2.c.id) \
+                                 .join(qry3, and_(qry1.c.id == qry2.c.id, qry2.c.id == qry3.c.id)) \
+                                 .all()
 
     analytics_by_post = {}
     for post_id, interactions, impressions, unique_impr in analytics_qry:
