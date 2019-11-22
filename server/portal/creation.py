@@ -175,7 +175,7 @@ Endpoint: /portal/post/image
 HTTP Methods: POST
 Response Formats: JSON
 Content-Type: multipart/form-data
-Parameters: account, image
+Parameters: account, post id, image
 
 Uploads image to server
 If successful, returns image URL
@@ -193,8 +193,12 @@ def save_image():
     try:
         account_id = request.form.get('account')
         account = PostAccount.get_account(account_id)
+        post_id = request.form.get('post_id')
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
+    
+    now = datetime.now()
+    timestamp = datetime.timestamp(now)
 
     # if request.args.original:
     #     s3.upload_fileobj(file, 'penn.mobile.portal/images/{}'.format(account.name), file.filename)
@@ -206,7 +210,7 @@ def save_image():
         aws_access_key_id=os.environ.get('AWS_KEY'),
         aws_secret_access_key=os.environ.get('AWS_SECRET'),
         region='us-east-1',
-        path='penn.mobile.portal/images/{}/{}'.format(account.name, file.filename)
+        path='penn.mobile.portal/images/{}/{}-{}'.format(account.name, timestamp, file.filename)
     ).location
 
     return jsonify({'image_url': aws_url})

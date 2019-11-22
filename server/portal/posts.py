@@ -279,8 +279,7 @@ def get_json_for_post(post, test):
         'title': post.title,
         'subtitle': post.subtitle,
         'time_label': post.time_label,
-        'image_url': post.image_url,
-        'image_url_cropped': post.image_url_cropped,
+        'image_url': post.image_url_cropped,
         'post_url': post.post_url,
         'post_id': post.id,
         'test': test
