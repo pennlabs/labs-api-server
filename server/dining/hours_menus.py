@@ -58,15 +58,9 @@ def retrieve_venues():
 
             imageUrlJSON = db.get('venue:%s' % (str(venue['id'])))
             if imageUrlJSON:
-                venue['imageUrl'] = imageUrlJSON.decode('utf8').replace("'", '')
+                venue['imageURL'] = imageUrlJSON.decode('utf8').replace('\"', '')
             else:
-                venue['imageUrl'] = None
-
-            if venue.get('weeklyMenuURL'):
-                del venue['weeklyMenuURL']
-
-            if venue.get('dailyMenuURL'):
-                del venue['dailyMenuURL']
+                venue['imageURL'] = None
         return json
 
     now = datetime.datetime.today()
