@@ -193,10 +193,9 @@ def save_image():
     try:
         account_id = request.form.get('account')
         account = PostAccount.get_account(account_id)
-        post_id = request.form.get('post_id')
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
-    
+
     now = datetime.now()
     timestamp = datetime.timestamp(now)
 
