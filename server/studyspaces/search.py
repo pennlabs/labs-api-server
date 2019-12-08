@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from server import app
 from server.models import Account
@@ -28,10 +28,14 @@ def get_nam():
 
     users = []
     if first and last:
-        matches = Account.query.filter(and_(
+        and_matches = Account.query.filter(and_(
             Account.first.like('{}%'.format(first)),
             Account.last.like('{}%'.format(last)))).all()
-        users.extend(matches)
+        users.extend(and_matches)
+
+        if not users:
+            or_matches = Account.query.filter(Account.last.like('{}%'.format(last))).all()
+            users.extend(or_matches)
     else:
         starting_query = '{}%'.format(query)
         general_query = '%{}%'.format(query)
