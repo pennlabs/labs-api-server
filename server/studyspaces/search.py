@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from penn.base import APIError
-from sqlalchemy import or_
+from sqlalchemy import and_
 
 from server import app
 from server.models import Account
@@ -20,18 +20,29 @@ def get_nam():
     	return jsonify({'error': 'Query is too short. Minimum length is two characters.'}), 400
 
     # query = query.lower()
-    starting_query = '{}%'.format(query)
-    general_query = '%{}%'.format(query)
+    if ' ' in query:
+    	split = query.split(' ')
+    	if len(split) >= 2:
+    		first = split[0]
+    		last = split[1]
 
-    starting_first_name_matches = Account.query.filter(Account.first.like(starting_query)).all()
-    starting_last_name_matches = Account.query.filter(Account.last.like(starting_query)).all()
-    general_first_name_matches = Account.query.filter(Account.first.like(general_query)).all()
-    general_last_name_matches = Account.query.filter(Account.last.like(general_query)).all()
+    users = []
+    if first and last:
+	    matches = Account.query.filter(and_(Account.first.like('{}%'.format(first)), Account.last.like('{}%'.format(last)))).all()
+	    users.extend(matches)
+    else:
+	    starting_query = '{}%'.format(query)
+	    general_query = '%{}%'.format(query)
 
-    users = starting_first_name_matches
-    users.extend(starting_last_name_matches)
-    users.extend(general_first_name_matches)
-    users.extend(general_last_name_matches)
+	    starting_first_name_matches = Account.query.filter(Account.first.like(starting_query)).all()
+	    starting_last_name_matches = Account.query.filter(Account.last.like(starting_query)).all()
+	    general_first_name_matches = Account.query.filter(Account.first.like(general_query)).all()
+	    general_last_name_matches = Account.query.filter(Account.last.like(general_query)).all()
+
+	    users.extend(starting_first_name_matches)
+	    users.extend(starting_last_name_matches)
+	    users.extend(general_first_name_matches)
+	    users.extend(general_last_name_matches)
 
     seen_pennkeys = set()
     filtered_users = []
