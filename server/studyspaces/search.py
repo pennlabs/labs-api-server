@@ -26,21 +26,21 @@ def get_nam():
 
     users = []
     if first and last:
-	    matches = Account.query.filter(and_(Account.first.like('{}%'.format(first)), Account.last.like('{}%'.format(last)))).all()
-	    users.extend(matches)
+        matches = Account.query.filter(and_(Account.first.like('{}%'.format(first)), Account.last.like('{}%'.format(last)))).all()
+        users.extend(matches)
     else:
-	    starting_query = '{}%'.format(query)
-	    general_query = '%{}%'.format(query)
+        starting_query = '{}%'.format(query)
+        general_query = '%{}%'.format(query)
 
-	    starting_first_name_matches = Account.query.filter(Account.first.like(starting_query)).all()
-	    starting_last_name_matches = Account.query.filter(Account.last.like(starting_query)).all()
-	    general_first_name_matches = Account.query.filter(Account.first.like(general_query)).all()
-	    general_last_name_matches = Account.query.filter(Account.last.like(general_query)).all()
+        starting_first_name_matches = Account.query.filter(Account.first.like(starting_query)).all()
+        starting_last_name_matches = Account.query.filter(Account.last.like(starting_query)).all()
+        general_first_name_matches = Account.query.filter(Account.first.like(general_query)).all()
+        general_last_name_matches = Account.query.filter(Account.last.like(general_query)).all()
 
-	    users.extend(starting_first_name_matches)
-	    users.extend(starting_last_name_matches)
-	    users.extend(general_first_name_matches)
-	    users.extend(general_last_name_matches)
+        users.extend(starting_first_name_matches)
+        users.extend(starting_last_name_matches)
+        users.extend(general_first_name_matches)
+        users.extend(general_last_name_matches)
 
     seen_pennkeys = set()
     filtered_users = []
