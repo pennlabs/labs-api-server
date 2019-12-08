@@ -34,8 +34,14 @@ def get_nam():
         users.extend(and_matches)
 
         if not users:
-            or_matches = Account.query.filter(Account.last.like('{}%'.format(last))).all()
-            users.extend(or_matches)
+            first_letter_matches_and_last_name = Account.query.filter(and_(
+                Account.first.like('{}%'.format(first[:1])),
+                Account.last.like('{}%'.format(last)))).all()
+            users.extend(first_letter_matches_and_last_name)
+
+            last_name_matches = Account.query.filter(Account.last.like('{}%'.format(last))).all()
+            last_name_matches = sorted(last_name_matches, key=lambda x: x.first)
+            users.extend(last_name_matches)
     else:
         starting_query = '{}%'.format(query)
         general_query = '%{}%'.format(query)
