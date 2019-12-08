@@ -18,7 +18,8 @@ def get_nam():
     if len(query) <= 1:
         return jsonify({'error': 'Query is too short. Minimum length is two characters.'}), 400
 
-    # query = query.lower()
+    first = None
+    last = None
     if ' ' in query:
         split = query.split(' ')
         if len(split) >= 2:
@@ -44,6 +45,14 @@ def get_nam():
         users.extend(starting_last_name_matches)
         users.extend(general_first_name_matches)
         users.extend(general_last_name_matches)
+
+    if not users:
+        # If no users found by search first or last name, search the pennkey
+        starting_pennkey_matches = Account.query.filter(Account.pennkey.like('{}%'.format(query))).all()
+        general_pennkey_matches = Account.query.filter(Account.pennkey.like('%{}%'.format(query))).all()
+
+        users.extend(starting_pennkey_matches)
+        users.extend(general_pennkey_matches)
 
     seen_pennkeys = set()
     filtered_users = []
