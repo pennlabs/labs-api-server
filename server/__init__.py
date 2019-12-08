@@ -68,6 +68,7 @@ import server.studyspaces.book  # noqa
 import server.studyspaces.cancel  # noqa
 import server.studyspaces.deprecated  # noqa
 import server.studyspaces.reservations  # noqa
+import server.studyspaces.search  # noqa
 import server.transit  # noqa
 import server.weather  # noqa
 
