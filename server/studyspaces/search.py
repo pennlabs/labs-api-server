@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from sqlalchemy import and_
 
+from server import app
 from server.models import Account
 
 
@@ -19,14 +20,16 @@ def get_nam():
 
     # query = query.lower()
     if ' ' in query:
-    split = query.split(' ')
+        split = query.split(' ')
         if len(split) >= 2:
             first = split[0]
             last = split[1]
 
     users = []
     if first and last:
-        matches = Account.query.filter(and_(Account.first.like('{}%'.format(first)), Account.last.like('{}%'.format(last)))).all()
+        matches = Account.query.filter(and_(
+            Account.first.like('{}%'.format(first)), 
+            Account.last.like('{}%'.format(last)))).all()
         users.extend(matches)
     else:
         starting_query = '{}%'.format(query)
