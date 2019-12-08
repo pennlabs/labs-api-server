@@ -28,7 +28,7 @@ def get_nam():
     users = []
     if first and last:
         matches = Account.query.filter(and_(
-            Account.first.like('{}%'.format(first)), 
+            Account.first.like('{}%'.format(first)),
             Account.last.like('{}%'.format(last)))).all()
         users.extend(matches)
     else:
