@@ -40,11 +40,17 @@ def get_nam():
         starting_query = '{}%'.format(query)
         general_query = '%{}%'.format(query)
 
+        starting_exact_matches = Account.query.filter(Account.first.like(query)).all()
+        starting_exact_matches = sorted(starting_exact_matches, key=lambda x: x.last)
+
         starting_first_name_matches = Account.query.filter(Account.first.like(starting_query)).all()
+        starting_first_name_matches = sorted(starting_first_name_matches, key=lambda x: x.last)
+
         starting_last_name_matches = Account.query.filter(Account.last.like(starting_query)).all()
         general_first_name_matches = Account.query.filter(Account.first.like(general_query)).all()
         general_last_name_matches = Account.query.filter(Account.last.like(general_query)).all()
 
+        users.extend(starting_exact_matches)
         users.extend(starting_first_name_matches)
         users.extend(starting_last_name_matches)
         users.extend(general_first_name_matches)
