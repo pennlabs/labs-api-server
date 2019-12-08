@@ -1,8 +1,6 @@
 from flask import jsonify, request
-from penn.base import APIError
 from sqlalchemy import and_
 
-from server import app
 from server.models import Account
 
 
@@ -17,14 +15,14 @@ def get_nam():
         return jsonify({'error': 'Query argument not found.'}), 400
 
     if len(query) <= 1:
-    	return jsonify({'error': 'Query is too short. Minimum length is two characters.'}), 400
+        return jsonify({'error': 'Query is too short. Minimum length is two characters.'}), 400
 
     # query = query.lower()
     if ' ' in query:
-    	split = query.split(' ')
-    	if len(split) >= 2:
-    		first = split[0]
-    		last = split[1]
+    split = query.split(' ')
+        if len(split) >= 2:
+            first = split[0]
+            last = split[1]
 
     users = []
     if first and last:
@@ -47,17 +45,17 @@ def get_nam():
     seen_pennkeys = set()
     filtered_users = []
     for user in users:
-    	if user.pennkey not in seen_pennkeys:
-    		filtered_users.append(user)
-    		seen_pennkeys.add(user.pennkey)
+        if user.pennkey not in seen_pennkeys:
+            filtered_users.append(user)
+            seen_pennkeys.add(user.pennkey)
 
     filtered_users = [
-    	{
-    		'first': x.first,
-    		'last': x.last,
-    		'pennkey': x.pennkey,
-    		'email': x.email,
-    	} for x in filtered_users
+        {
+            'first': x.first,
+            'last': x.last,
+            'pennkey': x.pennkey,
+            'email': x.email,
+        } for x in filtered_users
     ]
 
     return jsonify({'results': filtered_users})
