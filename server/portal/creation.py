@@ -101,7 +101,7 @@ def create_post():
     add_filters_testers_emails(account, post, filters, testers, emails)
 
     msg = data.get('comments')
-    update_status(post, 'submitted', msg)
+    update_status(post, 'Submitted', msg)
 
     return jsonify({'post_id': post.id})
 
@@ -165,7 +165,7 @@ def update_post():
     add_filters_testers_emails(account, post, filters, testers, emails)
 
     msg = data.get('comments')
-    update_status(post, 'updated', msg)
+    update_status(post, 'Updated', msg)
 
     return jsonify({'post_id': post.id})
 
@@ -242,14 +242,14 @@ def approve_post():
     approved = bool(request.form.get('approved'))
     if approved:
         post.approved = True
-        update_status(post, 'approved', None)
+        update_status(post, 'Approved', None)
     else:
         # TODO: Send rejection email
         post.approved = False
         msg = request.form.get('msg')
         if not msg:
             return jsonify({'error': 'Denied posts must include a reason'}), 400
-        update_status(post, 'rejected', msg)
+        update_status(post, 'Rejected', msg)
 
     return jsonify({'post_id': post.id})
 
@@ -325,7 +325,7 @@ def add_filters_testers_emails(account, post, filters, testers, emails):
     sqldb.session.commit()
 
 
-def update_status(post, status, msg):
-    status = PostStatus(post=post.id, status='updated', msg=msg)
+def update_status(post, update, msg):
+    status = PostStatus(post=post.id, status=update, msg=msg)
     sqldb.session.add(status)
     sqldb.session.commit()
