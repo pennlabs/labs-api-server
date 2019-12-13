@@ -84,12 +84,16 @@ def get_account_info():
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
 
+    if account.email == 'pennappslabs@gmail.com':
+        isAdmin = True
+
     verified_emails = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
     account_json = {
         'id': account.id,
         'name': account.name,
         'email': account.email,
-        'verified_emails': verified_emails
+        'verified_emails': verified_emails,
+        'is_admin': isAdmin
     }
     return jsonify({'account': account_json})
 
