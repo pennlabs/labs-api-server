@@ -149,11 +149,16 @@ def get_posts_for_account(account):
         filtered_posts = get_filtered_posts(account)
 
         post_arr.extend(tester_posts)
-        filtered_posts.extend(email_posts)
-        for post in filtered_posts:
-            if not any(post['post_id'] == post_obj['post_id'] for post_obj in post_arr):
-                post_arr.append(post)
-    return post_arr
+        post_arr.extend(email_posts)
+        post_arr.extend(filtered_posts)
+
+    unique_posts = []
+    seen_posts = set()
+    for post in post_arr:
+        if post['post_id'] not in seen_posts:
+            unique_posts.append(post)
+            seen_posts.add(post['post_id'])
+    return unique_posts
 
 
 def get_posts_where_tester(account):
@@ -224,7 +229,7 @@ def get_filtered_posts(account):
     approved_posts = []
     post_filter_dict = {}
     for (post, filter_obj) in post_filters:
-        if filter_obj.type == 'email-only' and filter_obj.filter == 'none':
+        if filter_obj and filter_obj.type == 'email-only' and filter_obj.filter == 'none':
             continue
 
         if post.id not in post_filter_dict:
