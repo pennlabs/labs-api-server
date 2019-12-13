@@ -17,6 +17,7 @@ Example: JSON Encoding
     'last': 'Doman',
     'image_url': null,
     'pennkey': 'joshdo',
+    'pennid': '144363238',
     'degrees': [
         {
             'school_name': 'Engineering & Applied Science',
@@ -173,12 +174,13 @@ def get_account(json):
     if pennkey is None:
         raise KeyError('pennkey is missing')
 
+    pennid = json.get('pennid')
     email = json.get('email')
     image_url = json.get('image_url')
     if email is None:
         email = get_potential_email(json)
 
-    return Account(first=first, last=last, pennkey=pennkey, email=email, image_url=image_url)
+    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email, image_url=image_url)
 
 
 def update_account(updated_account):
@@ -191,6 +193,8 @@ def update_account(updated_account):
             account.email = updated_account.email
         if updated_account.image_url:
             account.image_url = updated_account.image_url
+        if updated_account.pennid:
+            account.pennid = updated_account.pennid
     return account
 
 

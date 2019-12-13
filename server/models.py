@@ -17,6 +17,7 @@ class Account(sqldb.Model):
     first = sqldb.Column(sqldb.Text, nullable=False)
     last = sqldb.Column(sqldb.Text, nullable=False)
     pennkey = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
+    pennid = sqldb.Column(sqldb.Integer, nullable=True)
     email = sqldb.Column(sqldb.Text, nullable=True)
     image_url = sqldb.Column(sqldb.Text, nullable=True)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
