@@ -187,8 +187,10 @@ def update_account(updated_account):
     if account:
         account.first = updated_account.first
         account.last = updated_account.last
-        account.email = updated_account.email
-        account.image_url = updated_account.image_url
+        if updated_account.email:
+            account.email = updated_account.email
+        if updated_account.image_url:
+            account.image_url = updated_account.image_url
     return account
 
 
