@@ -1,11 +1,11 @@
 import math
+from datetime import datetime
 
 from flask import jsonify, request
-from datetime import datetime
-from server import app, sqldb
 from bs4 import BeautifulSoup
-from server.models import Account
 from sqlalchemy.exc import IntegrityError
+
+from server import app, sqldb
 from server.auth import auth
 
 
@@ -54,7 +54,7 @@ def save_housing_info(account):
             room = paragraphs[0]
             address = paragraphs[1]
 
-            split = year_text.strip().split(" ")
+            split = year_text.strip().split(' ')
             start, end = split[len(split) - 3], split[len(split) - 1]
 
             split = house_text.split('-')
@@ -67,7 +67,7 @@ def save_housing_info(account):
             address = split[0].strip()
 
         housing = Housing(account=account.id, house=house, location=location, address=address, off_campus=off_campus,
-            start=start, end=end, html=html)
+                    start=start, end=end, html=html)
     except (IndexError, AttributeError):
         # Parsing failed. Save the html so that we can diagnose the problem and update the account's info later.
         housing = Housing(account=account.id, html=html)
