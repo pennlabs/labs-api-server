@@ -1,11 +1,12 @@
-from flask import jsonify, request
 import math
-import requests
+
+from flask import jsonify, request
 from datetime import datetime
-from server import app, auth, sqldb
+from server import app, sqldb
 from bs4 import BeautifulSoup
 from server.models import Account
 from sqlalchemy.exc import IntegrityError
+from server.auth import auth
 
 
 class Housing(sqldb.Model):
@@ -33,7 +34,7 @@ def save_housing_info(account):
         house, location, address = None, None, None
         main = soup.findAll('div', {'class': 'interior-main-content col-md-6 col-md-push-3 md:mb-150'})[0]
 
-        off_campus = 'You don\'t have any assignments at this time' in html
+        off_campus = "You don't have any assignments at this time" in html
         if off_campus:
             # Off campus for 2020 - 2021 school year if today is after January and user has no assignments
             today = datetime.today()
@@ -56,17 +57,17 @@ def save_housing_info(account):
             split = year_text.strip().split(" ")
             start, end = split[len(split) - 3], split[len(split) - 1]
 
-            split = house_text.split("-")
+            split = house_text.split('-')
             house = split[1].strip()
 
-            split = room.text.split("  ")
+            split = room.text.split('  ')
             location = split[0].strip()
 
-            split = address.text.split("  ")
+            split = address.text.split('  ')
             address = split[0].strip()
 
-        housing = Housing(account=account.id, house=house, location=location, address=address, off_campus=off_campus, 
-                            start=start, end=end, html=html)
+        housing = Housing(account=account.id, house=house, location=location, address=address, off_campus=off_campus,
+            start=start, end=end, html=html)
     except (IndexError, AttributeError):
         # Parsing failed. Save the html so that we can diagnose the problem and update the account's info later.
         housing = Housing(account=account.id, html=html)
@@ -125,7 +126,7 @@ def get_details_for_location(location):
     Ex: 403 Butcher (Bed space: a)
     Returns 403, 4, Butcher
     """
-    split = location.split(" ")
+    split = location.split(' ')
     room = int(split[0].strip())
     floor = math.floor(room / 100)
     section = split[1].strip()

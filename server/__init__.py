@@ -9,7 +9,6 @@ from flask_cors import CORS
 from raven.contrib.flask import Sentry
 
 from server.models import sqldb
-from server.auth import auth
 
 
 app = Flask(__name__)

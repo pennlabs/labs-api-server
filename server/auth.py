@@ -1,4 +1,5 @@
 import requests
+
 from functools import wraps
 from flask import jsonify, request
 from server.models import Account
@@ -9,7 +10,6 @@ def auth():
         @wraps(f)
         def __auth(*args, **kwargs):
             authorization = request.headers.get('Authorization')
-            print(authorization)
             if authorization and ' ' in authorization:
                 auth_type, token = authorization.split()
                 if auth_type == 'Bearer':  # Only validate if Authorization header type is Bearer
