@@ -1,16 +1,26 @@
 from flask import jsonify, request
-from server import app, auth
-from bs4 import BeautifulSoup
 import math
 import requests
+from datetime import datetime
+from server import app, auth, sqldb
+from bs4 import BeautifulSoup
 from server.models import Account
+from sqlalchemy.exc import IntegrityError
+
+
+class Housing(sqldb.Model):
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), primary_key=True)
+    house = sqldb.Column(sqldb.Text, nullable=True)
+    location = sqldb.Column(sqldb.Text, nullable=True)
+    address = sqldb.Column(sqldb.Text, nullable=True)
+    start = sqldb.Column(sqldb.Integer, nullable=False, primary_key=True)
+    end = sqldb.Column(sqldb.Integer, nullable=False)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
 @app.route('/housing', methods=['POST'])
 @auth()
 def save_housing_info(account):
-    print(account)
-
     html = request.form.get('html')
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -31,7 +41,7 @@ def save_housing_info(account):
     address = paragraphs[1]
 
     split = year_text.strip().split(" ")
-    start_year, end_year = split[len(split) - 3], split[len(split) - 1]
+    start, end = split[len(split) - 3], split[len(split) - 1]
 
     split = house_text.split("-")
     house = split[1].strip()
@@ -42,12 +52,42 @@ def save_housing_info(account):
     split = address.text.split("  ")
     address = split[0].strip()
 
-    print(start_year, end_year)
-    print(house)
-    print(location)
-    print(address)
+    housing = Housing(account=account.id, house=house, location=location, address=address, start=start, end=end)
+    try:
+        sqldb.session.add(housing)
+        sqldb.session.commit()
+    except IntegrityError:
+        sqldb.session.rollback()
+        current_result = Housing.query.filter_by(account=account.id, start=start).first()
+        if house and location and address and end:
+            current_result.house = house
+            current_result.location = location
+            current_result.address = address
+            current_result.end = end
+            sqldb.session.commit()
 
-    return jsonify({ 'result': True })
+    return jsonify({
+        'house': house,
+        'location': location,
+        'address': address,
+        'start': start,
+        'end': end,
+    })
+
+
+@app.route('/housing', methods=['GET'])
+@auth()
+def get_housing_info(account):
+    today = datetime.today()
+    year = today.year if today.month > 6 else today.year - 1
+    housing = Housing.query.filter_by(account=account.id, start=year).first()
+    return jsonify({
+        'house': housing.house,
+        'location': housing.location,
+        'address': housing.address,
+        'start': housing.start,
+        'end': housing.end,
+    })
 
 
 def get_details_for_location(location):
