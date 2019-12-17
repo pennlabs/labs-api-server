@@ -67,7 +67,7 @@ def save_housing_info(account):
             address = split[0].strip()
 
         housing = Housing(account=account.id, house=house, location=location, address=address, off_campus=off_campus,
-                        start=start, end=end, html=html)
+                          start=start, end=end, html=html)
     except (IndexError, AttributeError):
         # Parsing failed. Save the html so that we can diagnose the problem and update the account's info later.
         housing = Housing(account=account.id, html=html)
