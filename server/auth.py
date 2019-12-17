@@ -1,7 +1,7 @@
-import requests
 from functools import wraps
 
 from flask import jsonify, request
+import requests
 
 from server.models import Account
 
