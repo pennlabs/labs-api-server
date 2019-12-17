@@ -68,7 +68,7 @@ def save_housing_info(account):
 
     return jsonify({
         'house': house,
-        'location': location,
+        'room': location,
         'address': address,
         'start': start,
         'end': end,
@@ -83,7 +83,7 @@ def get_housing_info(account):
     housing = Housing.query.filter_by(account=account.id, start=year).first()
     return jsonify({
         'house': housing.house,
-        'location': housing.location,
+        'room': housing.location,
         'address': housing.address,
         'start': housing.start,
         'end': housing.end,
