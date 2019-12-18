@@ -36,3 +36,15 @@ def register_push_notification(account):
             sqldb.session.commit()
 
     return jsonify({'registered': True})
+
+
+@app.route('/notifications/send', methods=['POST'])
+@auth()
+def register_push_notification(account):
+    token = NotificationToken.query.filter_by(account=account.id).first()
+
+    if not token.ios_token:
+        return jsonify({'error': 'A device token has not been registered'}), 400
+
+	print(token.ios_token)
+	return jsonify({'success': True})		
