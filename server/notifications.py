@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from apns2.client import APNsClient
+from apns2.credentials import TokenCredentials
+from apns2.payload import Payload
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
 
@@ -40,11 +43,24 @@ def register_push_notification(account):
 
 @app.route('/notifications/send', methods=['POST'])
 @auth()
-def register_push_notification(account):
+def send_push_notification(account):
+    title = request.form.get('title')
+    body = request.form.get('body')
     token = NotificationToken.query.filter_by(account=account.id).first()
+    use_sandbox = True if request.form.get('dev') else False
 
     if not token.ios_token:
-        return jsonify({'error': 'A device token has not been registered'}), 400
+        return jsonify({'error': 'A device token has not been registered on the server.'}), 400
 
-	print(token.ios_token)
-	return jsonify({'success': True})		
+    auth_key_path = 'ios_key.p8'
+    auth_key_id = '6MBD9SUNGE'
+    team_id = 'VU59R57FGM'
+    token_credentials = TokenCredentials(auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id)
+    client = APNsClient(credentials=token_credentials, use_sandbox=use_sandbox)
+
+    alert = {'title': title, 'body': body}
+    payload = Payload(alert=alert, sound="default", badge=1)
+    topic = 'org.pennlabs.PennMobile'
+    client.send_notification(token.ios_token, payload, topic)
+
+    return jsonify({'success': True})
