@@ -1,7 +1,7 @@
 from functools import wraps
 
 import requests
-from flask import jsonify, request, g
+from flask import g, jsonify, request
 
 from server.models import Account
 
@@ -29,7 +29,7 @@ def auth(nullable=False):
                                 g.account = account
                                 return f()
                             else:
-                                return f() if nullable else jsonify({'error': 'An account was not found for this user'}), 400
+                                return f() if nullable else jsonify({'error': 'Account not found.'}), 400
                         else:
                             return f() if nullable else jsonify({'error': 'Invalid token'}), 401
                     except requests.exceptions.RequestException:  # Can't connect to platform

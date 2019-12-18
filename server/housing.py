@@ -2,7 +2,7 @@ import math
 from datetime import datetime
 
 from bs4 import BeautifulSoup
-from flask import jsonify, request, g
+from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
