@@ -59,7 +59,7 @@ def send_push_notification(account):
     client = APNsClient(credentials=token_credentials, use_sandbox=use_sandbox)
 
     alert = {'title': title, 'body': body}
-    payload = Payload(alert=alert, sound="default", badge=1)
+    payload = Payload(alert=alert, sound='default', badge=1)
     topic = 'org.pennlabs.PennMobile'
     client.send_notification(token.ios_token, payload, topic)
 
