@@ -2,7 +2,7 @@ import math
 from datetime import datetime
 
 from bs4 import BeautifulSoup
-from flask import jsonify, request
+from flask import jsonify, request, g
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
@@ -23,7 +23,7 @@ class Housing(sqldb.Model):
 
 @app.route('/housing', methods=['POST'])
 @auth()
-def save_housing_info(account):
+def save_housing_info():
     html = request.form.get('html')
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -66,18 +66,18 @@ def save_housing_info(account):
             split = address.text.split('  ')
             address = split[0].strip()
 
-        housing = Housing(account=account.id, house=house, location=location, address=address, off_campus=off_campus,
+        housing = Housing(account=g.account.id, house=house, location=location, address=address, off_campus=off_campus,
                           start=start, end=end, html=html)
     except (IndexError, AttributeError):
         # Parsing failed. Save the html so that we can diagnose the problem and update the account's info later.
-        housing = Housing(account=account.id, html=html)
+        housing = Housing(account=g.account.id, html=html)
 
     try:
         sqldb.session.add(housing)
         sqldb.session.commit()
     except IntegrityError:
         sqldb.session.rollback()
-        current_result = Housing.query.filter_by(account=account.id, start=housing.start).first()
+        current_result = Housing.query.filter_by(account=g.account.id, start=housing.start).first()
         if current_result:
             if housing.off_campus or (housing.house and housing.location and housing.address):
                 current_result.house = house
@@ -102,10 +102,10 @@ def save_housing_info(account):
 
 @app.route('/housing', methods=['GET'])
 @auth()
-def get_housing_info(account):
+def get_housing_info():
     today = datetime.today()
     year = today.year if today.month > 5 else today.year - 1
-    housing = Housing.query.filter_by(account=account.id, start=year).first()
+    housing = Housing.query.filter_by(account=g.account.id, start=year).first()
     if housing:
         return jsonify({
             'result': {
