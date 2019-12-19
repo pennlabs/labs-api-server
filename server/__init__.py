@@ -72,6 +72,7 @@ import server.studyspaces.search  # noqa
 import server.transit  # noqa
 import server.weather  # noqa
 import server.housing  # noqa
+import server.notifications  # noqa
 
 if __name__ == '__main__':
     app.run(debug=True)

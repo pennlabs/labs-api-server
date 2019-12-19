@@ -42,6 +42,7 @@ MarkupSafe = "*"
 PennSDK = "*"
 SQLAlchemy = "*"
 Werkzeug = "*"
+apns2 = "*"
 
 [requires]
 python_version = "3"
