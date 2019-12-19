@@ -62,6 +62,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# iOS Push Notification Key
+ios_key.p8
+
 # Misc
 .idea/
 .DS_Store

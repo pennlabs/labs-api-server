@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 
 from server import app
 from server.models import Account
