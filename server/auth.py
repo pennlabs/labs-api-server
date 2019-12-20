@@ -1,4 +1,5 @@
 from functools import wraps
+import os
 
 import requests
 from flask import g, jsonify, request
@@ -46,3 +47,18 @@ def auth(nullable=False):
                 return f() if nullable else jsonify({'error': 'An access token was not provided. {}'.format(request.headers)}), 401
         return __auth
     return _auth
+
+
+def internal_auth(f):
+    @wraps(f)
+    def _internal_auth(*args, **kwargs):
+        authorization = request.headers.get('Authorization')
+        if (authorization and ' ' in authorization):
+            auth_type, token = authorization.split()
+            if auth_type == 'Bearer' and token == os.environ.get('AUTH_SECRET'):
+                return f()
+            else:
+               return jsonify({'error': 'Auth secret is not correct.'}), 401
+        else:
+             return jsonify({'error': 'Auth secret not provided.'}), 401
+    return _internal_auth

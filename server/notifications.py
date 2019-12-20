@@ -7,7 +7,8 @@ from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
-from server.auth import auth
+from server.auth import auth, internal_auth
+from server.models import Account
 
 
 class NotificationToken(sqldb.Model):
@@ -43,24 +44,50 @@ def register_push_notification():
 
 @app.route('/notifications/send', methods=['POST'])
 @auth()
-def send_push_notification():
+def send_push_notification_to_account():
     title = request.form.get('title')
     body = request.form.get('body')
     token = NotificationToken.query.filter_by(account=g.account.id).first()
-    use_sandbox = True if request.form.get('dev') else False
+    isDev = True if request.form.get('dev') else False
 
     if not token or not token.ios_token:
         return jsonify({'error': 'A device token has not been registered on the server.'}), 400
 
+    send_notification(token.ios_token, title, body, isDev)
+    return jsonify({'success': True})
+
+
+@app.route('/notifications/send/test', methods=['POST'])
+@internal_auth
+def send_test_push_notification():
+    pennkey = request.form.get('pennkey')
+    title = request.form.get('title')
+    body = request.form.get('body')
+    if not pennkey:
+        return jsonify({'error': 'Missing pennkey.'}), 400 
+
+    account = Account.query.filter_by(pennkey=pennkey).first()
+    if not account:
+        return jsonify({'error': 'Account not found.'}), 400
+
+    token = NotificationToken.query.filter_by(account=account.id).first()
+
+    if not token or not token.ios_token:
+        return jsonify({'error': 'A device token has not been registered on the server for this account.'}), 400
+
+    # Only development tokens can be tested (not production)
+    send_push_notification(token.ios_token, title, body, True)
+    return jsonify({'success': True})
+
+
+def send_push_notification(token, title, body, isDev):
     auth_key_path = 'ios_key.p8'
     auth_key_id = '6MBD9SUNGE'
     team_id = 'VU59R57FGM'
     token_credentials = TokenCredentials(auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id)
-    client = APNsClient(credentials=token_credentials, use_sandbox=use_sandbox)
+    client = APNsClient(credentials=token_credentials, use_sandbox=isDev)
 
     alert = {'title': title, 'body': body}
     payload = Payload(alert=alert, sound='default', badge=1)
     topic = 'org.pennlabs.PennMobile'
-    client.send_notification(token.ios_token, payload, topic)
-
-    return jsonify({'success': True})
+    client.send_notification(token, payload, topic)
