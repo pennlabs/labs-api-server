@@ -3,7 +3,7 @@ from datetime import datetime
 from apns2.client import APNsClient
 from apns2.credentials import TokenCredentials
 from apns2.payload import Payload
-from flask import jsonify, request
+from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
