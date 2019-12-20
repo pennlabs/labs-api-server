@@ -10,9 +10,14 @@ def auth(nullable=False):
     def _auth(f):
         @wraps(f)
         def __auth(*args, **kwargs):
+            # Authorization headers are restricted on iOS and not allowed to be set.
+            # Thus, iOS sets an X-Authorization header to carry the bearer token.
+            # We check both the X-Authorization header and the regular Authorization header for the access token.
+            # For more info: see https://developer.apple.com/documentation/foundation/nsurlrequest#1776617
+            x_authorization = request.headers.get('X-Authorization')
             authorization = request.headers.get('Authorization')
-            if authorization and ' ' in authorization:
-                auth_type, token = authorization.split()
+            if (authorization and ' ' in authorization) || (x_authorization and ' ' in x_authorization):
+                auth_type, token = authorization.split() if authorization else x_authorization.split()
                 if auth_type == 'Bearer':  # Only validate if Authorization header type is Bearer
                     try:
                         body = {'token': token}
