@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 
 from apns2.client import APNsClient
 from apns2.credentials import TokenCredentials
@@ -81,7 +82,7 @@ def send_test_push_notification():
 
 
 def send_push_notification(token, title, body, isDev):
-    auth_key_path = 'ios_key.p8'
+    auth_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ios_key.p8')
     auth_key_id = '6MBD9SUNGE'
     team_id = 'VU59R57FGM'
     token_credentials = TokenCredentials(auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id)
