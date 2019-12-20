@@ -16,7 +16,7 @@ def auth(nullable=False):
             # For more info: see https://developer.apple.com/documentation/foundation/nsurlrequest#1776617
             x_authorization = request.headers.get('X-Authorization')
             authorization = request.headers.get('Authorization')
-            if (authorization and ' ' in authorization) || (x_authorization and ' ' in x_authorization):
+            if (authorization and ' ' in authorization) or (x_authorization and ' ' in x_authorization):
                 auth_type, token = authorization.split() if authorization else x_authorization.split()
                 if auth_type == 'Bearer':  # Only validate if Authorization header type is Bearer
                     try:
