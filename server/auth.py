@@ -43,6 +43,8 @@ def auth(nullable=False):
                         # treat it as invalid. Ideally platform will never go down, so this
                         # should never happen.
                         return f() if nullable else jsonify({'error': 'Unable to connect to Platform'}), 401
+                else:
+                    return f() if nullable else jsonify({'error': 'Authorization token type is not Bearer.'}), 401
             else:
                 return f() if nullable else jsonify({'error': 'An access token was not provided.'}), 401
         return __auth
