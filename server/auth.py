@@ -44,7 +44,7 @@ def auth(nullable=False):
                         # should never happen.
                         return f() if nullable else jsonify({'error': 'Unable to connect to Platform'}), 401
             else:
-                return f() if nullable else jsonify({'error': 'An access token was not provided. {}'.format(request.headers)}), 401
+                return f() if nullable else jsonify({'error': 'An access token was not provided.'}), 401
         return __auth
     return _auth
 
