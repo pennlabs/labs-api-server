@@ -20,18 +20,18 @@ class NotificationToken(sqldb.Model):
 
 @app.route('/notifications/register', methods=['POST'])
 @auth()
-def register_push_notification(account):
+def register_push_notification():
     ios_token = request.form.get('ios_token')
     android_token = request.form.get('android_token')
 
-    notification_token = NotificationToken(account=account.id, ios_token=ios_token, android_token=android_token)
+    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token, android_token=android_token)
 
     try:
         sqldb.session.add(notification_token)
         sqldb.session.commit()
     except IntegrityError:
         sqldb.session.rollback()
-        current_result = NotificationToken.query.filter_by(account=account.id).first()
+        current_result = NotificationToken.query.filter_by(account=g.account.id).first()
         if current_result:
             current_result.ios_token = ios_token
             current_result.android_token = android_token
@@ -43,13 +43,13 @@ def register_push_notification(account):
 
 @app.route('/notifications/send', methods=['POST'])
 @auth()
-def send_push_notification(account):
+def send_push_notification():
     title = request.form.get('title')
     body = request.form.get('body')
-    token = NotificationToken.query.filter_by(account=account.id).first()
+    token = NotificationToken.query.filter_by(account=g.account.id).first()
     use_sandbox = True if request.form.get('dev') else False
 
-    if not token.ios_token:
+    if not token or not token.ios_token:
         return jsonify({'error': 'A device token has not been registered on the server.'}), 400
 
     auth_key_path = 'ios_key.p8'
