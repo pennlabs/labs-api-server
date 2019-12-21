@@ -7,7 +7,7 @@ from sqlalchemy import and_, not_
 from server import app, sqldb
 from server.notifications import Notification, NotificationToken, send_push_notification_batch
 from server.studyspaces.availability import get_room_name
-from server.studyspaces.models import StudySpacesBooking, GSRRoomName
+from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 
 
 @app.route('/studyspaces/reminders/send', methods=['POST'])
@@ -38,12 +38,12 @@ def send_reminders():
 
     get_tokens = NotificationToken.query.filter(NotificationToken.ios_token is not None).subquery()
 
-    join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid, GSRRoomName.name, 
-                                    get_gsr.c.start, get_tokens.c.ios_token) \
+    join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid, GSRRoomName.name,
+                                get_gsr.c.start, get_tokens.c.ios_token) \
                             .select_from(get_gsr) \
                             .join(get_tokens, get_gsr.c.account == get_tokens.c.account) \
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
-                                    get_gsr.c.rid == GSRRoomName.rid), isouter=True) \
+                                                    get_gsr.c.rid == GSRRoomName.rid), isouter=True) \
                             .all()
 
     booking_ids = []
