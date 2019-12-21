@@ -21,6 +21,12 @@ class NotificationToken(sqldb.Model):
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
+class Notification(object):
+    def __init__(self, token, alert):
+        self.token = token
+        self.payload = Payload(alert=alert, sound='default', badge=0)
+
+
 @app.route('/notifications/register', methods=['POST'])
 @auth()
 def register_push_notification():
@@ -28,7 +34,8 @@ def register_push_notification():
     android_token = request.form.get('android_token')
     isDev = True if request.form.get('dev') else False
 
-    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token, android_token=android_token, dev=isDev)
+    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token,
+                                           android_token=android_token, dev=isDev)
 
     try:
         sqldb.session.add(notification_token)
@@ -83,14 +90,24 @@ def send_test_push_notification():
     return jsonify({'success': True})
 
 
-def send_push_notification(token, title, body, isDev):
+def send_push_notification(token, title, body, isDev=False):
+    client = get_client(isDev)
+    alert = {'title': title, 'body': body}
+    payload = Payload(alert=alert, sound='default', badge=0)
+    topic = 'org.pennlabs.PennMobile'
+    client.send_notification(token, payload, topic)
+
+
+def send_push_notification_batch(notifications, isDev=False):
+    client = get_client(isDev)
+    topic = 'org.pennlabs.PennMobile'
+    client.send_notification_batch(notifications=notifications, topic=topic)
+
+
+def get_client(isDev):
     auth_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ios_key.p8')
     auth_key_id = '6MBD9SUNGE'
     team_id = 'VU59R57FGM'
     token_credentials = TokenCredentials(auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id)
     client = APNsClient(credentials=token_credentials, use_sandbox=isDev)
-
-    alert = {'title': title, 'body': body}
-    payload = Payload(alert=alert, sound='default', badge=0)
-    topic = 'org.pennlabs.PennMobile'
-    client.send_notification(token, payload, topic)
+    return client

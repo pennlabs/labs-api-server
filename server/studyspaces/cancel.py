@@ -2,9 +2,10 @@ from flask import jsonify, request
 from penn.base import APIError
 
 from server import app, sqldb
-from server.models import StudySpacesBooking, User
+from server.models import User
 from server.penndata import studyspaces, wharton
 from server.studyspaces.book import save_booking, save_wharton_sessionid
+from server.studyspaces.models import StudySpacesBooking
 
 
 @app.route('/studyspaces/cancel', methods=['POST'])
