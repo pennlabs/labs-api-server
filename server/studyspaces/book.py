@@ -5,8 +5,9 @@ from flask import g, jsonify, request
 
 from server import app, db, sqldb
 from server.auth import auth
-from server.models import StudySpacesBooking, User
+from server.models import User
 from server.penndata import studyspaces, wharton
+from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
 
 

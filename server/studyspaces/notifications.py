@@ -4,8 +4,9 @@ from flask import jsonify
 from sqlalchemy import and_, func
 
 from server import app, sqldb
-from server.models import Account, User, StudySpacesBooking
+from server.models import Account, User
 from server.notifications import NotificationToken, send_push_notification
+from server.studyspaces.models import StudySpacesBooking
 
 
 @app.route('/studyspaces/reminders/send', methods=['POST'])

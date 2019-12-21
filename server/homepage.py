@@ -10,9 +10,10 @@ from server import app, sqldb
 from server.account import get_courses_in_N_days, get_todays_courses
 from server.auth import auth
 from server.calendar3year import pull_todays_calendar
-from server.models import Account, DiningPreference, Event, HomeCell, LaundryPreference, StudySpacesBooking, User
+from server.models import Account, DiningPreference, Event, HomeCell, LaundryPreference, User
 from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
+from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
 
 

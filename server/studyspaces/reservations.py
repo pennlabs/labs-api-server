@@ -4,8 +4,8 @@ from flask import jsonify, request
 from penn.base import APIError
 
 from server import app
-from server.models import StudySpacesBooking
 from server.penndata import studyspaces, wharton
+from server.studyspaces.models import StudySpacesBooking
 
 
 @app.route('/studyspaces/reservations', methods=['GET'])
