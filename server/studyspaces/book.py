@@ -1,9 +1,10 @@
 import os
 
 from dateutil.parser import parse
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from server import app, db, sqldb
+from server.auth import auth
 from server.models import StudySpacesBooking, User
 from server.penndata import studyspaces, wharton
 from server.studyspaces.reservations import get_reservations
@@ -35,6 +36,7 @@ def save_wharton_sessionid():
 
 
 @app.route('/studyspaces/book', methods=['POST'])
+@auth(nullable=True)
 def book_room():
     """
     Books a room.
@@ -112,6 +114,8 @@ def book_room():
     except ValueError:
         user_id = None
 
+    account_id = g.account.id if g.account else None
+
     if room_booked:
         save_booking(
             lid=lid,
@@ -120,7 +124,8 @@ def book_room():
             start=start.replace(tzinfo=None),
             end=end.replace(tzinfo=None),
             booking_id=booking_id,
-            user=user_id
+            user=user_id,
+            account=account_id
         )
     return jsonify(resp)
 
