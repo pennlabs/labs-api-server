@@ -36,18 +36,18 @@ def auth(nullable=False):
                                 g.account = account
                                 return f()
                             else:
-                                return f() if nullable else jsonify({'error': 'Account not found.'}), 400
+                                return f() if nullable else (jsonify({'error': 'Account not found.'}), 400)
                         else:
                             return f() if nullable else jsonify({'error': 'Invalid token'}), 401
                     except requests.exceptions.RequestException:  # Can't connect to platform
                         # Throw a 403 because we can't verify the incoming access token so we
                         # treat it as invalid. Ideally platform will never go down, so this
                         # should never happen.
-                        return f() if nullable else jsonify({'error': 'Unable to connect to Platform'}), 401
+                        return f() if nullable else (jsonify({'error': 'Unable to connect to Platform'}), 401)
                 else:
-                    return f() if nullable else jsonify({'error': 'Authorization token type is not Bearer.'}), 401
+                    return f() if nullable else (jsonify({'error': 'Authorization token type is not Bearer.'}), 401)
             else:
-                return f() if nullable else jsonify({'error': 'An access token was not provided.'}), 401
+                return f() if nullable else (jsonify({'error': 'An access token was not provided.'}), 401)
         return __auth
     return _auth
 
