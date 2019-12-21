@@ -1,4 +1,5 @@
 import datetime
+import requests
 import os
 
 import pytz
@@ -273,6 +274,8 @@ def get_reservations_cell(user, sessionid):
         else:
             return None
     except APIError:
+        return None
+    except requests.exceptions.Timeout:
         return None
 
 
