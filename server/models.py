@@ -110,6 +110,7 @@ class LaundrySnapshot(sqldb.Model):
 
 class StudySpacesBooking(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), nullable=True)
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'), nullable=True)
     booking_id = sqldb.Column(sqldb.Text, nullable=True)
     date = sqldb.Column(sqldb.DateTime, default=datetime.datetime.now)
