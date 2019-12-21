@@ -54,7 +54,7 @@ def get_homepage():
         response.status_code = 400
         return response
 
-    account = g.account
+    account = None #g.account
     if not account:
         try:
             account = Account.get_account()
