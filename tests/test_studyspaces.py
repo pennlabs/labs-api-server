@@ -4,7 +4,8 @@ import unittest
 import mock
 
 import server
-from server.models import StudySpacesBooking, sqldb
+from server.models import sqldb
+from server.studyspaces.models import StudySpacesBooking
 
 
 class StudySpacesApiTests(unittest.TestCase):
