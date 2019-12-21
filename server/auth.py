@@ -1,5 +1,5 @@
-from functools import wraps
 import os
+from functools import wraps
 
 import requests
 from flask import g, jsonify, request
@@ -60,7 +60,7 @@ def internal_auth(f):
             if auth_type == 'Bearer' and token == os.environ.get('AUTH_SECRET'):
                 return f()
             else:
-               return jsonify({'error': 'Auth secret is not correct.'}), 401
+                return jsonify({'error': 'Auth secret is not correct.'}), 401
         else:
-             return jsonify({'error': 'Auth secret not provided.'}), 401
+            return jsonify({'error': 'Auth secret not provided.'}), 401
     return _internal_auth

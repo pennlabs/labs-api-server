@@ -1,5 +1,5 @@
-from datetime import datetime
 import os
+from datetime import datetime
 
 from apns2.client import APNsClient
 from apns2.credentials import TokenCredentials
@@ -54,7 +54,7 @@ def send_push_notification_to_account():
     if not token or not token.ios_token:
         return jsonify({'error': 'A device token has not been registered on the server.'}), 400
 
-    send_notification(token.ios_token, title, body, isDev)
+    send_push_notification(token.ios_token, title, body, isDev)
     return jsonify({'success': True})
 
 
@@ -65,7 +65,7 @@ def send_test_push_notification():
     title = request.form.get('title')
     body = request.form.get('body')
     if not pennkey:
-        return jsonify({'error': 'Missing pennkey.'}), 400 
+        return jsonify({'error': 'Missing pennkey.'}), 400
 
     account = Account.query.filter_by(pennkey=pennkey).first()
     if not account:
