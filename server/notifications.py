@@ -34,7 +34,8 @@ def register_push_notification():
     android_token = request.form.get('android_token')
     isDev = True if request.form.get('dev') else False
 
-    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token, android_token=android_token, dev=isDev)
+    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token,
+                                           android_token=android_token, dev=isDev)
 
     try:
         sqldb.session.add(notification_token)

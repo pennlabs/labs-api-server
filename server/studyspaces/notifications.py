@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timedelta
 
-from flask import jsonify, request
+from flask import jsonify
 from sqlalchemy import and_, not_
 
 from server import app, sqldb
