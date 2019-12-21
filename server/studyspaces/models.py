@@ -15,3 +15,11 @@ class StudySpacesBooking(sqldb.Model):
     start = sqldb.Column(sqldb.DateTime, nullable=True)
     end = sqldb.Column(sqldb.DateTime, nullable=True)
     is_cancelled = sqldb.Column(sqldb.Boolean, default=False)
+    reminder_sent = sqldb.Column(sqldb.Boolean, default=False)
+
+
+class GSRRoomName(sqldb.Model):
+    lid = sqldb.Column(sqldb.Integer, primary_key=True)
+    gid = sqldb.Column(sqldb.Integer, primary_key=True)
+    rid = sqldb.Column(sqldb.Integer, primary_key=True)
+    name = sqldb.Column(sqldb.VARCHAR(255))
