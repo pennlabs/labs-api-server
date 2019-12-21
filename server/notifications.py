@@ -87,7 +87,7 @@ def send_test_push_notification():
     return jsonify({'success': True})
 
 
-def send_push_notification(token, title, body, isDev):
+def send_push_notification(token, title, body, isDev=False):
     client = get_client(isDev)
     alert = {'title': title, 'body': body}
     payload = Payload(alert=alert, sound='default', badge=0)
@@ -95,7 +95,7 @@ def send_push_notification(token, title, body, isDev):
     client.send_notification(token, payload, topic)
 
 
-def send_push_notification_batch(notifications, isDev):
+def send_push_notification_batch(notifications, isDev=False):
     client = get_client(isDev)
     topic = 'org.pennlabs.PennMobile'
     client.send_notification_batch(notifications=notifications, topic=topic)
