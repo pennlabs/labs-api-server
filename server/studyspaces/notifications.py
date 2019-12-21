@@ -39,7 +39,7 @@ def send_reminders():
     get_tokens = NotificationToken.query.filter(NotificationToken.ios_token is not None).subquery()
 
     join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid, GSRRoomName.name,
-                                get_gsr.c.start, get_tokens.c.ios_token) \
+                                   get_gsr.c.start, get_tokens.c.ios_token) \
                             .select_from(get_gsr) \
                             .join(get_tokens, get_gsr.c.account == get_tokens.c.account) \
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
