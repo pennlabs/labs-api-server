@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timedelta
 
-from flask import jsonify
+from flask import jsonify, request
 from sqlalchemy import and_, not_
 
 from server import app, sqldb
@@ -14,11 +14,12 @@ from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 @app.route('/studyspaces/reminders/send', methods=['POST'])
 @internal_auth
 def request_send_reminders():
-    send_reminders()
+    isDev = True if request.form.get("dev") else False
+    send_reminders(isDev)
     return jsonify({'result': 'success'})
 
 
-def send_reminders():
+def send_reminders(isDev=False):
     # Query logic
     # Get bookings that meet the following criteria:
     # 1) Start within the next 10 minutes
@@ -28,7 +29,7 @@ def send_reminders():
     # 5) Have an associated account with an iOS push notification token
 
     now = datetime.now()
-    check_start_date = now + timedelta(minutes=10)
+    check_start_date = now + timedelta(minutes=30)
     get_gsr = StudySpacesBooking.query \
                                 .filter(StudySpacesBooking.start <= check_start_date) \
                                 .filter(StudySpacesBooking.start > now) \
@@ -66,7 +67,7 @@ def send_reminders():
         booking_ids.append(bid)
 
     if notifications:
-        send_push_notification_batch(notifications)
+        send_push_notification_batch(notifications, isDev)
 
     # Flag each booking as SENT so that a duplicate notification is not accidentally sent
     bookings = StudySpacesBooking.query.filter(StudySpacesBooking.id.in_(tuple(booking_ids))).all()
