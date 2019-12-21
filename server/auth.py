@@ -38,7 +38,7 @@ def auth(nullable=False):
                             else:
                                 return f() if nullable else (jsonify({'error': 'Account not found.'}), 400)
                         else:
-                            return f() if nullable else jsonify({'error': 'Invalid token'}), 401
+                            return f() if nullable else (jsonify({'error': 'Invalid token'}), 401)
                     except requests.exceptions.RequestException:  # Can't connect to platform
                         # Throw a 403 because we can't verify the incoming access token so we
                         # treat it as invalid. Ideally platform will never go down, so this
