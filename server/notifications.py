@@ -16,6 +16,7 @@ class NotificationToken(sqldb.Model):
     account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), primary_key=True)
     ios_token = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
     android_token = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
+    dev = sqldb.Column(sqldb.Boolean, default=False)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
@@ -25,8 +26,9 @@ class NotificationToken(sqldb.Model):
 def register_push_notification():
     ios_token = request.form.get('ios_token')
     android_token = request.form.get('android_token')
+    isDev = True if request.form.get('dev') else False
 
-    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token, android_token=android_token)
+    notification_token = NotificationToken(account=g.account.id, ios_token=ios_token, android_token=android_token, dev=isDev)
 
     try:
         sqldb.session.add(notification_token)
@@ -37,6 +39,7 @@ def register_push_notification():
         if current_result:
             current_result.ios_token = ios_token
             current_result.android_token = android_token
+            current_result.dev = isDev
             current_result.updated_at = datetime.now()
             sqldb.session.commit()
 
@@ -49,12 +52,11 @@ def send_push_notification_to_account():
     title = request.form.get('title')
     body = request.form.get('body')
     token = NotificationToken.query.filter_by(account=g.account.id).first()
-    isDev = True if request.form.get('dev') else False
 
     if not token or not token.ios_token:
         return jsonify({'error': 'A device token has not been registered on the server.'}), 400
 
-    send_push_notification(token.ios_token, title, body, isDev)
+    send_push_notification(token.ios_token, title, body, token.dev)
     return jsonify({'success': True})
 
 
