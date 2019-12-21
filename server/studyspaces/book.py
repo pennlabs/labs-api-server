@@ -114,7 +114,10 @@ def book_room():
     except ValueError:
         user_id = None
 
-    account_id = g.account.id if g.account else None
+    if g.account:
+        account_id = g.account.id
+    else:
+        account_id = None
 
     if room_booked:
         save_booking(
