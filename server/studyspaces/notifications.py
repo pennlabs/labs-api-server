@@ -14,12 +14,11 @@ from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 @app.route('/studyspaces/reminders/send', methods=['POST'])
 @internal_auth
 def request_send_reminders():
-    isDev = True if request.form.get("dev") else False
-    send_reminders(isDev)
+    send_reminders()
     return jsonify({'result': 'success'})
 
 
-def send_reminders(isDev=False):
+def send_reminders():
     # Query logic
     # Get bookings that meet the following criteria:
     # 1) Start within the next 10 minutes
@@ -29,7 +28,7 @@ def send_reminders(isDev=False):
     # 5) Have an associated account with an iOS push notification token
 
     now = datetime.now()
-    check_start_date = now + timedelta(minutes=30)
+    check_start_date = now + timedelta(minutes=10)
     get_gsr = StudySpacesBooking.query \
                                 .filter(StudySpacesBooking.start <= check_start_date) \
                                 .filter(StudySpacesBooking.start > now) \
@@ -42,7 +41,7 @@ def send_reminders(isDev=False):
     get_tokens = NotificationToken.query.filter(NotificationToken.ios_token is not None).subquery()
 
     join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid, GSRRoomName.name,
-                                   get_gsr.c.start, get_tokens.c.ios_token) \
+                                   get_gsr.c.start, get_tokens.c.ios_token, get_tokens.c.dev) \
                             .select_from(get_gsr) \
                             .join(get_tokens, get_gsr.c.account == get_tokens.c.account) \
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
@@ -51,7 +50,8 @@ def send_reminders(isDev=False):
 
     booking_ids = []
     notifications = []
-    for bid, lid, rid, name, start, token in join_qry:
+    dev_notifications = []
+    for bid, lid, rid, name, start, token, dev in join_qry:
         minutes_to_start = int(math.ceil((start - now).seconds / 60))
         title = 'Upcoming reservation'
         if not name:
@@ -63,11 +63,16 @@ def send_reminders(isDev=False):
             body = 'You have a reservation starting in {} minutes'.format(minutes_to_start)
         alert = {'title': title, 'body': body}
         notification = Notification(token=token, alert=alert)
-        notifications.append(notification)
+        if dev:
+            dev_notifications.append(notification)
+        else:
+            notifications.append(notification)
         booking_ids.append(bid)
 
     if notifications:
-        send_push_notification_batch(notifications, isDev)
+        send_push_notification_batch(notifications, False)
+    if dev_notifications:
+        send_push_notification_batch(dev_notifications, True)
 
     # Flag each booking as SENT so that a duplicate notification is not accidentally sent
     bookings = StudySpacesBooking.query.filter(StudySpacesBooking.id.in_(tuple(booking_ids))).all()
