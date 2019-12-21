@@ -5,12 +5,14 @@ from flask import jsonify
 from sqlalchemy import and_, not_
 
 from server import app, sqldb
+from server.auth import internal_auth
 from server.notifications import Notification, NotificationToken, send_push_notification_batch
 from server.studyspaces.availability import get_room_name
 from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 
 
 @app.route('/studyspaces/reminders/send', methods=['POST'])
+@internal_auth
 def request_send_reminders():
     send_reminders()
     return jsonify({'result': 'success'})
