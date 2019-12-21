@@ -10,7 +10,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-import server  # noqa
+if True:
+    import server
 
 
 server.laundry.save_data()
