@@ -15,6 +15,7 @@ def auth(nullable=False):
             # Thus, iOS sets an X-Authorization header to carry the bearer token.
             # We check both the X-Authorization header and the regular Authorization header for the access token.
             # For more info: see https://developer.apple.com/documentation/foundation/nsurlrequest#1776617
+            g.account = None
             x_authorization = request.headers.get('X-Authorization')
             authorization = request.headers.get('Authorization')
             if (authorization and ' ' in authorization) or (x_authorization and ' ' in x_authorization):
