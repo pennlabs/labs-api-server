@@ -2,12 +2,13 @@ import datetime
 import os
 
 import pytz
-from flask import jsonify, request
+from flask import g, jsonify, request
 from penn.base import APIError
 from sqlalchemy import and_, func
 
 from server import app, sqldb
 from server.account import get_courses_in_N_days, get_todays_courses
+from server.auth import auth
 from server.calendar3year import pull_todays_calendar
 from server.models import Account, DiningPreference, Event, HomeCell, LaundryPreference, StudySpacesBooking, User
 from server.news import fetch_frontpage_article
@@ -43,6 +44,7 @@ def get_app_version():
 
 
 @app.route('/homepage', methods=['GET'])
+@auth(nullable=True)
 def get_homepage():
     # Find user in database
     try:
@@ -52,10 +54,12 @@ def get_homepage():
         response.status_code = 400
         return response
 
-    try:
-        account = Account.get_account()
-    except ValueError:
-        account = None
+    account = g.account
+    if not account:
+        try:
+            account = Account.get_account()
+        except ValueError:
+            account = None
 
     if account and account.email and user.email is None:
         user.email = account.email
@@ -79,9 +83,8 @@ def get_homepage():
     dining = get_dining_cell(user)
     cells.extend([dining, laundry])
 
-    if version and version >= '5.1.1':
-        gsr_locations = get_gsr_locations_cell(user, account)
-        cells.append(gsr_locations)
+    gsr_locations = get_gsr_locations_cell(user, account)
+    cells.append(gsr_locations)
 
     app_version = os.environ.get('APP_VERSION')
 
