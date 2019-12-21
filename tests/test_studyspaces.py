@@ -11,11 +11,6 @@ from server.studyspaces.models import StudySpacesBooking
 class StudySpacesApiTests(unittest.TestCase):
     def setUp(self):
         server.app.config['TESTING'] = True
-        sqldb.create_all()
-
-    def tearDown(self):
-        sqldb.session.remove()
-        sqldb.drop_all()
 
     def testStudyspaceBooking(self):
         with server.app.test_client() as c:

@@ -30,13 +30,6 @@ s3 = boto3.client(
 # allow cors
 CORS(app)
 
-# sql
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-sqldb.init_app(app)
-with app.app_context():
-    sqldb.create_all()
-
 # redis
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
@@ -74,6 +67,13 @@ import server.transit  # noqa
 import server.weather  # noqa
 import server.housing  # noqa
 import server.notifications  # noqa
+
+# sql
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+sqldb.init_app(app)
+with app.app_context():
+    sqldb.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)
