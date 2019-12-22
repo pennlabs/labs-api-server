@@ -14,11 +14,16 @@ from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 @app.route('/studyspaces/reminders/send', methods=['POST'])
 @internal_auth
 def request_send_reminders():
-    send_reminders()
+    run_query()
     return jsonify({'result': 'success'})
 
 
 def send_reminders():
+    with app.app_context():
+        run_query()
+
+
+def run_query():
     # Query logic
     # Get bookings that meet the following criteria:
     # 1) Start within the next 10 minutes
