@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 if True:
-	import server
+    import server
 
 
 server.studyspaces.notifications.send_reminders()
