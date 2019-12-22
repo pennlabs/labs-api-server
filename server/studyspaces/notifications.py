@@ -58,7 +58,7 @@ def run_query():
     dev_notifications = []
     for bid, lid, rid, name, start, token, dev in join_qry:
         minutes_to_start = int(math.ceil((start - now).seconds / 60))
-        title = 'Upcoming reservation'
+        title = 'Upcoming GSR'
         if not name:
             # Fetch name from API if it does not already exist in the DB
             name = get_room_name(lid, rid)
