@@ -33,7 +33,7 @@ def run_query():
     # 5) Have an associated account with an iOS push notification token
 
     now = datetime.now()
-    check_start_date = now + timedelta(minutes=30)
+    check_start_date = now + timedelta(minutes=10)
     get_gsr = StudySpacesBooking.query \
                                 .filter(StudySpacesBooking.start <= check_start_date) \
                                 .filter(StudySpacesBooking.start > now) \
