@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import pytz
 import requests
 from flask import g, jsonify, request
 from penn.base import APIError
@@ -16,10 +15,6 @@ from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
 from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
-
-
-utc = pytz.timezone('UTC')
-eastern = pytz.timezone('US/Eastern')
 
 
 @app.route('/appversion/iOS', methods=['POST'])
@@ -197,26 +192,6 @@ def get_news_cell():
     article = fetch_frontpage_article()
     if article:
         return HomeCell('news', article, 50)
-    else:
-        return None
-
-
-def get_event_cell():
-    # return a event cell
-    # TODO Fetch most recent, most popular, etc
-    event = Event.query.first()
-    if event:
-        info = {
-            'name': event.name,
-            'description': event.description,
-            'image_url': event.image_url,
-            'start_time': utc.localize(event.start_time).astimezone(eastern).isoformat(),
-            'end_time': utc.localize(event.end_time).astimezone(eastern).isoformat(),
-            'email': event.email,
-            'website': event.website,
-            'facebook': event.facebook
-        }
-        return HomeCell('event', info)
     else:
         return None
 
