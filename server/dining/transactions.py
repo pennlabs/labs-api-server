@@ -1,18 +1,23 @@
 import csv
 import datetime
 
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from server import app, sqldb
+from server.auth import auth
 from server.models import Account, DiningTransaction
 
 
 @app.route('/dining/transactions', methods=['POST'])
+@auth()
 def save_dining_dollar_transactions():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
+    account = g.account
+    # if not account:
+    #     # DEPRECATED
+    #     try:
+    #         account = Account.get_account()
+    #     except ValueError as e:
+    #         return jsonify({'success': False, 'error': str(e)}), 400
 
     last_transaction = sqldb.session.query(DiningTransaction.date) \
                                     .filter_by(account_id=account.id) \
@@ -43,11 +48,15 @@ def save_dining_dollar_transactions():
 
 
 @app.route('/dining/transactions', methods=['GET'])
+@auth(nullable=True)
 def get_dining_dollar_transactions():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
+    account = g.account
+    if not account:
+        # DEPRECATED
+        try:
+            account = Account.get_account()
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
 
     transactions = sqldb.session.query(DiningTransaction) \
                                 .filter_by(account_id=account.id) \
