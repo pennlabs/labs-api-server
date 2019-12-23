@@ -12,12 +12,12 @@ from server.models import Account, DiningTransaction
 @auth()
 def save_dining_dollar_transactions():
     account = g.account
-    # if not account:
-    #     # DEPRECATED
-    #     try:
-    #         account = Account.get_account()
-    #     except ValueError as e:
-    #         return jsonify({'success': False, 'error': str(e)}), 400
+    if not account:
+        # DEPRECATED
+        try:
+            account = Account.get_account()
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
 
     last_transaction = sqldb.session.query(DiningTransaction.date) \
                                     .filter_by(account_id=account.id) \
