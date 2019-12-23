@@ -5,17 +5,14 @@ from bs4 import BeautifulSoup
 from flask import jsonify, request
 
 from server import app
+from server.auth import auth
 from server.models import Account, DiningBalance, sqldb
 from server.penndata import wharton
 
 
-@app.route('/dining/balance/v2', methods=['POST'])
-def parse_and_save_dining_balance():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
+@app.route('/dining/balance', methods=['POST'])
+@auth()
+def save_dining_balance():
     html = request.form.get('html')
     if 'You are not currently signed up' in html:
         return jsonify({'hasPlan': False, 'balance': None, 'error': None})
@@ -40,7 +37,7 @@ def parse_and_save_dining_balance():
         return jsonify({'success': False, 'error': 'Something went wrong parsing HTML.'}), 400
 
     total_swipes = swipes + added_swipes
-    dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=total_swipes,
+    dining_balance = DiningBalance(account_id=g.account.id, dining_dollars=dollars, swipes=total_swipes,
                                    guest_swipes=guest_swipes)
     sqldb.session.add(dining_balance)
     sqldb.session.commit()
@@ -49,38 +46,16 @@ def parse_and_save_dining_balance():
     return jsonify({'hasPlan': True, 'balance': balance, 'error': None})
 
 
-@app.route('/dining/balance', methods=['POST'])
-def save_dining_balance():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
-    dining_dollars_str = request.form.get('dining_dollars')
-    swipes_str = request.form.get('swipes')
-    guest_swipes_str = request.form.get('guest_swipes')
-
-    if dining_dollars_str and swipes_str and guest_swipes_str:
-        dollars = float(dining_dollars_str)
-        swipes = int(swipes_str)
-        g_swipes = int(guest_swipes_str)
-
-        dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=swipes,
-                                       guest_swipes=g_swipes)
-        sqldb.session.add(dining_balance)
-        sqldb.session.commit()
-
-        return jsonify({'success': True, 'error': None})
-    else:
-        return jsonify({'success': False, 'error': 'Field missing'}), 400
-
-
 @app.route('/dining/balance', methods=['GET'])
+@auth(nullable=False)
 def get_dining_balance():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
+    account = g.account
+    if not account:
+        # DEPRECATED
+        try:
+            account = Account.get_account()
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
 
     dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
         .order_by(DiningBalance.created_at.desc()).first()
@@ -103,22 +78,18 @@ def get_dining_balance():
 
 
 @app.route('/dining/balances', methods=['GET'])
+@auth()
 def get_average_balances_by_day():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
     if start_date_str and end_date_str:
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
-        dining_balance = DiningBalance.query.filter_by(account_id=account.id) \
+        dining_balance = DiningBalance.query.filter_by(account_id=g.account.id) \
             .filter(DiningBalance.created_at >= start_date, DiningBalance.created_at <= end_date)
     else:
-        dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+        dining_balance = DiningBalance.query.filter_by(account_id=g.account.id)
 
     balance_array = []
     if dining_balance:
@@ -137,13 +108,9 @@ def get_average_balances_by_day():
 
 
 @app.route('/dining/projection', methods=['GET'])
+@auth()
 def get_dining_projection():
-    try:
-        account = Account.get_account()
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
-    dining_balance = DiningBalance.query.filter_by(account_id=account.id)
+    dining_balance = DiningBalance.query.filter_by(account_id=g.account.id)
     date = request.args.get('date')
 
     if date:
@@ -217,3 +184,44 @@ def get_dining_projection():
         })
 
     return jsonify({'projection': None})
+
+
+# DEPRECATED
+@app.route('/dining/balance/v2', methods=['POST'])
+def parse_and_save_dining_balance():
+    try:
+        account = Account.get_account()
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+    html = request.form.get('html')
+    if 'You are not currently signed up' in html:
+        return jsonify({'hasPlan': False, 'balance': None, 'error': None})
+
+    soup = BeautifulSoup(html, 'html.parser')
+    divs = soup.findAll('div', {'class': 'info-column'})
+    dollars = None
+    swipes = None
+    guest_swipes = None
+    added_swipes = None
+    if len(divs) >= 4:
+        for div in divs[:4]:
+            if 'Dining Dollars' in div.text:
+                dollars = float(div.span.text[1:])
+            elif 'Regular Visits' in div.text:
+                swipes = int(div.span.text)
+            elif 'Guest Visits' in div.text:
+                guest_swipes = int(div.span.text)
+            elif 'Add-on Visits' in div.text:
+                added_swipes = int(div.span.text)
+    else:
+        return jsonify({'success': False, 'error': 'Something went wrong parsing HTML.'}), 400
+
+    total_swipes = swipes + added_swipes
+    dining_balance = DiningBalance(account_id=account.id, dining_dollars=dollars, swipes=total_swipes,
+                                   guest_swipes=guest_swipes)
+    sqldb.session.add(dining_balance)
+    sqldb.session.commit()
+
+    balance = {'dollars': dollars, 'swipes': total_swipes, 'guest_swipes': guest_swipes}
+    return jsonify({'hasPlan': True, 'balance': balance, 'error': None})
