@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from flask import jsonify, request
+from flask import g, jsonify, request
 
 from server import app
 from server.auth import auth
