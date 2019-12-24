@@ -76,7 +76,7 @@ def get_homepage():
     #     if courses:
     #         cells.append(courses)
 
-    courses = request.args.get('courses')
+    courses = request.args.get('hasCourses')
     if courses == 'today':
         cells.append(HomeCell('courses', None, 200))
     elif courses == 'tomorrow':
