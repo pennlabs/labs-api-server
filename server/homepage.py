@@ -76,6 +76,12 @@ def get_homepage():
     #     if courses:
     #         cells.append(courses)
 
+    courses = request.args.get('courses')
+    if courses == 'today':
+        cells.append(HomeCell('courses', None, 200))
+    elif courses == 'tomorrow':
+        cells.append(HomeCell('courses', None, 30))
+
     laundry = get_top_laundry_cell(user)
     dining = get_dining_cell(user)
     cells.extend([dining, laundry])
