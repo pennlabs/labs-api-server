@@ -22,8 +22,9 @@ def save_dining_preferences():
     if venues:
         venue_ids = [int(x) for x in venues.split(',')]
 
+        account_id = g.account.id if g.account else None
         for venue_id in venue_ids:
-            dining_preference = DiningPreference(user_id=user.id, account=g.account, venue_id=venue_id)
+            dining_preference = DiningPreference(user_id=user.id, account=account_id, venue_id=venue_id)
             sqldb.session.add(dining_preference)
     sqldb.session.commit()
 

@@ -206,8 +206,9 @@ def save_laundry_preferences():
 
     room_ids = [int(x) for x in room_ids.split(',')]
 
+    account_id = g.account.id if g.account else None
     for room_id in room_ids:
-        laundry_preference = LaundryPreference(user_id=user.id, account=g.account, room_id=room_id)
+        laundry_preference = LaundryPreference(user_id=user.id, account=account_id, room_id=room_id)
         sqldb.session.add(laundry_preference)
     sqldb.session.commit()
 
