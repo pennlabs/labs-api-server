@@ -92,8 +92,8 @@ def save_housing_info():
             'house': housing.house,
             'room': housing.location,
             'address': housing.address,
-            'start': housing.start,
-            'end': housing.end,
+            'start': int(housing.start),
+            'end': int(housing.end),
             'off_campus': housing.off_campus,
         })
     else:
