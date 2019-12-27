@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import g, jsonify, request
 from sqlalchemy import func
 
 from server import app, sqldb

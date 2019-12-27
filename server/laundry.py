@@ -1,7 +1,7 @@
 import calendar
 import datetime
 
-from flask import jsonify, request
+from flask import g, jsonify, request
 from requests.exceptions import HTTPError
 from sqlalchemy import Integer, cast, exists, func
 
