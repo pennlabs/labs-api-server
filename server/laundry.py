@@ -6,6 +6,7 @@ from requests.exceptions import HTTPError
 from sqlalchemy import Integer, cast, exists, func
 
 from server import app, sqldb
+from server.auth import auth
 from server.base import cached_route
 from server.models import LaundryPreference, LaundrySnapshot, User
 from server.penndata import laundry
@@ -188,6 +189,7 @@ def save_data():
 
 
 @app.route('/laundry/preferences', methods=['POST'])
+@auth(nullable=True)
 def save_laundry_preferences():
     try:
         user = User.get_or_create()
@@ -205,7 +207,7 @@ def save_laundry_preferences():
     room_ids = [int(x) for x in room_ids.split(',')]
 
     for room_id in room_ids:
-        laundry_preference = LaundryPreference(user_id=user.id, room_id=room_id)
+        laundry_preference = LaundryPreference(user_id=user.id, account=g.account, room_id=room_id)
         sqldb.session.add(laundry_preference)
     sqldb.session.commit()
 

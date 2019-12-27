@@ -2,10 +2,12 @@ from flask import jsonify, request
 from sqlalchemy import func
 
 from server import app, sqldb
+from server.auth import auth
 from server.models import DiningPreference, User
 
 
 @app.route('/dining/preferences', methods=['POST'])
+@auth(nullable=True)
 def save_dining_preferences():
     try:
         user = User.get_or_create()
@@ -21,7 +23,7 @@ def save_dining_preferences():
         venue_ids = [int(x) for x in venues.split(',')]
 
         for venue_id in venue_ids:
-            dining_preference = DiningPreference(user_id=user.id, venue_id=venue_id)
+            dining_preference = DiningPreference(user_id=user.id, account=g.account, venue_id=venue_id)
             sqldb.session.add(dining_preference)
     sqldb.session.commit()
 
