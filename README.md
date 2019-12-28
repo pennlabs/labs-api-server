@@ -15,6 +15,7 @@ Setup
     * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
 * Install pipenv: `pip install --user --upgrade pipenv`
 * Install requirements using `pipenv install -d`
+    * If on macOS and mysql is throwing errors, try [this](https://stackoverflow.com/questions/53111111/cant-install-mysqlclient-on-mac-os-x-mojave)
 * Add environment secrets to `.env` in the root directory
 * Enter the virtual environment using `pipenv shell`
 * Run mobile API server with`./runserver.py`
