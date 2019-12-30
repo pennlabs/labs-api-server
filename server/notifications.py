@@ -129,7 +129,7 @@ def get_client(isDev):
 def save_notification_settings():
     settings = request.get_json()
     for setting in settings:
-        enabled = json[setting]
+        enabled = settings[setting]
         notifSetting = NotificationSetting(account=g.account.id, setting=setting, enabled=enabled)
         try:
             sqldb.session.add(notifSetting)

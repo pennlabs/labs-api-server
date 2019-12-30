@@ -20,7 +20,7 @@ class PrivacySetting(sqldb.Model):
 def save_privacy_settings():
     settings = request.get_json()
     for setting in settings:
-        enabled = json[setting]
+        enabled = settings[setting]
         privSetting = PrivacySetting(account=g.account.id, setting=setting, enabled=enabled)
         try:
             sqldb.session.add(privSetting)
