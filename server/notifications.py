@@ -121,7 +121,7 @@ def get_client(isDev):
     return client
 
 
-############# Notification Settings #############
+""" Notification Settings """
 
 
 @app.route('/notifications/settings', methods=['POST'])
