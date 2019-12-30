@@ -1,6 +1,6 @@
 import datetime
 
-from flask import jsonify, request
+from flask import jsonify
 
 from server import app, sqldb
 from server.models import Course, CourseAccount, CourseInstructor, CourseMeetingTime
