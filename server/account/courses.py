@@ -1,10 +1,9 @@
 import datetime
 
 from flask import jsonify, request
-from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
-from server.models import Account, Course, CourseAccount, CourseInstructor, CourseMeetingTime
+from server.models import Course, CourseAccount, CourseInstructor, CourseMeetingTime
 
 
 @app.route('/account/courses', methods=['POST'])

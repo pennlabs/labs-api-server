@@ -1,12 +1,9 @@
-import datetime
-
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
 from server.account.courses import add_courses
-from server.models import (Account, Course, CourseAccount, CourseInstructor,
-                           CourseMeetingTime, Degree, Major, School, SchoolMajorAccount)
+from server.models import (Account, Degree, Major, School)
 
 
 """

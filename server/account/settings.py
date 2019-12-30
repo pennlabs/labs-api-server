@@ -1,4 +1,4 @@
-from flask import g, jsonify, request
+from flask import g, jsonify
 
 from server import app
 from server.auth import auth
@@ -12,6 +12,6 @@ def get_account_settings():
     notifSettings = get_notification_settings(g.account)
     privacySettings = get_privacy_settings(g.account)
     return jsonify({
-    	'notification_settings': notifSettings,
-    	'privacy_settings': privacySettings,
+        'notification_settings': notifSettings,
+        'privacy_settings': privacySettings,
     })
