@@ -143,7 +143,6 @@ def save_notification_settings():
                 notifSetting.enabled = enabled
                 notifSetting.updated_at = datetime.now()
                 sqldb.session.commit()
-
     return jsonify({'success': True})
 
 
@@ -162,5 +161,4 @@ def get_notification_settings(account):
             'name': setting.setting,
             'enabled': setting.enabled,
         })
-
     return jsonArr

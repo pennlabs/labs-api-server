@@ -67,6 +67,7 @@ import server.transit  # noqa
 import server.weather  # noqa
 import server.housing  # noqa
 import server.notifications  # noqa
+import server.privacy  # noqa
 
 # sql
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
