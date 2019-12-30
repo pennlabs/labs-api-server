@@ -34,7 +34,8 @@ CORS(app)
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 app.secret_key = os.urandom(24)
 
-import server.account  # noqa
+import server.account.account  # noqa
+import server.account.settings  # noqa
 import server.analytics  # noqa
 import server.auth  # noqa
 import server.buildings  # noqa
@@ -67,6 +68,7 @@ import server.transit  # noqa
 import server.weather  # noqa
 import server.housing  # noqa
 import server.notifications  # noqa
+import server.privacy  # noqa
 
 # sql
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')

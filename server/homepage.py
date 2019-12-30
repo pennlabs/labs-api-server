@@ -7,7 +7,7 @@ from penn.base import APIError
 from sqlalchemy import and_, func
 
 from server import app, sqldb
-from server.account import get_courses_in_N_days, get_todays_courses
+from server.account.courses import get_courses_in_N_days, get_todays_courses
 from server.auth import auth
 from server.calendar3year import pull_todays_calendar
 from server.models import Account, DiningPreference, HomeCell, LaundryPreference, User
