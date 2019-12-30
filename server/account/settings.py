@@ -12,6 +12,6 @@ def get_account_settings():
     notifSettings = get_notification_settings(g.account)
     privacySettings = get_privacy_settings(g.account)
     return jsonify({
-        'notification_settings': notifSettings,
-        'privacy_settings': privacySettings,
+        'notifications': notifSettings,
+        'privacy': privacySettings,
     })

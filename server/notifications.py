@@ -127,17 +127,16 @@ def get_client(isDev):
 @app.route('/notifications/settings', methods=['POST'])
 @auth()
 def save_notification_settings():
-    json = request.get_json()
-    for setting in json:
-        name = setting.get('name')
-        enabled = setting.get('enabled')
-        notifSetting = NotificationSetting(account=g.account.id, setting=name, enabled=enabled)
+    settings = request.get_json()
+    for setting in settings:
+        enabled = json[setting]
+        notifSetting = NotificationSetting(account=g.account.id, setting=setting, enabled=enabled)
         try:
             sqldb.session.add(notifSetting)
             sqldb.session.commit()
         except IntegrityError:
             sqldb.session.rollback()
-            notifSetting = NotificationSetting.query.filter_by(account=g.account.id, setting=name).first()
+            notifSetting = NotificationSetting.query.filter_by(account=g.account.id, setting=setting).first()
             if notifSetting.enabled != enabled:
                 notifSetting.enabled = enabled
                 notifSetting.updated_at = datetime.now()
@@ -154,10 +153,7 @@ def get_notification_settings_endpoint():
 
 def get_notification_settings(account):
     settings = NotificationSetting.query.filter_by(account=account.id).all()
-    jsonArr = []
+    jsonArr = {}
     for setting in settings:
-        jsonArr.append({
-            'name': setting.setting,
-            'enabled': setting.enabled,
-        })
+        jsonArr[setting.setting] = setting.enabled
     return jsonArr

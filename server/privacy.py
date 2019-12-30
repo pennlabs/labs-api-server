@@ -18,17 +18,16 @@ class PrivacySetting(sqldb.Model):
 @app.route('/privacy/settings', methods=['POST'])
 @auth()
 def save_privacy_settings():
-    json = request.get_json()
-    for setting in json:
-        name = setting.get('name')
-        enabled = setting.get('enabled')
-        privSetting = PrivacySetting(account=g.account.id, setting=name, enabled=enabled)
+    settings = request.get_json()
+    for setting in settings:
+        enabled = json[setting]
+        privSetting = PrivacySetting(account=g.account.id, setting=setting, enabled=enabled)
         try:
             sqldb.session.add(privSetting)
             sqldb.session.commit()
         except IntegrityError:
             sqldb.session.rollback()
-            privSetting = PrivacySetting.query.filter_by(account=g.account.id, setting=name).first()
+            privSetting = PrivacySetting.query.filter_by(account=g.account.id, setting=setting).first()
             if privSetting.enabled != enabled:
                 privSetting.enabled = enabled
                 privSetting.updated_at = datetime.now()
@@ -45,10 +44,7 @@ def get_privacy_settings_endpoint():
 
 def get_privacy_settings(account):
     settings = PrivacySetting.query.filter_by(account=account.id).all()
-    jsonArr = []
+    jsonArr = {}
     for setting in settings:
-        jsonArr.append({
-            'name': setting.setting,
-            'enabled': setting.enabled,
-        })
+        jsonArr[setting.setting] = setting.enabled
     return jsonArr
