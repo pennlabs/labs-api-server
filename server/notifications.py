@@ -21,6 +21,14 @@ class NotificationToken(sqldb.Model):
     updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
 
 
+class NotificationSetting(sqldb.Model):
+    account = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), primary_key=True)
+    setting = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    enabled = sqldb.Column(sqldb.Boolean)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+    updated_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+
 class Notification(object):
     def __init__(self, token, alert):
         self.token = token
@@ -111,3 +119,48 @@ def get_client(isDev):
     token_credentials = TokenCredentials(auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id)
     client = APNsClient(credentials=token_credentials, use_sandbox=isDev)
     return client
+
+
+############# Notification Settings #############
+
+
+@app.route('/notifications/settings', methods=['POST'])
+@auth()
+def save_notification_settings():
+    json = request.get_json()
+    jsonArr = json.get('settings')
+    for setting in jsonArr:
+        name = setting.get('name')
+        enabled = setting.get('enabled')
+        notifSetting = NotificationSetting(account=g.account.id, setting=name, enabled=enabled)
+        try:
+            sqldb.session.add(notifSetting)
+            sqldb.session.commit()
+        except IntegrityError:
+            sqldb.session.rollback()
+            notifSetting = NotificationSetting.query.filter_by(account=g.account.id, setting=name).first()
+            if notifSetting.enabled != enabled:
+                notifSetting.enabled = enabled
+                notifSetting.updated_at = datetime.now()
+                sqldb.session.commit()
+
+    return jsonify({'success': True})
+
+
+@app.route('/notifications/settings', methods=['GET'])
+@auth()
+def get_notification_settings_endpoint():
+    jsonArr = get_notification_settings(g.account)
+    return jsonify({'settings': jsonArr})
+
+
+def get_notification_settings(account):
+    settings = NotificationSetting.query.filter_by(account=account.id).all()
+    jsonArr = []
+    for setting in settings:
+        jsonArr.append({
+            'name': setting.setting,
+            'enabled': setting.enabled,
+        })
+
+    return jsonArr
