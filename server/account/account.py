@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
 from server.account.courses import add_courses
-from server.models import Account, Degree, Major, SchoolMajorAccount
+from server.models import Account, Degree, Major, School, SchoolMajorAccount
 
 
 """
