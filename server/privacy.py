@@ -19,8 +19,7 @@ class PrivacySetting(sqldb.Model):
 @auth()
 def save_privacy_settings():
     json = request.get_json()
-    jsonArr = json.get('settings')
-    for setting in jsonArr:
+    for setting in json:
         name = setting.get('name')
         enabled = setting.get('enabled')
         privSetting = PrivacySetting(account=g.account.id, setting=name, enabled=enabled)

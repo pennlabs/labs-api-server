@@ -128,8 +128,7 @@ def get_client(isDev):
 @auth()
 def save_notification_settings():
     json = request.get_json()
-    jsonArr = json.get('settings')
-    for setting in jsonArr:
+    for setting in json:
         name = setting.get('name')
         enabled = setting.get('enabled')
         notifSetting = NotificationSetting(account=g.account.id, setting=name, enabled=enabled)
