@@ -65,7 +65,7 @@ def get_homepage():
     cells.append(gsr_locations)
 
     version = request.args.get('version')
-    if version and version != get_current_version():
+    if version and version <= get_current_version():
         update_cell = HomeCell('new-version-released', None, 10000)
         cells.append(update_cell)
 
