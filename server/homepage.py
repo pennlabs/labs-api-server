@@ -1,6 +1,4 @@
-import ast
 import datetime
-import os
 
 import requests
 from flask import g, jsonify, request
