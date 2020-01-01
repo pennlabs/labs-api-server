@@ -50,7 +50,7 @@ def get_courses_endpoint():
     return jsonify({'courses': []})
 
 
-@app.route('/account/courses/private/add', methods=['POST'])
+@app.route('/account/courses/private/save', methods=['POST'])
 @anonymous_auth
 def save_anonymouss_courses():
     """ Anonymously saves a user's courses """
