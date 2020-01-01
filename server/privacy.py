@@ -4,7 +4,7 @@ from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
-from server.auth import auth, anonymous_auth
+from server.auth import anonymous_auth, auth
 
 
 class PrivacySetting(sqldb.Model):
