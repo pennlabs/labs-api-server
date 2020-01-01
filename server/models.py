@@ -96,6 +96,13 @@ class CourseAccount(sqldb.Model):
     course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('course.id'), primary_key=True)
 
 
+class CourseAnonymousID(sqldb.Model):
+    __tablename__ = 'course_anonymous_id'
+
+    anonymous_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('anonymous_id.id'), primary_key=True)
+    course_id = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('course.id'), primary_key=True)
+
+
 class LaundrySnapshot(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
     date = sqldb.Column(sqldb.Date, nullable=False, index=True)
