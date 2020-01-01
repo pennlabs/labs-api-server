@@ -1,5 +1,4 @@
 import datetime
-import os
 
 import requests
 from flask import g, jsonify, request
@@ -9,35 +8,13 @@ from sqlalchemy import and_, func
 from server import app, sqldb
 from server.account.courses import get_courses_in_N_days, get_todays_courses
 from server.auth import auth
+from server.base import cache_get
 from server.calendar3year import pull_todays_calendar
 from server.models import Account, DiningPreference, HomeCell, LaundryPreference, User
 from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
 from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
-
-
-@app.route('/appversion/iOS', methods=['POST'])
-def update_app_version():
-    secret = os.environ.get('AUTH_SECRET')
-    auth_secret = request.form.get('auth_secret')
-    if auth_secret is None:
-        return jsonify({'error': 'Auth secret is not provided.'}), 400
-    if not auth_secret == secret:
-        return jsonify({'error': 'Auth secret is not correct.'}), 400
-
-    version = request.form.get('version')
-    if version is None:
-        return jsonify({'err': 'No version passed to server'}), 400
-
-    os.environ['APP_VERSION'] = version
-    return jsonify({'success': 'App version has been updated to ' + version})
-
-
-@app.route('/appversion/iOS', methods=['GET'])
-def get_app_version():
-    version = os.environ.get('APP_VERSION')
-    return jsonify({'version': version})
 
 
 @app.route('/homepage', methods=['GET'])
@@ -69,8 +46,6 @@ def get_homepage():
     if reservations_cell:
         cells.append(reservations_cell)
 
-    version = request.args.get('version')
-
     # if account and account.is_student():
     #     courses = get_courses_cell(account)
     #     if courses:
@@ -89,10 +64,9 @@ def get_homepage():
     gsr_locations = get_gsr_locations_cell(user, account)
     cells.append(gsr_locations)
 
-    app_version = os.environ.get('APP_VERSION')
-
-    if version and version < app_version:
-        update_cell = get_version_cell(version)
+    version = request.args.get('version')
+    if version and version <= get_current_version():
+        update_cell = HomeCell('new-version-released', None, 10000)
         cells.append(update_cell)
 
     calendar = get_university_event_cell()
@@ -270,5 +244,12 @@ def get_post_cells(account):
     return cells
 
 
-def get_version_cell(version):
-    return HomeCell('new-version-released', None, 10000)
+def get_current_version():
+    def get_data():
+        r = requests.get(url='http://itunes.apple.com/lookup?bundleId=org.pennlabs.PennMobile')
+        json = r.json()
+        version = json['results'][0]['version']
+        return version
+
+    td = datetime.timedelta(days=1)
+    return cache_get('ios_version', td, get_data)
