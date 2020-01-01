@@ -2,11 +2,11 @@ import ast
 import datetime
 
 from flask import g, jsonify, request
+from sqlalchemy import func
 
 from server import app, sqldb
 from server.auth import anonymous_auth
-from server.models import (Course, CourseAccount, CourseAnonymousID,
-                           CourseInstructor, CourseMeetingTime)
+from server.models import Course, CourseAccount, CourseAnonymousID, CourseInstructor, CourseMeetingTime
 
 
 @app.route('/account/courses', methods=['POST'])
