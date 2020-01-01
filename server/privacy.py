@@ -4,7 +4,7 @@ from flask import g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
-from server.auth import auth
+from server.auth import auth, 
 
 
 class PrivacySetting(sqldb.Model):
@@ -48,3 +48,9 @@ def get_privacy_settings(account):
     for setting in settings:
         jsonArr[setting.setting] = setting.enabled
     return jsonArr
+
+
+@app.route('/privacy/anonymous/register', methods=['POST'])
+@anonymous_auth
+def register_device_key_password_hash():
+    return jsonify({'success': True})
