@@ -140,10 +140,21 @@ def add_all_housing_info():
         start = json.get('start')
         end = json.get('end')
         off_campus = json.get('off_campus')
-        housing = Housing(account=g.account.id, house=house, location=room, address=address, off_campus=off_campus,
-                          start=start, end=end)
-        sqldb.session.add(housing)
-    sqldb.session.commit()
+        try:
+            housing = Housing(account=g.account.id, house=house, location=room, address=address, 
+                              off_campus=off_campus, start=start, end=end)
+            sqldb.session.add(housing)
+            sqldb.session.commit()
+        except IntegrityError:
+            sqldb.session.rollback()
+            current_result = Housing.query.filter_by(account=g.account.id, start=start).first()
+            if current_result:
+                current_result.house = house
+                current_result.location = location
+                current_result.address = address
+                current_result.off_campus = off_campus
+                sqldb.session.commit()
+
     return jsonify({'success': True})
 
 
