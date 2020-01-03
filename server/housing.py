@@ -139,7 +139,7 @@ def add_all_housing_info():
         start = json.get('start')
         end = json.get('end')
         off_campus = json.get('off_campus')
-        housing = Housing(account=g.account.id, house=house, location=location, address=address, off_campus=off_campus,
+        housing = Housing(account=g.account.id, house=house, location=room, address=address, off_campus=off_campus,
                           start=start, end=end)
         sqldb.session.add(housing)
     sqldb.session.commit()
