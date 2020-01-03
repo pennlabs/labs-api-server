@@ -133,7 +133,7 @@ def get_account(json):
     pennid = json.get('pennid')
     email = json.get('email')
     image_url = json.get('image_url')
-    if email is None:
+    if not email:
         email = get_potential_email(json)
 
     return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email, image_url=image_url)
