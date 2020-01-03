@@ -107,9 +107,9 @@ def register_account_endpoint():
             if degrees:
                 add_schools_and_majors(account, degrees)
 
-            courses = json.get('courses')
-            if courses:
-                add_courses(account, courses)
+            # courses = json.get('courses')
+            # if courses:
+            #     add_courses(account, courses)
 
             return jsonify({'account_id': account.id})
         except KeyError as e:
