@@ -57,7 +57,7 @@ def run_query():
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
                                                     get_gsr.c.rid == GSRRoomName.rid), isouter=True) \
                             .join(lacks_permission, lacks_permission.c.account == get_gsr.c.account, isouter=True) \
-                            .filter(lacks_permission.c.account is None) \
+                            .filter(lacks_permission.c.account.is_(None)) \
                             .all()
 
     booking_ids = []
