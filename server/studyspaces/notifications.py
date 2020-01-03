@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from flask import jsonify
-from sqlalchemy import and_, not_, or_
+from sqlalchemy import and_, not_
 
 from server import app, sqldb
 from server.auth import internal_auth
@@ -57,7 +57,7 @@ def run_query():
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
                                                     get_gsr.c.rid == GSRRoomName.rid), isouter=True) \
                             .join(lacks_permission, lacks_permission.c.account == get_gsr.c.account, isouter=True) \
-                            .filter(lacks_permission.c.account == None) \
+                            .filter(lacks_permission.c.account is None) \
                             .all()
 
     booking_ids = []
