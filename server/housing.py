@@ -150,7 +150,7 @@ def add_all_housing_info():
             current_result = Housing.query.filter_by(account=g.account.id, start=start).first()
             if current_result:
                 current_result.house = house
-                current_result.location = location
+                current_result.location = room
                 current_result.address = address
                 current_result.off_campus = off_campus
                 sqldb.session.commit()
