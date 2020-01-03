@@ -17,6 +17,7 @@ def add_degrees():
 @auth()
 def delete_degrees():
     SchoolMajorAccount.query.filter_by(account_id=g.account.id).delete()
+    sqldb.session.commit()
     return jsonify({'success': True})
 
 

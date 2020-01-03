@@ -125,6 +125,7 @@ def get_housing_info():
 @auth()
 def delete_housing_info():
     Housing.query.filter_by(account=g.account.id).delete()
+    sqldb.session.commit()
     return jsonify({'success': True})
 
 
