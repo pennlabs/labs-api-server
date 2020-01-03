@@ -2,7 +2,7 @@ import ast
 import datetime
 
 from flask import g, jsonify, request
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from server import app, sqldb
 from server.auth import anonymous_auth
@@ -157,7 +157,7 @@ def add_courses_to_db(json_array):
             ) \
                 .filter_by(term=term) \
                 .group_by(Course.start_date, Course.end_date) \
-                .order_by('count DESC') \
+                .order_by(text('count DESC')) \
                 .all()
 
             if len(term_start_end_dates) > 0:
