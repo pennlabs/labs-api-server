@@ -121,6 +121,31 @@ def get_housing_info():
         return jsonify({'result': None})
 
 
+@app.route('/housing/delete', methods=['POST'])
+@auth()
+def delete_housing_info():
+    Housing.query.filter_by(account=g.account.id).delete()
+    return jsonify({'success': True})
+
+
+@app.route('/housing/all', methods=['POST'])
+@auth()
+def add_all_housing_info():
+    json_arr = request.get_json()
+    for json in json_arr:
+        house = json.get('house')
+        room = json.get('room')
+        address = json.get('address')
+        start = json.get('start')
+        end = json.get('end')
+        off_campus = json.get('off_campus')
+        housing = Housing(account=g.account.id, house=house, location=room, address=address, off_campus=off_campus,
+                          start=start, end=end)
+        sqldb.session.add(housing)
+    sqldb.session.commit()
+    return jsonify({'success': True})
+
+
 def get_details_for_location(location):
     """
     Ex: 403 Butcher (Bed space: a)
