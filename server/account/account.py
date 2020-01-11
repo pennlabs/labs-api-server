@@ -132,11 +132,18 @@ def get_account(json):
 
     pennid = json.get('pennid')
     email = json.get('email')
+    affiliations_list = json.get('affiliations')
+    affiliation = None
     image_url = json.get('image_url')
     if not email:
         email = get_potential_email(json)
+    if affiliations_list:
+        filtered_affliations = filter(lambda x: x != 'member', affiliations_list)
+        if filtered_affliations:
+            affiliation = ",".join(filtered_affliations)
 
-    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email, image_url=image_url)
+    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email, 
+                   affiliation=affiliation, image_url=image_url)
 
 
 def update_account(updated_account):
@@ -151,6 +158,8 @@ def update_account(updated_account):
             account.image_url = updated_account.image_url
         if updated_account.pennid:
             account.pennid = updated_account.pennid
+        if updated_account.affiliation:
+            account.affiliation = updated_account.affiliation
     return account
 
 
