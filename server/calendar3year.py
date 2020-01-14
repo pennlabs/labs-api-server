@@ -24,6 +24,7 @@ def pull_calendar(d):
             event['name'] = re.split('Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday',
                                      event['name'])[0].strip()
             event['name'] = re.split(r'\($', event['name'])[0].strip()
+            event['name'] = event['name'].replace('\\', '')
             if 'Advance Registration' in event['name']:
                 event['name'] = 'Advance Registration'
             within_range.append(event)
