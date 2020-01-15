@@ -13,8 +13,8 @@ def generate_uuid():
 
 class Account(sqldb.Model):
     id = sqldb.Column(sqldb.VARCHAR(255), primary_key=True, default=generate_uuid)
-    first = sqldb.Column(sqldb.Text, nullable=False)
-    last = sqldb.Column(sqldb.Text, nullable=False)
+    first = sqldb.Column(sqldb.Text, nullable=True)
+    last = sqldb.Column(sqldb.Text, nullable=True)
     pennkey = sqldb.Column(sqldb.VARCHAR(255), nullable=False, unique=True)
     pennid = sqldb.Column(sqldb.Integer, nullable=True)
     email = sqldb.Column(sqldb.Text, nullable=True)

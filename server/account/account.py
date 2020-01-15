@@ -123,10 +123,6 @@ def get_account(json):
     last = json.get('last')
     pennkey = json.get('pennkey')
 
-    if first is None:
-        raise KeyError('first is missing')
-    if last is None:
-        raise KeyError('last is missing')
     if pennkey is None:
         raise KeyError('pennkey is missing')
 
