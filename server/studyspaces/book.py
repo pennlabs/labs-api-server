@@ -74,11 +74,11 @@ def book_room():
 
             # Look up the reservation to get the booking id
             reservations = get_reservations(None, sessionid, 0)
-            startStr = request.form['start'].split('-')[0]
-            endStr = request.form['end'].split('-')[0]
+            startStr = request.form['start']
+            endStr = request.form['end']
             for reservation in reservations:
-                resStartStr = reservation['fromDate'].split('-')[0]
-                resEndStr = reservation['toDate'].split('-')[0]
+                resStartStr = reservation['fromDate']
+                resEndStr = reservation['toDate']
                 if startStr == resStartStr and endStr == resEndStr:
                     booking_id = reservation['booking_id']
                     break
