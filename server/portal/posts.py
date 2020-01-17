@@ -4,24 +4,11 @@ from flask import jsonify, request
 from sqlalchemy import and_, desc, func
 
 from server import app, sqldb
-from server.models import (AnalyticsEvent, Post, PostFilter, PostStatus,
+from server.models import (AnalyticsEvent, Post, PostAccount, PostFilter, PostStatus,
                            PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
-"""
-Endpoint: /portal/posts
-HTTP Methods: GET
-Response Formats: JSON
-Parameters: account
-
-Returns list of posts
-"""
-@app.route('/portal/posts', methods=['GET'])
-def get_posts():
-    account_id = request.args.get('account')
-    posts = Post.query.filter_by(account=account_id).all()
-    posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
-
+def get_analytics(posts_query):
     qry1 = sqldb.session.query(AnalyticsEvent.post_id.label('id'),
                                func.count(AnalyticsEvent.post_id).label('interactions')) \
                         .filter(AnalyticsEvent.type == 'post') \
@@ -60,9 +47,75 @@ def get_posts():
     for post_id, interactions, impressions, unique_impr in analytics_qry:
         analytics_by_post[post_id] = (interactions, impressions, unique_impr)
 
+    return analytics_by_post
+
+
+"""
+Endpoint: /portal/posts
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account
+
+Returns list of posts
+"""
+@app.route('/portal/posts', methods=['GET'])
+def get_posts():
+    account_id = request.args.get('account')
+    posts = Post.query.filter_by(account=account_id).all()
+    posts_query = sqldb.session.query(Post.id).filter_by(account=account_id).subquery()
+
+    analytics_by_post = get_analytics(posts_query)
+
     json_arr = []
     for post in posts:
         post_json = get_post_json(post)
+        post_json['organization'] = PostAccount.get_account(post_json['account']).name
+        if str(post.id) in analytics_by_post:
+            (interactions, impressions, unique_impr) = analytics_by_post[str(post.id)]
+            post_json['interactions'] = interactions
+            post_json['impressions'] = impressions
+            post_json['unique_impressions'] = unique_impr
+        elif post.approved:
+            post_json['interactions'] = 0
+            post_json['impressions'] = 0
+            post_json['unique_impressions'] = 0
+        else:
+            post_json['interactions'] = None
+            post_json['impressions'] = None
+            post_json['unique_impressions'] = None
+        json_arr.append(post_json)
+    return jsonify({'posts': json_arr})
+
+
+"""
+Endpoint: /portal/posts/all
+HTTP Methods: GET
+Response Formats: JSON
+Parameters: account
+
+Returns list of posts
+"""
+@app.route('/portal/posts/all', methods=['GET'])
+def get_all_posts():
+    account_id = request.args.get('account')
+
+    try:
+        account = PostAccount.get_account(account_id)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+    if account.email != 'pennappslabs@gmail.com':
+        return jsonify({'error': 'Account not authorized to view all posts.'}), 400
+
+    posts = Post.query.all()
+    posts_query = sqldb.session.query(Post.id).subquery()
+
+    analytics_by_post = get_analytics(posts_query)
+
+    json_arr = []
+    for post in posts:
+        post_json = get_post_json(post)
+        post_json['organization'] = PostAccount.get_account(post_json['account']).name
         if str(post.id) in analytics_by_post:
             (interactions, impressions, unique_impr) = analytics_by_post[str(post.id)]
             post_json['interactions'] = interactions
@@ -102,6 +155,7 @@ def get_post(post_id):
 def get_post_json(post):
     post_json = {
         'id': post.id,
+        'account': post.account,
         'source': post.source,
         'title': post.title,
         'subtitle': post.subtitle,
