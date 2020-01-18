@@ -18,7 +18,6 @@ class Housing(sqldb.Model):
     start = sqldb.Column(sqldb.Integer, primary_key=True, default=-1)
     end = sqldb.Column(sqldb.Integer, default=-1)
     created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
-    html = sqldb.Column(sqldb.Text, nullable=True)
 
 
 @app.route('/housing', methods=['POST'])
@@ -29,48 +28,43 @@ def save_housing_info():
     soup = BeautifulSoup(html, 'html.parser')
     html = soup.prettify().strip().strip('\t\r\n')
 
-    housing = None
-    try:
-        house, location, address = None, None, None
-        main = soup.findAll('div', {'class': 'interior-main-content col-md-6 col-md-push-3 md:mb-150'})[0]
+    house, location, address = None, None, None
+    main = soup.findAll('div', {'class': 'interior-main-content col-md-6 col-md-push-3 md:mb-150'})[0]
 
-        off_campus = "You don't have any assignments at this time" in html
-        if off_campus:
-            # Off campus for 2020 - 2021 school year if today is after January and user has no assignments
-            today = datetime.today()
-            start = today.year if today.month > 1 else today.year - 1
-            end = start + 1
-        else:
-            year_text, house_text = None, None
-            headers = main.findAll('h3')
-            for h3 in headers:
-                if 'Academic Year' in h3.text:
-                    year_text = h3.text
-                elif 'House Information' in h3.text:
-                    house_text = h3.text
+    off_campus = "You don't have any assignments at this time" in html
+    if off_campus:
+        # Off campus for 2020 - 2021 school year if today is after January and user has no assignments
+        today = datetime.today()
+        start = today.year if today.month > 1 else today.year - 1
+        end = start + 1
+    else:
+        year_text, house_text = None, None
+        headers = main.findAll('h3')
+        for h3 in headers:
+            if 'Academic Year' in h3.text:
+                year_text = h3.text
+            elif 'House Information' in h3.text:
+                house_text = h3.text
 
-            info = main.findAll('div', {'class': 'col-md-8'})[0]
-            paragraphs = info.findAll('p')
-            room = paragraphs[0]
-            address = paragraphs[1]
+        info = main.findAll('div', {'class': 'col-md-8'})[0]
+        paragraphs = info.findAll('p')
+        room = paragraphs[0]
+        address = paragraphs[1]
 
-            split = year_text.strip().split(' ')
-            start, end = split[len(split) - 3], split[len(split) - 1]
+        split = year_text.strip().split(' ')
+        start, end = split[len(split) - 3], split[len(split) - 1]
 
-            split = house_text.split('-')
-            house = split[1].strip()
+        split = house_text.split('-')
+        house = split[1].strip()
 
-            split = room.text.split('  ')
-            location = split[0].strip()
+        split = room.text.split('  ')
+        location = split[0].strip()
 
-            split = address.text.split('  ')
-            address = split[0].strip()
+        split = address.text.split('  ')
+        address = split[0].strip()
 
-        housing = Housing(account=g.account.id, house=house, location=location, address=address, off_campus=off_campus,
-                          start=start, end=end, html=html)
-    except (IndexError, AttributeError):
-        # Parsing failed. Save the html so that we can diagnose the problem and update the account's info later.
-        housing = Housing(account=g.account.id, html=html)
+    housing = Housing(account=g.account.id, house=house, location=location, address=address, off_campus=off_campus,
+                      start=start, end=end)
 
     try:
         sqldb.session.add(housing)
@@ -84,7 +78,6 @@ def save_housing_info():
                 current_result.location = location
                 current_result.address = address
                 current_result.off_campus = off_campus
-            current_result.html = html
             sqldb.session.commit()
 
     if housing.start:
