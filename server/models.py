@@ -209,7 +209,7 @@ class AnalyticsEvent(sqldb.Model):
     user = sqldb.Column(sqldb.Integer, sqldb.ForeignKey('user.id'))
     account_id = sqldb.Column(sqldb.VARCHAR(255), sqldb.ForeignKey('account.id'), nullable=True)
     timestamp = sqldb.Column(sqldb.DateTime(3), nullable=False)
-    type = sqldb.Column(sqldb.Text, nullable=False)
+    type = sqldb.Column(sqldb.VARCHAR(50), nullable=False)
     index = sqldb.Column(sqldb.Integer, nullable=False)
     post_id = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
     is_interaction = sqldb.Column(sqldb.Boolean, nullable=False)
