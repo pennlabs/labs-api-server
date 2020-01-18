@@ -34,9 +34,11 @@ def send_analytics():
         index = int(event_json.get('index'))
         post_id = event_json.get('id')
         flag = bool(event_json.get('is_interaction'))
-        event = AnalyticsEvent(user=user.id, account_id=account_id, timestamp=timestamp, type=type, index=index,
-                               post_id=post_id, is_interaction=flag)
-        sqldb.session.add(event)
+        if any(x == type for x in ['news', 'post']):
+            # Only log news and post events
+            event = AnalyticsEvent(user=user.id, account_id=account_id, timestamp=timestamp, type=type, index=index,
+                                   post_id=post_id, is_interaction=flag)
+            sqldb.session.add(event)
     sqldb.session.commit()
 
     return jsonify({'success': True, 'error': None})
