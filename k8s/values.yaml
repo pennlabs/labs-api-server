@@ -1,0 +1,19 @@
+deploy_version: 0.1.12
+image_tag: latest
+
+applications:
+  - name: flask
+    image: pennlabs/labs-api-server
+    secret: labs-api-server
+    ingress:
+      hosts:
+        - host: api.pennlabs.org
+          paths: ["/"]
+    secretMounts:
+      - name: ios_key
+        item: ios_key
+        path: "/app/ios_key.p8"
+  - name: redis
+    image: redis
+    tag: 6.0rc
+    port: 6379
