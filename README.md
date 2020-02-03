@@ -12,6 +12,7 @@ Setup
 * Install [redis](https://redis.io/)
 * Install mysql
     * Mac OS X: `brew install mysql` and [these instructions](https://solitum.net/openssl-os-x-el-capitan-and-brew/)
+        * If you have trouble installing mysqlclient, follow the accepted answer [here](https://stackoverflow.com/questions/56133947/install-mysqlclient-via-pipenv-throw-errors), except replace the `pip` with `pipenv`
     * Debian/Ubuntu: `apt-get install libmysqlclient-dev`
 * Install pipenv: `pip install --user --upgrade pipenv`
 * Install requirements using `pipenv install -d`
