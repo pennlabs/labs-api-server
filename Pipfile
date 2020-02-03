@@ -43,6 +43,7 @@ PennSDK = "*"
 SQLAlchemy = "*"
 Werkzeug = "*"
 apns2 = "*"
+uwsgi = "*"
 
 [requires]
 python_version = "3"
