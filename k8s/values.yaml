@@ -17,3 +17,14 @@ applications:
     image: redis
     tag: 6.0rc
     port: 6379
+cronjobs:
+  - name: laundry
+    schedule: "*/15 * * * *"
+    secret: labs-api-server
+    image: pennlabs/labs-api-server:latest
+    cmd: ["python3", "cron/save_laundry_data.py"]
+  - name: gsr-notifications
+    schedule: "20,50 * * * *"
+    secret: labs-api-server
+    image: pennlabs/labs-api-server:latest
+    cmd: ["python3", "cron/send_gsr_push_notification.py"]
