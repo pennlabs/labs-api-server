@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y default-libmysq
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipenv
-RUN pip install pipenv 
+RUN pip install pipenv
 
 WORKDIR /app/
 
