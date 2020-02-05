@@ -10,7 +10,7 @@ applications:
         - host: api-test.pennlabs.org
           paths: ["/"]
     secretMounts:
-      - name: ios-key
+      - name: labs-api-server
         item: ios-key
         path: "/app/ios_key.p8"
   - name: redis
