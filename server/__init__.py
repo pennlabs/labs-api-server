@@ -31,7 +31,8 @@ s3 = boto3.client(
 CORS(app)
 
 # redis
-db = redis.StrictRedis(host='localhost', port=6379, db=0)
+app.config['REDIS_URL'] = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+db = redis.StrictRedis().from_url(app.config['REDIS_URL'])
 app.secret_key = os.urandom(24)
 
 import server.account.account  # noqa
