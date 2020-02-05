@@ -9,8 +9,8 @@ nose2 = {extras = ["coverage_plugin"],version = "*"}
 flake8 = "*"
 flake8-isort = "*"
 flake8-quotes = "*"
-coveralls = "*"
 nose = "*"
+codecov = "*"
 
 [packages]
 boto3 = "*"
