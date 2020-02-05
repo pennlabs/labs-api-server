@@ -7,7 +7,7 @@ applications:
     secret: labs-api-server
     ingress:
       hosts:
-        - host: api.pennlabs.org
+        - host: api-test.pennlabs.org
           paths: ["/"]
     secretMounts:
       - name: ios_key
