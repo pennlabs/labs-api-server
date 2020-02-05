@@ -1,4 +1,4 @@
-deploy_version: 0.1.12
+deploy_version: 0.1.14
 image_tag: latest
 
 applications:
@@ -21,10 +21,10 @@ cronjobs:
   - name: laundry
     schedule: "*/15 * * * *"
     secret: labs-api-server
-    image: pennlabs/labs-api-server:latest
+    image: pennlabs/labs-api-server
     cmd: ["python3", "cron/save_laundry_data.py"]
   - name: gsr-notifications
     schedule: "20,50 * * * *"
     secret: labs-api-server
-    image: pennlabs/labs-api-server:latest
+    image: pennlabs/labs-api-server
     cmd: ["python3", "cron/send_gsr_push_notification.py"]
