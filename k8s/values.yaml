@@ -15,7 +15,7 @@ applications:
         path: "/app/ios_key.p8"
   - name: redis
     image: redis
-    tag: 6.0rc
+    tag: "5"
     port: 6379
 cronjobs:
   - name: laundry
