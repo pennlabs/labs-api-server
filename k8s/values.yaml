@@ -28,3 +28,7 @@ cronjobs:
     secret: labs-api-server
     image: pennlabs/labs-api-server
     cmd: ["python3", "cron/send_gsr_push_notifications.py"]
+    secretMounts:
+      - name: labs-api-server
+        item: ios-key
+        path: "/app/ios_key.p8"
