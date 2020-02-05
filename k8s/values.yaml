@@ -27,4 +27,4 @@ cronjobs:
     schedule: "20,50 * * * *"
     secret: labs-api-server
     image: pennlabs/labs-api-server
-    cmd: ["python3", "cron/send_gsr_push_notification.py"]
+    cmd: ["python3", "cron/send_gsr_push_notifications.py"]
