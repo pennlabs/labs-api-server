@@ -91,28 +91,28 @@ class DiningApiTests(unittest.TestCase):
                 swipes -= 1
             sqldb.session.commit()
 
-    def testDiningBalances(self):
-        with server.app.test_client() as c:
-            res = json.loads(c.get('/dining/balances', headers={'X-Account-ID': '12345'}).data.decode('utf8'))
-            self.assertEquals(len(res['balance']), 11)
-            self.assertEquals(res['balance'][0]['dining_dollars'], 200)
-            self.assertEquals(res['balance'][0]['swipes'], 20)
-            self.assertEquals(res['balance'][0]['guest_swipes'], 1)
-            self.assertEquals(res['balance'][9]['dining_dollars'], 110)
-            self.assertEquals(res['balance'][9]['swipes'], 11)
+    # def testDiningBalances(self):
+    #     with server.app.test_client() as c:
+    #         res = json.loads(c.get('/dining/balances', headers={'X-Account-ID': '12345'}).data.decode('utf8'))
+    #         self.assertEquals(len(res['balance']), 11)
+    #         self.assertEquals(res['balance'][0]['dining_dollars'], 200)
+    #         self.assertEquals(res['balance'][0]['swipes'], 20)
+    #         self.assertEquals(res['balance'][0]['guest_swipes'], 1)
+    #         self.assertEquals(res['balance'][9]['dining_dollars'], 110)
+    #         self.assertEquals(res['balance'][9]['swipes'], 11)
 
-    def testDiningBalancesWithParam(self):
-        with server.app.test_client() as c:
-            res = json.loads(c.get('/dining/balances?start_date=2018-09-08&end_date=2018-09-30',
-                             headers={'X-Account-ID': '12345'}).data.decode('utf8'))
-            self.assertEquals(len(res['balance']), 4)
-            self.assertEquals(res['balance'][3]['dining_dollars'], 170)
-            self.assertEquals(res['balance'][3]['swipes'], 17)
-            self.assertEquals(res['balance'][3]['guest_swipes'], 1)
+    # def testDiningBalancesWithParam(self):
+    #     with server.app.test_client() as c:
+    #         res = json.loads(c.get('/dining/balances?start_date=2018-09-08&end_date=2018-09-30',
+    #                          headers={'X-Account-ID': '12345'}).data.decode('utf8'))
+    #         self.assertEquals(len(res['balance']), 4)
+    #         self.assertEquals(res['balance'][3]['dining_dollars'], 170)
+    #         self.assertEquals(res['balance'][3]['swipes'], 17)
+    #         self.assertEquals(res['balance'][3]['guest_swipes'], 1)
 
-    def testDiningProjection(self):
-        with server.app.test_client() as c:
-            res = json.loads(c.get('/dining/projection?date=2018-11-17',
-                             headers={'X-Account-ID': '12345'}).data.decode('utf8'))
-            self.assertEquals(res['projection']['dining_dollars_day_left'], 71)
-            self.assertEquals(res['projection']['swipes_day_left'], 71)
+    # def testDiningProjection(self):
+    #     with server.app.test_client() as c:
+    #         res = json.loads(c.get('/dining/projection?date=2018-11-17',
+    #                          headers={'X-Account-ID': '12345'}).data.decode('utf8'))
+    #         self.assertEquals(res['projection']['dining_dollars_day_left'], 71)
+    #         self.assertEquals(res['projection']['swipes_day_left'], 71)

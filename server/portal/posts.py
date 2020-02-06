@@ -163,6 +163,7 @@ def get_post_json(post):
         'image_url': post.image_url,
         'image_url_cropped': post.image_url_cropped,
         'post_url': post.post_url,
+        'approved': post.approved,
         'start_date': datetime.strftime(post.start_date, '%Y-%m-%dT%H:%M:%S'),
         'end_date': datetime.strftime(post.end_date, '%Y-%m-%dT%H:%M:%S'),
         'filters': [],

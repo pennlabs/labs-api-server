@@ -1,0 +1,34 @@
+deploy_version: 0.1.14
+image_tag: latest
+
+applications:
+  - name: flask
+    image: pennlabs/labs-api-server
+    secret: labs-api-server
+    ingress:
+      hosts:
+        - host: api-test.pennlabs.org
+          paths: ["/"]
+    secretMounts:
+      - name: labs-api-server
+        item: ios-key
+        path: "/app/ios_key.p8"
+  - name: redis
+    image: redis
+    tag: "5"
+    port: 6379
+cronjobs:
+  - name: laundry
+    schedule: "*/15 * * * *"
+    secret: labs-api-server
+    image: pennlabs/labs-api-server
+    cmd: ["python3", "cron/save_laundry_data.py"]
+  - name: gsr-notifications
+    schedule: "20,50 * * * *"
+    secret: labs-api-server
+    image: pennlabs/labs-api-server
+    cmd: ["python3", "cron/send_gsr_push_notifications.py"]
+    secretMounts:
+      - name: labs-api-server
+        item: ios-key
+        path: "/app/ios_key.p8"
