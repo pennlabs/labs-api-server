@@ -75,7 +75,7 @@ def send_push_notification_to_account():
     return jsonify({'success': True})
 
 
-@app.route('/notifications/send/test', methods=['POST'])
+@app.route('/notifications/send/internal', methods=['POST'])
 @internal_auth
 def send_test_push_notification():
     pennkey = request.form.get('pennkey')
@@ -94,7 +94,7 @@ def send_test_push_notification():
         return jsonify({'error': 'A device token has not been registered on the server for this account.'}), 400
 
     # Only development tokens can be tested (not production)
-    send_push_notification(token.ios_token, title, body, True)
+    send_push_notification(token.ios_token, title, body, token.dev)
     return jsonify({'success': True})
 
 
