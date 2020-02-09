@@ -136,9 +136,9 @@ def get_account(json):
     if affiliations_list:
         filtered_affliations = filter(lambda x: x != 'member', affiliations_list)
         if filtered_affliations:
-            affiliation = ",".join(filtered_affliations)
+            affiliation = ','.join(filtered_affliations)
 
-    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email, 
+    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email,
                    affiliation=affiliation, image_url=image_url)
 
 
