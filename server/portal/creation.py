@@ -220,7 +220,7 @@ Endpoint: /portal/post/approve
 HTTP Methods: POST
 Response Formats: JSON
 Content-Type: application/x-www-form-urlencoded
-Parameters: account_id, post_id, approved, msg
+Parameters: account_id, post_id, approved, rejected, msg
 
 Approve post for view
 If successful, returns post ID
@@ -240,16 +240,24 @@ def approve_post():
         return jsonify({'error': 'This account does not have permission to issue post approval decisions.'}), 400
 
     approved = bool(request.form.get('approved'))
+    rejected = bool(request.form.get('rejected'))
     if approved:
         post.approved = True
         update_status(post, 'Approved', None)
-    else:
+    elif rejected:
         # TODO: Send rejection email
         post.approved = False
         msg = request.form.get('msg')
         if not msg:
-            return jsonify({'error': 'Denied posts must include a reason'}), 400
+            return jsonify({'error': 'Post rejections must include a reason'}), 400
         update_status(post, 'Rejected', msg)
+    else:
+        # TODO: Send changes requested email
+        post.approved = False
+        msg = request.form.get('msg')
+        if not msg:
+            return jsonify({'error': 'Requests for post changes must include a reason'}), 400
+        update_status(post, 'Changes', msg)
 
     return jsonify({'post_id': post.id})
 
