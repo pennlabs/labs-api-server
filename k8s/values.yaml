@@ -7,7 +7,7 @@ applications:
     secret: labs-api-server
     ingress:
       hosts:
-        - host: api-test.pennlabs.org
+        - host: api.pennlabs.org
           paths: ["/"]
     secretMounts:
       - name: labs-api-server
