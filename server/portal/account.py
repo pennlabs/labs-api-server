@@ -86,6 +86,8 @@ def get_account_info():
 
     if account.email == 'pennappslabs@gmail.com':
         isAdmin = True
+    else:
+        isAdmin = False
 
     verified_emails = sqldb.session.query(PostAccountEmail.email).filter_by(account=account.id, verified=True).all()
     account_json = {
