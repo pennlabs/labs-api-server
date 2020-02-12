@@ -23,12 +23,12 @@ cronjobs:
     secret: labs-api-server
     image: pennlabs/labs-api-server
     cmd: ["python3", "cron/save_laundry_data.py"]
-  # - name: gsr-notifications
-  #   schedule: "20,50 * * * *"
-  #   secret: labs-api-server
-  #   image: pennlabs/labs-api-server
-  #   cmd: ["python3", "cron/send_gsr_push_notifications.py"]
-  #   secretMounts:
-  #     - name: labs-api-server
-  #       item: ios-key
-  #       path: "/app/ios_key.p8"
+  - name: gsr-notifications
+    schedule: "20,50 * * * *"
+    secret: labs-api-server
+    image: pennlabs/labs-api-server
+    cmd: ["python3", "cron/send_gsr_push_notifications.py"]
+    secretMounts:
+      - name: labs-api-server
+        item: ios-key
+        path: "/app/ios_key.p8"
