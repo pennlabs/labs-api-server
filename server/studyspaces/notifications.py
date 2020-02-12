@@ -1,8 +1,8 @@
 import math
 from datetime import datetime, timedelta
-from pytz import timezone
 
 from flask import jsonify
+from pytz import timezone
 from sqlalchemy import and_, not_
 
 from server import app, sqldb

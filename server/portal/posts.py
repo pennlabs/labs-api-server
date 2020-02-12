@@ -1,7 +1,7 @@
 from datetime import datetime
-from pytz import timezone
 
 from flask import jsonify, request
+from pytz import timezone
 from sqlalchemy import and_, desc, func
 
 from server import app, sqldb

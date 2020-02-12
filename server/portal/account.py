@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime, timedelta
-from pytz import timezone
 
 from flask import jsonify, redirect, request
+from pytz import timezone
 from sqlalchemy import exists
 
 from server import app, bcrypt, sqldb
