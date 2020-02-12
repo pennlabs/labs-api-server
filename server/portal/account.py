@@ -198,7 +198,7 @@ def verify_account_email_token():
     else:
         account_email.verified = True
         est = timezone('EST')
-        now = datetime.now(est)
+        now = datetime.now(est).replace(tzinfo=None)
         upcoming_posts = Post.query.filter(Post.account == account_email.account).filter(Post.end_date >= now).all()
         for post in upcoming_posts:
             tester = PostTester(post=post.id, email=account_email.email)
