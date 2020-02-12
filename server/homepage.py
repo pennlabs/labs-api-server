@@ -84,10 +84,12 @@ def get_homepage():
     posts = get_post_cells(account)
     if posts:
         cells.extend(posts)
-
-    group_invites = get_group_invite_cell(account)
-    if group_invites:
-        cells.append(group_invites)
+    
+    groups_enabled = request.args.get('groupsEnabled')
+    if groups_enabled:
+        group_invites = get_group_invite_cell(account)
+        if group_invites:
+            cells.append(group_invites)
 
     cells.sort(key=lambda x: x.weight, reverse=True)
 
