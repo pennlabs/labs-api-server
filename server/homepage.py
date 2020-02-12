@@ -10,12 +10,13 @@ from server.account.courses import get_courses_in_N_days, get_todays_courses
 from server.auth import auth
 from server.base import cache_get
 from server.calendar3year import pull_todays_calendar
+from server.groups import get_invites_for_account
 from server.models import Account, DiningPreference, HomeCell, LaundryPreference, User
 from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
 from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
-from server.groups import get_invites_for_account
+
 
 @app.route('/homepage', methods=['GET'])
 @auth(nullable=True)
@@ -84,7 +85,7 @@ def get_homepage():
     posts = get_post_cells(account)
     if posts:
         cells.extend(posts)
-    
+
     groups_enabled = request.args.get('groupsEnabled')
     if groups_enabled:
         group_invites = get_group_invite_cell(account)
@@ -260,9 +261,10 @@ def get_current_version():
     td = datetime.timedelta(days=1)
     return cache_get('ios_version', td, get_data)
 
+
 def get_group_invite_cell(account):
     invites = get_invites_for_account(account)
     if invites:
-         return HomeCell('invites', invites, 1001) 
-         
+        return HomeCell('invites', invites, 1001)
+
     return None
