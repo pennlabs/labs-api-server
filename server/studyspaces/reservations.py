@@ -41,7 +41,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
     if sessionid:
         try:
             gsr_reservations = wharton.get_reservations(sessionid, timeout)
-            timezone = wharton.get_dst_gmt_timezone()
+            timezone_hours = wharton.get_dst_gmt_timezone()
 
             for res in gsr_reservations:
                 res['service'] = 'wharton'
@@ -56,9 +56,9 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                 date_str = datetime.strftime(date, '%Y-%m-%d')
 
                 if res['startTime'] == 'midnight':
-                    res['fromDate'] = date_str + 'T00:00:00-{}'.format(timezone)
+                    res['fromDate'] = date_str + 'T00:00:00-{}'.format(timezone_hours)
                 elif res['startTime'] == 'noon':
-                    res['fromDate'] = date_str + 'T12:00:00-{}'.format(timezone)
+                    res['fromDate'] = date_str + 'T12:00:00-{}'.format(timezone_hours)
                 else:
                     start_str = res['startTime'].replace('.', '').upper()
                     try:
@@ -66,14 +66,14 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                     except ValueError:
                         start_time = datetime.strptime(start_str, '%I %p')
                     start_str = datetime.strftime(start_time, '%H:%M:%S')
-                    res['fromDate'] = '{}T{}-{}'.format(date_str, start_str, timezone)
+                    res['fromDate'] = '{}T{}-{}'.format(date_str, start_str, timezone_hours)
 
                 if res['endTime'] == 'midnight':
                     date += timedelta(days=1)
                     date_str = datetime.strftime(date, '%Y-%m-%d')
-                    res['toDate'] = date_str + 'T00:00:00-{}'.format(timezone)
+                    res['toDate'] = date_str + 'T00:00:00-{}'.format(timezone_hours)
                 elif res['endTime'] == 'noon':
-                    res['toDate'] = date_str + 'T12:00:00-{}'.format(timezone)
+                    res['toDate'] = date_str + 'T12:00:00-{}'.format(timezone_hours)
                 else:
                     end_str = res['endTime'].replace('.', '').upper()
                     try:
@@ -81,7 +81,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                     except ValueError:
                         end_time = datetime.strptime(end_str, '%I %p')
                     end_str = datetime.strftime(end_time, '%H:%M:%S')
-                    res['toDate'] = '{}T{}-{}'.format(date_str, end_str, timezone)
+                    res['toDate'] = '{}T{}-{}'.format(date_str, end_str, timezone_hours)
 
                 del res['date']
                 del res['startTime']
@@ -99,8 +99,8 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                 booking = StudySpacesBooking.query.filter_by(booking_id=booking_id).first()
                 return not (booking and booking.is_cancelled)
 
-            est = timezone('EST')
-            now = datetime.now(est)
+            est = timezone('US/Eastern')
+            now = datetime.now(est).replace(tzinfo=None)
             dateFormat = '%Y-%m-%d'
             i = 0
             while len(confirmed_reservations) == 0 and i < libcal_search_span:

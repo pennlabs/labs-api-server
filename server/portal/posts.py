@@ -189,7 +189,7 @@ def get_post_json(post):
 
 def get_posts_for_account(account):
     est = timezone('EST')
-    now = datetime.now(est)
+    now = datetime.now(est).replace(tzinfo=None)
     post_arr = []
 
     if not account:
@@ -221,7 +221,7 @@ def get_posts_for_account(account):
 def get_posts_where_tester(account):
     # Find any posts that have yet to end for which this account is a tester
     est = timezone('EST')
-    now = datetime.now(est)
+    now = datetime.now(est).replace(tzinfo=None)
     post_testers = sqldb.session.query(Post) \
                                 .join(PostTester, isouter=True, full=False) \
                                 .filter(Post.end_date >= now) \
@@ -239,7 +239,7 @@ def get_posts_where_tester(account):
 def get_email_targeted_posts(account):
     # Find running posts that have yet to end for which this account is in target email list
     est = timezone('EST')
-    now = datetime.now(est)
+    now = datetime.now(est).replace(tzinfo=None)
     posts_emails = sqldb.session.query(Post) \
                                 .join(PostTargetEmail, isouter=True, full=False) \
                                 .filter(Post.start_date <= now) \
@@ -258,7 +258,7 @@ def get_email_targeted_posts(account):
 
 def get_filtered_posts(account):
     est = timezone('EST')
-    now = datetime.now(est)
+    now = datetime.now(est).replace(tzinfo=None)
     majr_filters = sqldb.session.query(SchoolMajorAccount.major, SchoolMajorAccount.expected_grad, School.code) \
                                 .join(School, School.id == SchoolMajorAccount.school_id) \
                                 .filter(SchoolMajorAccount.account_id == account.id) \
