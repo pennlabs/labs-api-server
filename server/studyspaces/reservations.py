@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 
 from flask import jsonify, request
@@ -69,7 +69,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
                     res['fromDate'] = '{}T{}-{}'.format(date_str, start_str, timezone)
 
                 if res['endTime'] == 'midnight':
-                    date += datetime.timedelta(days=1)
+                    date += timedelta(days=1)
                     date_str = datetime.strftime(date, '%Y-%m-%d')
                     res['toDate'] = date_str + 'T00:00:00-{}'.format(timezone)
                 elif res['endTime'] == 'noon':
@@ -104,7 +104,7 @@ def get_reservations(email, sessionid, libcal_search_span, timeout=20):
             dateFormat = '%Y-%m-%d'
             i = 0
             while len(confirmed_reservations) == 0 and i < libcal_search_span:
-                date = now + datetime.timedelta(days=i)
+                date = now + timedelta(days=i)
                 dateStr = datetime.strftime(date, dateFormat)
                 libcal_reservations = studyspaces.get_reservations(email, dateStr, timeout)
                 confirmed_reservations = [res for res in libcal_reservations if (type(res) == dict
