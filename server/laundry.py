@@ -2,6 +2,7 @@ import calendar
 import datetime
 
 from flask import g, jsonify, request
+from pytz import timezone
 from requests.exceptions import HTTPError
 from sqlalchemy import Integer, cast, exists, func
 
@@ -22,7 +23,8 @@ def all_halls():
 
 @app.route('/laundry/rooms/<hall_ids>', methods=['GET'])
 def get_rooms(hall_ids):
-    date = datetime.datetime.now()
+    est = timezone('EST')
+    date = datetime.datetime.now(est)
     halls = [int(x) for x in hall_ids.split(',')]
     output = {'rooms': []}
     for hall in halls:
@@ -70,7 +72,8 @@ def safe_division(a, b):
 
 @app.route('/laundry/usage/<int:hall_no>')
 def usage_shortcut(hall_no):
-    now = datetime.datetime.now()
+    est = timezone('EST')
+    now = datetime.datetime.now(est)
     return usage(hall_no, now.year, now.month, now.day)
 
 
@@ -154,7 +157,8 @@ def save_data():
     """Retrieves current laundry info and saves it into the database."""
 
     # get the number of minutes since midnight
-    now = datetime.datetime.now()
+    est = timezone('EST')
+    now = datetime.datetime.now(est)
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     date = now.date()
     time = round((now - midnight).seconds / 60)

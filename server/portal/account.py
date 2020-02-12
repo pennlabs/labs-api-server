@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from flask import jsonify, redirect, request
+from pytz import timezone
 from sqlalchemy import exists
 
 from server import app, bcrypt, sqldb
@@ -196,7 +197,8 @@ def verify_account_email_token():
         return jsonify({'error': 'This email has already been verified for this account.'})
     else:
         account_email.verified = True
-        now = datetime.now()
+        est = timezone('EST')
+        now = datetime.now(est).replace(tzinfo=None)
         upcoming_posts = Post.query.filter(Post.account == account_email.account).filter(Post.end_date >= now).all()
         for post in upcoming_posts:
             tester = PostTester(post=post.id, email=account_email.email)

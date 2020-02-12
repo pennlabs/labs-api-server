@@ -2,6 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from flask import jsonify
+from pytz import timezone
 from sqlalchemy import and_, not_
 
 from server import app, sqldb
@@ -32,7 +33,8 @@ def run_query():
     # 4) Have not been sent a reminder yet
     # 5) Have an associated account with an iOS push notification token
 
-    now = datetime.now()
+    est = timezone('EST')
+    now = datetime.now(est).replace(tzinfo=None)
     check_start_date = now + timedelta(minutes=10)
     get_gsr = StudySpacesBooking.query \
                                 .filter(StudySpacesBooking.start <= check_start_date) \

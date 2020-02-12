@@ -16,6 +16,7 @@ def cancel_room():
     try:
         user = User.get_user()
     except ValueError as err:
+        print(err)
         return jsonify({'error': str(err)})
 
     booking_id = request.form.get('booking_id')

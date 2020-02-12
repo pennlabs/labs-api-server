@@ -2,6 +2,7 @@ import datetime
 import re
 
 from flask import jsonify
+from pytz import timezone
 
 from server import app
 from server.base import cache_get
@@ -40,7 +41,9 @@ def pull_todays_calendar():
     """Returns array of events which are 2 weeks away
     from today
     """
-    today = datetime.datetime.now().date()
+    est = timezone('EST')
+    now = datetime.datetime.now(est)
+    today = now.date()
     return pull_calendar(today)
 
 
@@ -49,7 +52,9 @@ def pull_today():
     """Returns JSON object with all events 2 weeks from the
     current date.
     """
-    today = datetime.datetime.now().date()
+    est = timezone('EST')
+    now = datetime.datetime.now(est)
+    today = now.date()
     return pull_calendar_response(today)
 
 
