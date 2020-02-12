@@ -34,7 +34,7 @@ def run_query():
     # 5) Have an associated account with an iOS push notification token
 
     est = timezone('EST')
-    now = datetime.now(est)
+    now = datetime.now(est).replace(tzinfo=None)
     check_start_date = now + timedelta(minutes=10)
     get_gsr = StudySpacesBooking.query \
                                 .filter(StudySpacesBooking.start <= check_start_date) \

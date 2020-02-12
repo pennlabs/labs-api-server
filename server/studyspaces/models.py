@@ -6,7 +6,7 @@ from server import sqldb
 
 def get_est_date():
     est = timezone('EST')
-    return datetime.now(est)
+    return datetime.now(est).replace(tzinfo=None)
 
 
 class StudySpacesBooking(sqldb.Model):
