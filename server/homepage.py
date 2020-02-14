@@ -13,6 +13,7 @@ from server.calendar3year import pull_todays_calendar
 from server.models import Account, DiningPreference, HomeCell, LaundryPreference, User
 from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
+from server.studyspaces.groups import get_invites_for_account
 from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
 
@@ -84,6 +85,12 @@ def get_homepage():
     posts = get_post_cells(account)
     if posts:
         cells.extend(posts)
+
+    groups_enabled = request.args.get('groupsEnabled')
+    if groups_enabled:
+        group_invites = get_group_invite_cell(account)
+        if group_invites:
+            cells.append(group_invites)
 
     cells.sort(key=lambda x: x.weight, reverse=True)
 
@@ -253,3 +260,16 @@ def get_current_version():
 
     td = datetime.timedelta(days=1)
     return cache_get('ios_version', td, get_data)
+
+
+def get_group_invite_cell(account):
+    try:
+        invites = get_invites_for_account(account)
+
+        if invites:
+            return HomeCell('invites', invites, 1001)
+        else:
+            return None
+
+    except APIError:
+        return None
