@@ -3,7 +3,7 @@ from flask import request
 from penn.base import APIError
 
 
-def get_invites_for_account(account, timeout=20):
+def get_invites_for_account(account, timeout=5):
     """
     Gets a users invites for any gsr groups.
     Return invites along with details about the gsr group (color, name, group id)

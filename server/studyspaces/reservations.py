@@ -36,7 +36,7 @@ def get_reservations_endpoint():
         return jsonify({'error': str(e)}), 400
 
 
-def get_reservations(email, sessionid, libcal_search_span, timeout=20):
+def get_reservations(email, sessionid, libcal_search_span, timeout=5):
     reservations = []
     if sessionid:
         try:
