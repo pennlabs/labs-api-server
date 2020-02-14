@@ -10,10 +10,10 @@ from server.account.courses import get_courses_in_N_days, get_todays_courses
 from server.auth import auth
 from server.base import cache_get
 from server.calendar3year import pull_todays_calendar
-from server.groups import get_invites_for_account
 from server.models import Account, DiningPreference, HomeCell, LaundryPreference, User
 from server.news import fetch_frontpage_article
 from server.portal.posts import get_posts_for_account
+from server.studyspaces.groups import get_invites_for_account
 from server.studyspaces.models import StudySpacesBooking
 from server.studyspaces.reservations import get_reservations
 
@@ -263,8 +263,13 @@ def get_current_version():
 
 
 def get_group_invite_cell(account):
-    invites = get_invites_for_account(account)
-    if invites:
-        return HomeCell('invites', invites, 1001)
+    try:
+        invites = get_invites_for_account(account)
 
-    return None
+        if invites:
+            return HomeCell('invites', invites, 1001)
+        else:
+            return None
+
+    except APIError:
+        return None
