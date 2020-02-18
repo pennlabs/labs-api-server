@@ -42,6 +42,9 @@ def retrieve_item_v2(item_id):
 @app.route('/dining/venues', methods=['GET'])
 def retrieve_venues():
     def get_data():
+        def sortByStart(elem):
+            return elem['open']
+
         json = din.venues()['result_data']
         venues = json['document']['venue']
         for venue in venues:
@@ -52,8 +55,8 @@ def retrieve_venues():
                     new_meals = []
                     for meal in meals:
                         meal_type = meal['type']
-                        if 'Light' not in meal_type:
-                            new_meals.append(meal)
+                        new_meals.append(meal)
+                    new_meals.sort(key=sortByStart)
                     day['meal'] = new_meals
 
             imageUrlJSON = db.get('venue:%s' % (str(venue['id'])))
