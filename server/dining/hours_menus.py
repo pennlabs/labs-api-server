@@ -54,7 +54,6 @@ def retrieve_venues():
                     meals = day['meal']
                     new_meals = []
                     for meal in meals:
-                        meal_type = meal['type']
                         new_meals.append(meal)
                     new_meals.sort(key=sortByStart)
                     day['meal'] = new_meals
