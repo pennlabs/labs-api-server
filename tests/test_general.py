@@ -38,11 +38,11 @@ class MobileAppApiTests(unittest.TestCase):
             for val in course_data['courses']:
                 self.assertEquals('CIS', val['course_department'])
 
-    def testTransitStopInventory(self):
-        with server.app.test_request_context():
-            res = json.loads(server.transit.transit_stops().data.decode(
-                'utf8'))
-            self.assertTrue(len(res['result_data']) > 0)
+    # def testTransitStopInventory(self):
+    #     with server.app.test_request_context():
+    #         res = json.loads(server.transit.transit_stops().data.decode(
+    #             'utf8'))
+    #         self.assertTrue(len(res['result_data']) > 0)
 
     # def testTransitBasicRouting(self):
     #     query = '/?latFrom=39.9529075495845&lonFrom=-75.1925700902939&latTo=39.9447689912513&lonTo=-75.1751947402954'
