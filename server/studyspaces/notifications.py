@@ -1,6 +1,7 @@
 import math
 from datetime import datetime, timedelta
 
+from apns2.payload import Payload
 from flask import jsonify
 from pytz import timezone
 from sqlalchemy import and_, not_
@@ -8,6 +9,7 @@ from sqlalchemy import and_, not_
 from server import app, sqldb
 from server.auth import internal_auth
 from server.notifications import Notification, NotificationSetting, NotificationToken, send_push_notification_batch
+from server.penndata import wharton
 from server.studyspaces.availability import get_room_name
 from server.studyspaces.models import GSRRoomName, StudySpacesBooking
 
@@ -52,8 +54,9 @@ def run_query():
                                     .filter(NotificationSetting.enabled == 0) \
                                     .subquery()
 
-    join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid, GSRRoomName.name,
-                                   get_gsr.c.start, get_tokens.c.ios_token, get_tokens.c.dev) \
+    join_qry = sqldb.session.query(get_gsr.c.id, get_gsr.c.lid, get_gsr.c.rid,
+                                   get_gsr.c.booking_id, GSRRoomName.name, GSRRoomName.image_url,
+                                   get_gsr.c.start, get_gsr.c.end, get_tokens.c.ios_token, get_tokens.c.dev) \
                             .select_from(get_gsr) \
                             .join(get_tokens, get_gsr.c.account == get_tokens.c.account) \
                             .join(GSRRoomName, and_(get_gsr.c.lid == GSRRoomName.lid,
@@ -62,10 +65,10 @@ def run_query():
                             .filter(lacks_permission.c.account.is_(None)) \
                             .all()
 
-    booking_ids = []
+    reservation_ids = []
     notifications = []
     dev_notifications = []
-    for bid, lid, rid, name, start, token, dev in join_qry:
+    for res_id, lid, rid, bid, name, image_url, start, end, token, dev in join_qry:
         minutes_to_start = int(math.ceil((start - now).seconds / 60))
         title = 'Upcoming GSR'
         if not name:
@@ -76,20 +79,32 @@ def run_query():
         else:
             body = 'You have a reservation starting in {} minutes'.format(minutes_to_start)
         alert = {'title': title, 'body': body}
-        notification = Notification(token=token, alert=alert)
+        timezone_hours = wharton.get_dst_gmt_timezone()
+        custom = {
+            'reservation': {
+                'room_name': name,
+                'image_url': image_url,
+                'start': '{}-{}'.format(datetime.strftime(start, '%Y-%m-%dT%H:%M:%S'), timezone_hours),
+                'end': '{}-{}'.format(datetime.strftime(end, '%Y-%m-%dT%H:%M:%S'), timezone_hours),
+                'booking_id': bid,
+            }
+        }
+        payload = Payload(alert=alert, sound='default', badge=0, category="UPCOMING_GSR", 
+                          mutable_content=True, custom=custom)
+        notification = Notification(token=token, payload=payload)
         if dev:
             dev_notifications.append(notification)
         else:
             notifications.append(notification)
-        booking_ids.append(bid)
+        reservation_ids.append(res_id)
 
     if notifications:
         send_push_notification_batch(notifications, False)
     if dev_notifications:
         send_push_notification_batch(dev_notifications, True)
 
-    # Flag each booking as SENT so that a duplicate notification is not accidentally sent
-    bookings = StudySpacesBooking.query.filter(StudySpacesBooking.id.in_(tuple(booking_ids))).all()
+    # # Flag each booking as SENT so that a duplicate notification is not accidentally sent
+    bookings = StudySpacesBooking.query.filter(StudySpacesBooking.id.in_(tuple(reservation_ids))).all()
     for booking in bookings:
         booking.reminder_sent = True
     sqldb.session.commit()

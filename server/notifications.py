@@ -30,9 +30,9 @@ class NotificationSetting(sqldb.Model):
 
 
 class Notification(object):
-    def __init__(self, token, alert):
+    def __init__(self, token, payload):
         self.token = token
-        self.payload = Payload(alert=alert, sound='default', badge=0)
+        self.payload = payload
 
 
 @app.route('/notifications/register', methods=['POST'])
