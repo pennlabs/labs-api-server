@@ -89,7 +89,7 @@ def run_query():
                 'booking_id': bid,
             }
         }
-        payload = Payload(alert=alert, sound='default', badge=0, category="UPCOMING_GSR", 
+        payload = Payload(alert=alert, sound='default', badge=0, category='UPCOMING_GSR',
                           mutable_content=True, custom=custom)
         notification = Notification(token=token, payload=payload)
         if dev:
