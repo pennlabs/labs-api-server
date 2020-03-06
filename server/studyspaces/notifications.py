@@ -103,7 +103,7 @@ def run_query():
     if dev_notifications:
         send_push_notification_batch(dev_notifications, True)
 
-    # # Flag each booking as SENT so that a duplicate notification is not accidentally sent
+    # Flag each booking as SENT so that a duplicate notification is not accidentally sent
     bookings = StudySpacesBooking.query.filter(StudySpacesBooking.id.in_(tuple(reservation_ids))).all()
     for booking in bookings:
         booking.reminder_sent = True
