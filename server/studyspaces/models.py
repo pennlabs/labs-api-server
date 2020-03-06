@@ -30,3 +30,4 @@ class GSRRoomName(sqldb.Model):
     gid = sqldb.Column(sqldb.Integer, primary_key=True)
     rid = sqldb.Column(sqldb.Integer, primary_key=True)
     name = sqldb.Column(sqldb.VARCHAR(255))
+    image_url = sqldb.Column(sqldb.VARCHAR(255), nullable=True)
