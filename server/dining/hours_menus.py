@@ -65,9 +65,8 @@ def retrieve_venues():
                 venue['imageURL'] = None
         return json
 
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
     return cached_route('dining:venues', td, get_data)
 
 
