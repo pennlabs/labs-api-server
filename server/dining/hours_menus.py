@@ -10,9 +10,8 @@ def retrieve_venues_v2():
     def get_data():
         return dinV2.venues()['result_data']
 
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
     return cached_route('dining:v2:venues', td, get_data)
 
 
@@ -21,9 +20,8 @@ def retrieve_menu_v2(venue_id, date):
     def get_data():
         return dinV2.menu(venue_id, date)['result_data']
 
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
     return cached_route('dining:v2:menu:%s:%s' % (venue_id, date), td,
                         get_data)
 
@@ -33,9 +31,8 @@ def retrieve_item_v2(item_id):
     def get_data():
         return dinV2.item(item_id)['result_data']
 
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
     return cached_route('dining:v2:item:%s' % item_id, td, get_data)
 
 
@@ -75,17 +72,15 @@ def retrieve_hours(venue_id):
     def get_data():
         return dinV2.hours(venue_id)['result_data']
 
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
     return cached_route('dining:v2:hours:%s' % venue_id, td, get_data)
 
 
 @app.route('/dining/weekly_menu/<venue_id>', methods=['GET'])
 def retrieve_weekly_menu(venue_id):
-    now = datetime.datetime.today()
-    daysTillWeek = 6 - now.weekday()
-    td = datetime.timedelta(days=daysTillWeek)
+    # Cache the result for 24 hours
+    td = datetime.timedelta(days=1)
 
     def get_data():
         menu = din.menu_weekly(venue_id)
