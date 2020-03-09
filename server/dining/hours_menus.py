@@ -53,6 +53,7 @@ def retrieve_venues():
                     for meal in meals:
                         if venue['name'] == 'English House' and day['date'] <= '2020-03-13' and meal['type'] == 'Lunch':
                             # Hack to fix English House hours during Spring Break 2020 because Bon Appetit won't do it
+                            # THIS SHOULD BE REMOVED AFTER SPRING BREAK
                             continue
                         new_meals.append(meal)
                     new_meals.sort(key=sortByStart)
