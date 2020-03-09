@@ -67,7 +67,8 @@ def retrieve_venues():
         return json
 
     # Cache the result for 24 hours
-    td = datetime.timedelta(days=1)
+    # TEMPORARILY CHANGED CACHE TO 15 MINUTES WHILE BON APPETIT WORKS TO FIX API
+    td = datetime.timedelta(minutes=15)
     return cached_route('dining:venues', td, get_data)
 
 
