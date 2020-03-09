@@ -51,6 +51,9 @@ def retrieve_venues():
                     meals = day['meal']
                     new_meals = []
                     for meal in meals:
+                        if venue['name'] == 'English House' and day['date'] <= '2020-03-13' and meal['type'] == 'Lunch':
+                            # Hack to fix English House hours during Spring Break 2020 because Bon Appetit won't do it
+                            continue
                         new_meals.append(meal)
                     new_meals.sort(key=sortByStart)
                     day['meal'] = new_meals
