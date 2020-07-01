@@ -1,4 +1,3 @@
-from os import getenv
 from penn import (
     Calendar,
     Dining,
@@ -12,6 +11,8 @@ from penn import (
     Transit,
     Wharton,
 )
+
+from os import getenv
 
 
 din = Dining(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
