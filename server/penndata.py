@@ -1,5 +1,4 @@
 from os import getenv
-
 from penn import (
     Calendar,
     Dining,
