@@ -15,24 +15,24 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 # Tinify Image Compression API
-tinify.key = os.environ.get('TINIFY_KEY')
+tinify.key = os.environ.get("TINIFY_KEY")
 
 # sentry
 sentry = Sentry(app)
 
 # AWS S3
 s3 = boto3.client(
-    's3',
-    aws_access_key_id=os.environ.get('AWS_KEY'),
-    aws_secret_access_key=os.environ.get('AWS_SECRET'),
+    "s3",
+    aws_access_key_id=os.environ.get("AWS_KEY"),
+    aws_secret_access_key=os.environ.get("AWS_SECRET"),
 )
 
 # allow cors
 CORS(app)
 
 # redis
-app.config['REDIS_URL'] = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-db = redis.StrictRedis().from_url(app.config['REDIS_URL'])
+app.config["REDIS_URL"] = os.environ.get("REDIS_URL", "redis://localhost:6379")
+db = redis.StrictRedis().from_url(app.config["REDIS_URL"])
 app.secret_key = os.urandom(24)
 
 import server.account.account  # noqa
@@ -72,11 +72,11 @@ import server.notifications  # noqa
 import server.privacy  # noqa
 
 # sql
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 sqldb.init_app(app)
 with app.app_context():
     sqldb.create_all()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

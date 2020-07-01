@@ -10,7 +10,7 @@ from server.models import LaundrySnapshot, sqldb
 
 class LaundryApiTests(unittest.TestCase):
     def setUp(self):
-        server.app.config['TESTING'] = True
+        server.app.config["TESTING"] = True
 
     @classmethod
     def setUpClass(self):
@@ -23,7 +23,7 @@ class LaundryApiTests(unittest.TestCase):
                     washers=3,
                     dryers=3,
                     total_washers=3,
-                    total_dryers=3
+                    total_dryers=3,
                 )
                 sqldb.session.add(item)
             for x in range(0, 24 * 60, 60):
@@ -34,67 +34,77 @@ class LaundryApiTests(unittest.TestCase):
                     washers=0,
                     dryers=0,
                     total_washers=3,
-                    total_dryers=3
+                    total_dryers=3,
                 )
                 sqldb.session.add(item)
             sqldb.session.commit()
 
     def fakeLaundryGet(url, *args, **kwargs):
-        if 'suds.kite.upenn.edu' in url:
-            with open('tests/laundry_snapshot.html', 'rb') as f:
+        if "suds.kite.upenn.edu" in url:
+            with open("tests/laundry_snapshot.html", "rb") as f:
                 m = mock.MagicMock(content=f.read())
             return m
         else:
             raise NotImplementedError
 
-    @mock.patch('penn.laundry.requests.get', fakeLaundryGet)
+    @mock.patch("penn.laundry.requests.get", fakeLaundryGet)
     def testLaundryAllHalls(self):
         with server.app.test_request_context():
-            res = json.loads(server.laundry.all_halls().data.decode('utf8'))[
-                'halls']
+            res = json.loads(server.laundry.all_halls().data.decode("utf8"))["halls"]
             self.assertTrue(len(res) > 45)
-            self.assertTrue('English House' in res)
+            self.assertTrue("English House" in res)
             for info in res.values():
-                for t in ['washers', 'dryers']:
-                    self.assertTrue(info[t]['running'] >= 0)
-                    self.assertTrue(info[t]['offline'] >= 0)
-                    self.assertTrue(info[t]['out_of_order'] >= 0)
-                    self.assertTrue(info[t]['open'] >= 0)
+                for t in ["washers", "dryers"]:
+                    self.assertTrue(info[t]["running"] >= 0)
+                    self.assertTrue(info[t]["offline"] >= 0)
+                    self.assertTrue(info[t]["out_of_order"] >= 0)
+                    self.assertTrue(info[t]["open"] >= 0)
 
-    @mock.patch('requests.get', fakeLaundryGet)
+    @mock.patch("requests.get", fakeLaundryGet)
     def testLaundryOneHall(self):
         with server.app.test_request_context():
-            res = json.loads(server.laundry.hall(26).data.decode('utf8'))
-            self.assertEquals(res['hall_name'], 'Harrison Floor 20')
+            res = json.loads(server.laundry.hall(26).data.decode("utf8"))
+            self.assertEquals(res["hall_name"], "Harrison Floor 20")
 
     def testLaundryUsage(self):
         with server.app.test_request_context():
             request = server.laundry.usage(20, 2017, 1, 1)
-            res = json.loads(request.data.decode('utf8'))
-            self.assertEquals(res['hall_name'], 'Harrison Floor 08')
-            self.assertEquals(res['location'], 'Harrison')
-            self.assertEquals(res['day_of_week'], 'Sunday')
-            self.assertEquals(res['end_date'], '2017-01-01')
-            self.assertEquals(len(res['washer_data']), 27)
-            self.assertEquals(len(res['dryer_data']), 27)
+            res = json.loads(request.data.decode("utf8"))
+            self.assertEquals(res["hall_name"], "Harrison Floor 08")
+            self.assertEquals(res["location"], "Harrison")
+            self.assertEquals(res["day_of_week"], "Sunday")
+            self.assertEquals(res["end_date"], "2017-01-01")
+            self.assertEquals(len(res["washer_data"]), 27)
+            self.assertEquals(len(res["dryer_data"]), 27)
 
     def testLaundryDatabase(self):
         with server.app.test_request_context():
             request = server.laundry.usage(1, 2017, 1, 1)
-            res = json.loads(request.data.decode('utf8'))
-            self.assertEquals(res['total_number_of_washers'], 3)
-            self.assertEquals(res['total_number_of_dryers'], 3)
+            res = json.loads(request.data.decode("utf8"))
+            self.assertEquals(res["total_number_of_washers"], 3)
+            self.assertEquals(res["total_number_of_dryers"], 3)
             for x in range(0, 23):
-                self.assertEquals(res['washer_data'][str(x)], 1.5)
-                self.assertEquals(res['dryer_data'][str(x)], 1.5)
+                self.assertEquals(res["washer_data"][str(x)], 1.5)
+                self.assertEquals(res["dryer_data"][str(x)], 1.5)
 
     def testLaundryPreferences(self):
         with server.app.test_client() as c:
-            resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
-            self.assertEquals(resp['rooms'], [])
+            resp = json.loads(
+                c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode(
+                    "utf8"
+                )
+            )
+            self.assertEquals(resp["rooms"], [])
 
-            c.post('/laundry/preferences', headers={'X-Device-ID': 'testing'},
-                   data={'rooms': '1,2,3', 'platform': 'Android'})
+            c.post(
+                "/laundry/preferences",
+                headers={"X-Device-ID": "testing"},
+                data={"rooms": "1,2,3", "platform": "Android"},
+            )
 
-            resp = json.loads(c.get('/laundry/preferences', headers={'X-Device-ID': 'testing'}).data.decode('utf8'))
-            self.assertEquals(resp['rooms'], [1, 2, 3])
+            resp = json.loads(
+                c.get("/laundry/preferences", headers={"X-Device-ID": "testing"}).data.decode(
+                    "utf8"
+                )
+            )
+            self.assertEquals(resp["rooms"], [1, 2, 3])

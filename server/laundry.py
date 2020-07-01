@@ -13,66 +13,64 @@ from server.models import LaundryPreference, LaundrySnapshot, User
 from server.penndata import laundry
 
 
-@app.route('/laundry/halls', methods=['GET'])
+@app.route("/laundry/halls", methods=["GET"])
 def all_halls():
     try:
-        return jsonify({'halls': laundry.all_status()})
+        return jsonify({"halls": laundry.all_status()})
     except HTTPError:
-        return jsonify({'error': 'The laundry api is currently unavailable.'})
+        return jsonify({"error": "The laundry api is currently unavailable."})
 
 
-@app.route('/laundry/rooms/<hall_ids>', methods=['GET'])
+@app.route("/laundry/rooms/<hall_ids>", methods=["GET"])
 def get_rooms(hall_ids):
-    est = timezone('EST')
+    est = timezone("EST")
     date = datetime.datetime.now(est)
-    halls = [int(x) for x in hall_ids.split(',')]
-    output = {'rooms': []}
+    halls = [int(x) for x in hall_ids.split(",")]
+    output = {"rooms": []}
     for hall in halls:
         hall_data = laundry.hall_status(hall)
-        hall_data['id'] = hall
-        hall_data['usage_data'] = usage_data(hall, date.year, date.month, date.day)
-        output['rooms'].append(hall_data)
+        hall_data["id"] = hall
+        hall_data["usage_data"] = usage_data(hall, date.year, date.month, date.day)
+        output["rooms"].append(hall_data)
     return jsonify(output)
 
 
-@app.route('/laundry/hall/<int:hall_id>', methods=['GET'])
+@app.route("/laundry/hall/<int:hall_id>", methods=["GET"])
 def hall(hall_id):
     try:
         return jsonify(laundry.hall_status(hall_id))
     except ValueError:
-        return jsonify({'error': 'Invalid hall id passed to server.'})
+        return jsonify({"error": "Invalid hall id passed to server."})
     except HTTPError:
-        return jsonify({'error': 'The laundry api is currently unavailable.'})
+        return jsonify({"error": "The laundry api is currently unavailable."})
 
 
-@app.route('/laundry/hall/<int:hall_id>/<int:hall_id2>', methods=['GET'])
+@app.route("/laundry/hall/<int:hall_id>/<int:hall_id2>", methods=["GET"])
 def two_halls(hall_id, hall_id2):
     try:
-        to_ret = {'halls': [laundry.hall_status(hall_id), laundry.hall_status(hall_id2)]}
+        to_ret = {"halls": [laundry.hall_status(hall_id), laundry.hall_status(hall_id2)]}
         return jsonify(to_ret)
     except ValueError:
-        return jsonify({'error': 'Invalid hall id passed to server.'})
+        return jsonify({"error": "Invalid hall id passed to server."})
     except HTTPError:
-        return jsonify({'error': 'The laundry api is currently unavailable.'})
+        return jsonify({"error": "The laundry api is currently unavailable."})
 
 
-@app.route('/laundry/halls/ids', methods=['GET'])
+@app.route("/laundry/halls/ids", methods=["GET"])
 def id_to_name():
     try:
-        return jsonify({
-            'halls': laundry.hall_id_list
-        })
+        return jsonify({"halls": laundry.hall_id_list})
     except HTTPError:
-        return jsonify({'error': 'The laundry api is currently unavailable.'})
+        return jsonify({"error": "The laundry api is currently unavailable."})
 
 
 def safe_division(a, b):
     return round(a / float(b), 3) if b > 0 else 0
 
 
-@app.route('/laundry/usage/<int:hall_no>')
+@app.route("/laundry/usage/<int:hall_no>")
 def usage_shortcut(hall_no):
-    est = timezone('EST')
+    est = timezone("EST")
     now = datetime.datetime.now(est)
     return usage(hall_no, now.year, now.month, now.day)
 
@@ -89,75 +87,96 @@ def usage_data(hall_no, year, month, day):
     tmw = (dow + 1) % 7
 
     # some commands are different between mysql and sqlite
-    is_mysql = sqldb.engine.name == 'mysql'
+    is_mysql = sqldb.engine.name == "mysql"
 
     # get the laundry information for today based on the day
     # of week (if today is tuesday, get all the tuesdays
     # in the past 30 days), group them by time, and include
     # the first 2 hours of the next day
-    data = sqldb.session.query(
-        LaundrySnapshot.date,
-        (func.floor(LaundrySnapshot.time / 60).label('time') if is_mysql else
-         cast(LaundrySnapshot.time / 60, Integer).label('time')),
-        func.avg(LaundrySnapshot.washers).label('all_washers'),
-        func.avg(LaundrySnapshot.dryers).label('all_dryers'),
-        func.avg(LaundrySnapshot.total_washers).label('all_total_washers'),
-        func.avg(LaundrySnapshot.total_dryers).label('all_total_dryers'),
-    ).filter(((LaundrySnapshot.room == hall_no)
-             & ((func.dayofweek(LaundrySnapshot.date) == dow + 1 if is_mysql else
-                 func.strftime('%w', LaundrySnapshot.date) == str(dow))
-             | ((LaundrySnapshot.time <= 180 - 1)
-                 & (func.dayofweek(LaundrySnapshot.date) == tmw + 1 if is_mysql else
-                    func.strftime('%w', LaundrySnapshot.date) == str(tmw))))
-             & (LaundrySnapshot.date >= start))) \
-     .group_by(LaundrySnapshot.date, 'time') \
-     .order_by(LaundrySnapshot.date, 'time').all()
+    data = (
+        sqldb.session.query(
+            LaundrySnapshot.date,
+            (
+                func.floor(LaundrySnapshot.time / 60).label("time")
+                if is_mysql
+                else cast(LaundrySnapshot.time / 60, Integer).label("time")
+            ),
+            func.avg(LaundrySnapshot.washers).label("all_washers"),
+            func.avg(LaundrySnapshot.dryers).label("all_dryers"),
+            func.avg(LaundrySnapshot.total_washers).label("all_total_washers"),
+            func.avg(LaundrySnapshot.total_dryers).label("all_total_dryers"),
+        )
+        .filter(
+            (
+                (LaundrySnapshot.room == hall_no)
+                & (
+                    (
+                        func.dayofweek(LaundrySnapshot.date) == dow + 1
+                        if is_mysql
+                        else func.strftime("%w", LaundrySnapshot.date) == str(dow)
+                    )
+                    | (
+                        (LaundrySnapshot.time <= 180 - 1)
+                        & (
+                            func.dayofweek(LaundrySnapshot.date) == tmw + 1
+                            if is_mysql
+                            else func.strftime("%w", LaundrySnapshot.date) == str(tmw)
+                        )
+                    )
+                )
+                & (LaundrySnapshot.date >= start)
+            )
+        )
+        .group_by(LaundrySnapshot.date, "time")
+        .order_by(LaundrySnapshot.date, "time")
+        .all()
+    )
     data = [x._asdict() for x in data]
-    all_dryers = [int(x['all_total_dryers']) for x in data]
-    all_washers = [int(x['all_total_washers']) for x in data]
+    all_dryers = [int(x["all_total_dryers"]) for x in data]
+    all_washers = [int(x["all_total_washers"]) for x in data]
     washer_points = {k: 0 for k in range(27)}
     dryer_points = {k: 0 for k in range(27)}
     washer_total = {k: 0 for k in range(27)}
     dryer_total = {k: 0 for k in range(27)}
     for x in data:
-        hour = int(x['time'])
+        hour = int(x["time"])
         # if the value is for tomorrow, add 24 hours
-        if x['date'].weekday() != now.weekday():
+        if x["date"].weekday() != now.weekday():
             hour += 24
-        washer_points[hour] += int(x['all_washers'])
-        dryer_points[hour] += int(x['all_dryers'])
+        washer_points[hour] += int(x["all_washers"])
+        dryer_points[hour] += int(x["all_dryers"])
         washer_total[hour] += 1
         dryer_total[hour] += 1
-    dates = [x['date'] for x in data]
+    dates = [x["date"] for x in data]
     if not dates:
         dates = [now]
     return {
-        'hall_name': laundry.id_to_hall[hall_no],
-        'location': laundry.id_to_location[hall_no],
-        'day_of_week': calendar.day_name[now.weekday()],
-        'start_date': min(dates).strftime('%Y-%m-%d'),
-        'end_date': max(dates).strftime('%Y-%m-%d'),
-        'total_number_of_dryers': safe_division(sum(all_dryers), len(all_dryers)),
-        'total_number_of_washers': safe_division(sum(all_washers), len(all_washers)),
-        'washer_data': {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
-        'dryer_data': {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points}
+        "hall_name": laundry.id_to_hall[hall_no],
+        "location": laundry.id_to_location[hall_no],
+        "day_of_week": calendar.day_name[now.weekday()],
+        "start_date": min(dates).strftime("%Y-%m-%d"),
+        "end_date": max(dates).strftime("%Y-%m-%d"),
+        "total_number_of_dryers": safe_division(sum(all_dryers), len(all_dryers)),
+        "total_number_of_washers": safe_division(sum(all_washers), len(all_washers)),
+        "washer_data": {x: safe_division(washer_points[x], washer_total[x]) for x in washer_points},
+        "dryer_data": {x: safe_division(dryer_points[x], dryer_total[x]) for x in dryer_points},
     }
 
 
-@app.route('/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>', methods=['GET'])
+@app.route("/laundry/usage/<int:hall_no>/<int:year>-<int:month>-<int:day>", methods=["GET"])
 def usage(hall_no, year, month, day):
     def get_data():
         return usage_data(hall_no, year, month, day)
 
     td = datetime.timedelta(minutes=15)
-    return cached_route('laundry:usage:%s:%s-%s-%s' % (hall_no, year, month, day), td, get_data)
+    return cached_route("laundry:usage:%s:%s-%s-%s" % (hall_no, year, month, day), td, get_data)
 
 
 def save_data():
     """Retrieves current laundry info and saves it into the database."""
 
     # get the number of minutes since midnight
-    est = timezone('EST')
+    est = timezone("EST")
     now = datetime.datetime.now(est)
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     date = now.date()
@@ -166,19 +185,24 @@ def save_data():
     # check if we already have data for this minute
     # if we do, skip
     with app.app_context():
-        if sqldb.session.query(exists().where((LaundrySnapshot.date == date)
-                                              & (LaundrySnapshot.time == time))).scalar():
+        if sqldb.session.query(
+            exists().where((LaundrySnapshot.date == date) & (LaundrySnapshot.time == time))
+        ).scalar():
             return
 
         # make a dict for hall name -> id
-        ids = {x['hall_name']: x['id'] for x in laundry.hall_id_list}
+        ids = {x["hall_name"]: x["id"] for x in laundry.hall_id_list}
         data = laundry.all_status()
         for name, room in data.items():
             id = ids[name]
-            dryers = room['dryers']['open']
-            washers = room['washers']['open']
-            total_dryers = sum([room['dryers'][x] for x in ['open', 'running', 'offline', 'out_of_order']])
-            total_washers = sum([room['washers'][x] for x in ['open', 'running', 'offline', 'out_of_order']])
+            dryers = room["dryers"]["open"]
+            washers = room["washers"]["open"]
+            total_dryers = sum(
+                [room["dryers"][x] for x in ["open", "running", "offline", "out_of_order"]]
+            )
+            total_washers = sum(
+                [room["washers"][x] for x in ["open", "running", "offline", "out_of_order"]]
+            )
             item = LaundrySnapshot(
                 date=date,
                 time=time,
@@ -186,29 +210,29 @@ def save_data():
                 washers=washers,
                 dryers=dryers,
                 total_washers=total_washers,
-                total_dryers=total_dryers
+                total_dryers=total_dryers,
             )
             sqldb.session.add(item)
         sqldb.session.commit()
 
 
-@app.route('/laundry/preferences', methods=['POST'])
+@app.route("/laundry/preferences", methods=["POST"])
 @auth(nullable=True)
 def save_laundry_preferences():
     try:
         user = User.get_or_create()
     except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({"success": False, "error": str(e)})
 
-    room_ids = request.form.get('rooms')
+    room_ids = request.form.get("rooms")
 
     if not room_ids:
-        return jsonify({'success': False, 'error': 'No rooms specified.'})
+        return jsonify({"success": False, "error": "No rooms specified."})
 
     # delete old preferences for user
     LaundryPreference.query.filter_by(user_id=user.id).delete()
 
-    room_ids = [int(x) for x in room_ids.split(',')]
+    room_ids = [int(x) for x in room_ids.split(",")]
 
     account_id = g.account.id if g.account else None
     for room_id in room_ids:
@@ -216,29 +240,29 @@ def save_laundry_preferences():
         sqldb.session.add(laundry_preference)
     sqldb.session.commit()
 
-    return jsonify({'success': True, 'error': None})
+    return jsonify({"success": True, "error": None})
 
 
-@app.route('/laundry/preferences', methods=['GET'])
+@app.route("/laundry/preferences", methods=["GET"])
 def get_laundry_preferences():
     try:
         user = User.get_or_create()
     except ValueError:
-        return jsonify({'rooms': []})
+        return jsonify({"rooms": []})
 
     preferences = LaundryPreference.query.filter_by(user_id=user.id)
     room_ids = [x.room_id for x in preferences]
-    return jsonify({'rooms': room_ids})
+    return jsonify({"rooms": room_ids})
 
 
-@app.route('/laundry/status', methods=['GET'])
+@app.route("/laundry/status", methods=["GET"])
 def get_laundry_status():
     def get_data():
         if laundry.check_is_working():
-            return {'is_working': True, 'error_msg': None}
+            return {"is_working": True, "error_msg": None}
         else:
             error_msg = "Penn's laundry server is currently not updating. We hope this will be fixed shortly."
-            return {'is_working': False, 'error_msg': error_msg}
+            return {"is_working": False, "error_msg": error_msg}
 
     td = datetime.timedelta(hours=1)
-    return cached_route('laundry:working', td, get_data)
+    return cached_route("laundry:working", td, get_data)

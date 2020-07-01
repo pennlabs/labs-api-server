@@ -2,6 +2,7 @@ from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from server import app, sqldb
+
 # from server.account.courses import add_courses
 from server.account.degrees import add_schools_and_majors
 from server.models import Account
@@ -87,7 +88,7 @@ Example: JSON Encoding
 """
 
 
-@app.route('/account/register', methods=['POST'])
+@app.route("/account/register", methods=["POST"])
 def register_account_endpoint():
     """ Add/update a Penn account in the database with degrees (optional) and current courses (optional) """
     json = request.get_json()
@@ -103,7 +104,7 @@ def register_account_endpoint():
                 account = update_account(account)
                 sqldb.session.commit()
 
-            degrees = json.get('degrees')
+            degrees = json.get("degrees")
             if degrees:
                 add_schools_and_majors(account, degrees)
 
@@ -111,35 +112,42 @@ def register_account_endpoint():
             # if courses:
             #     add_courses(account, courses)
 
-            return jsonify({'account_id': account.id})
+            return jsonify({"account_id": account.id})
         except KeyError as e:
-            return jsonify({'error': str(e)}), 400
+            return jsonify({"error": str(e)}), 400
     else:
-        return jsonify({'error': 'JSON not passed'}), 400
+        return jsonify({"error": "JSON not passed"}), 400
 
 
 def get_account(json):
-    first = json.get('first')
-    last = json.get('last')
-    pennkey = json.get('pennkey')
+    first = json.get("first")
+    last = json.get("last")
+    pennkey = json.get("pennkey")
 
     if pennkey is None:
-        raise KeyError('pennkey is missing')
+        raise KeyError("pennkey is missing")
 
-    pennid = json.get('pennid')
-    email = json.get('email')
-    affiliations_list = json.get('affiliations')
+    pennid = json.get("pennid")
+    email = json.get("email")
+    affiliations_list = json.get("affiliations")
     affiliation = None
-    image_url = json.get('image_url')
+    image_url = json.get("image_url")
     if not email:
         email = get_potential_email(json)
     if affiliations_list:
-        filtered_affliations = filter(lambda x: x != 'member', affiliations_list)
+        filtered_affliations = filter(lambda x: x != "member", affiliations_list)
         if filtered_affliations:
-            affiliation = ','.join(filtered_affliations)
+            affiliation = ",".join(filtered_affliations)
 
-    return Account(first=first, last=last, pennkey=pennkey, pennid=pennid, email=email,
-                   affiliation=affiliation, image_url=image_url)
+    return Account(
+        first=first,
+        last=last,
+        pennkey=pennkey,
+        pennid=pennid,
+        email=email,
+        affiliation=affiliation,
+        image_url=image_url,
+    )
 
 
 def update_account(updated_account):
@@ -160,42 +168,42 @@ def update_account(updated_account):
 
 
 def get_potential_email(json):
-    pennkey = json.get('pennkey')
-    degrees = json.get('degrees', None)
+    pennkey = json.get("pennkey")
+    degrees = json.get("degrees", None)
     if degrees is None:
         return None
 
     email = None
     if degrees:
         for degree in degrees:
-            code = degree.get('school_code')
+            code = degree.get("school_code")
             if code:
-                if 'WH' in code:
-                    return '{}@wharton.upenn.edu'.format(pennkey)
-                elif 'COL' in code:
-                    email = '{}@sas.upenn.edu'.format(pennkey)
-                elif 'SAS' in code:
-                    email = '{}@sas.upenn.edu'.format(pennkey)
-                elif 'EAS' in code:
-                    email = '{}@seas.upenn.edu'.format(pennkey)
-                elif 'NUR' in code:
-                    email = '{}@nursing.upenn.edu'.format(pennkey)
-                elif 'SOD' in code:
-                    email = '{}@design.upenn.edu'.format(pennkey)
-                elif 'EDG' in code:
-                    email = '{}@gse.upenn.edu'.format(pennkey)
-                elif 'GEP' in code:
-                    email = '{}@seas.upenn.edu'.format(pennkey)
-                elif 'GAS' in code:
-                    email = '{}@sas.upenn.edu'.format(pennkey)
-                elif 'GEN' in code:
-                    email = '{}@seas.upenn.edu'.format(pennkey)
-                elif 'EDP' in code:
-                    email = '{}@gse.upenn.edu'.format(pennkey)
-                elif 'LPS' in code:
-                    email = '{}@sas.upenn.edu'.format(pennkey)
-                elif 'SP2' in code:
-                    email = '{}@upenn.edu'.format(pennkey)
-                elif 'NUG' in code:
-                    email = '{}@nursing.upenn.edu'.format(pennkey)
+                if "WH" in code:
+                    return "{}@wharton.upenn.edu".format(pennkey)
+                elif "COL" in code:
+                    email = "{}@sas.upenn.edu".format(pennkey)
+                elif "SAS" in code:
+                    email = "{}@sas.upenn.edu".format(pennkey)
+                elif "EAS" in code:
+                    email = "{}@seas.upenn.edu".format(pennkey)
+                elif "NUR" in code:
+                    email = "{}@nursing.upenn.edu".format(pennkey)
+                elif "SOD" in code:
+                    email = "{}@design.upenn.edu".format(pennkey)
+                elif "EDG" in code:
+                    email = "{}@gse.upenn.edu".format(pennkey)
+                elif "GEP" in code:
+                    email = "{}@seas.upenn.edu".format(pennkey)
+                elif "GAS" in code:
+                    email = "{}@sas.upenn.edu".format(pennkey)
+                elif "GEN" in code:
+                    email = "{}@seas.upenn.edu".format(pennkey)
+                elif "EDP" in code:
+                    email = "{}@gse.upenn.edu".format(pennkey)
+                elif "LPS" in code:
+                    email = "{}@sas.upenn.edu".format(pennkey)
+                elif "SP2" in code:
+                    email = "{}@upenn.edu".format(pennkey)
+                elif "NUG" in code:
+                    email = "{}@nursing.upenn.edu".format(pennkey)
     return email
