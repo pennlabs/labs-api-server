@@ -5,17 +5,8 @@ from pytz import timezone
 from sqlalchemy import and_, desc, func
 
 from server import app, sqldb
-from server.models import (
-    AnalyticsEvent,
-    Post,
-    PostAccount,
-    PostFilter,
-    PostStatus,
-    PostTargetEmail,
-    PostTester,
-    School,
-    SchoolMajorAccount,
-)
+from server.models import (AnalyticsEvent, Post, PostAccount, PostFilter, PostStatus,
+                           PostTargetEmail, PostTester, School, SchoolMajorAccount)
 
 
 def get_analytics(posts_query):

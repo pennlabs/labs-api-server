@@ -6,16 +6,8 @@ import tinify
 from flask import jsonify, request
 
 from server import app, sqldb
-from server.models import (
-    Major,
-    Post,
-    PostAccount,
-    PostAccountEmail,
-    PostFilter,
-    PostStatus,
-    PostTargetEmail,
-    PostTester,
-)
+from server.models import (Major, Post, PostAccount, PostAccountEmail,
+                           PostFilter, PostStatus, PostTargetEmail, PostTester)
 
 
 """

@@ -45,6 +45,7 @@ Werkzeug = "*"
 apns2 = "*"
 uwsgi = "*"
 flake8 = "*"
+isort = "*"
 
 [requires]
 python_version = "3"

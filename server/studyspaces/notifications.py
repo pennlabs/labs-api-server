@@ -8,12 +8,7 @@ from sqlalchemy import and_, not_
 
 from server import app, sqldb
 from server.auth import internal_auth
-from server.notifications import (
-    Notification,
-    NotificationSetting,
-    NotificationToken,
-    send_push_notification_batch,
-)
+from server.notifications import Notification, NotificationSetting, NotificationToken, send_push_notification_batch
 from server.penndata import wharton
 from server.studyspaces.availability import get_room_name
 from server.studyspaces.models import GSRRoomName, StudySpacesBooking

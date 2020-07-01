@@ -6,13 +6,7 @@ from sqlalchemy import func, text
 
 from server import app, sqldb
 from server.auth import anonymous_auth
-from server.models import (
-    Course,
-    CourseAccount,
-    CourseAnonymousID,
-    CourseInstructor,
-    CourseMeetingTime,
-)
+from server.models import Course, CourseAccount, CourseAnonymousID, CourseInstructor, CourseMeetingTime
 
 
 @app.route("/account/courses", methods=["POST"])

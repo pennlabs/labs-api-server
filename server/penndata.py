@@ -1,18 +1,6 @@
-from penn import (
-    Calendar,
-    Dining,
-    DiningV2,
-    Directory,
-    Fitness,
-    Laundry,
-    Map,
-    Registrar,
-    StudySpaces,
-    Transit,
-    Wharton,
-)
-
 from os import getenv
+
+from penn import Calendar, Dining, DiningV2, Directory, Fitness, Laundry, Map, Registrar, StudySpaces, Transit, Wharton
 
 
 din = Dining(getenv("DIN_USERNAME"), getenv("DIN_PASSWORD"))
