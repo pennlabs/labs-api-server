@@ -56,7 +56,8 @@ export class LASStack extends Stack {
         image: `python:3.8`,
       },
       env: {
-        DATABASE_URL: 'mysql://root:password@mysql:3306/mysql'
+        DATABASE_URL: 'mysql://root:password@mysql:3306/mysql',
+        REDIS_URL: 'redis://redis:6379',
       },
       services: {
         mysql: {
