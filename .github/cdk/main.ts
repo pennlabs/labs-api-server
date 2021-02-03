@@ -11,21 +11,6 @@ export class LASStack extends Stack {
       on: 'push',
     });
 
-    //   - name: Cache
-    //   uses: actions/cache@v2
-    //   with:
-    //     path: ~/.local/share/virtualenvs
-    //     key: v0-${{ hashFiles('./Pipfile.lock') }}
-    // - name: Install Dependencies
-    //   run: |-
-    //     cd .
-    //     pip install pipenv
-    //     pipenv install --deploy --dev
-    // - name: Lint (flake8)
-    //   run: |-
-    //     cd .
-    //     pipenv run flake8 .
-
     const checkJob = new CheckoutJob(workflow, 'check', {
       runsOn: 'ubuntu-latest',
       steps: [
@@ -66,7 +51,7 @@ export class LASStack extends Stack {
             MYSQL_ROOT_PASSWORD: 'password',
             MYSQL_DATABASE: 'mysql'
           },
-          options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3'
+          options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --entrypoint="docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"'
         },
         redis: {
           image: 'redis:latest',
