@@ -51,7 +51,7 @@ export class LASStack extends Stack {
             MYSQL_ROOT_PASSWORD: 'password',
             MYSQL_DATABASE: 'mysql'
           },
-          options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --entrypoint="docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"'
+          options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --entrypoint sh -c "docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"'
         },
         redis: {
           image: 'redis:latest',
