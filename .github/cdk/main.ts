@@ -31,32 +31,27 @@ export class LASStack extends Stack {
           name: 'Lint (flake8)',
           run: 'pipenv run flake8 .',
         },
-        {
-          name: 'Run Tests',
-          run: dedent`mkdir test-results
-          pipenv run nose2 -c setup.cfg --with-coverage --plugin nose2.plugins.junitxml`
-        }
       ],
       container: {
         image: `python:3.8`,
       },
       env: {
-        DATABASE_URL: 'mysql://root:password@mysql:3306/mysql',
+        // DATABASE_URL: 'mysql://root:password@mysql:3306/mysql',
         REDIS_URL: 'redis://redis:6379',
       },
-      services: {
-        mysql: {
-          image: 'mysql:latest',
-          env: {
-            MYSQL_ROOT_PASSWORD: 'password',
-            MYSQL_DATABASE: 'mysql'
-          },
-          options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --entrypoint sh -c "docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"'
-        },
-        redis: {
-          image: 'redis:latest',
-        },
-      },
+      // services: {
+      //   mysql: {
+      //     image: 'mysql:latest',
+      //     env: {
+      //       MYSQL_ROOT_PASSWORD: 'password',
+      //       MYSQL_DATABASE: 'mysql'
+      //     },
+      //     options: '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --entrypoint sh -c "docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"'
+      //   },
+      //   redis: {
+      //     image: 'redis:latest',
+      //   },
+      // },
     });
 
     const publishJob = new DockerPublishJob(workflow, 'publish', {
