@@ -27,25 +27,28 @@ def get_all_polls():
 
     json_arr = []
     for poll in polls:
-        poll_json = get_poll_json(poll, archive)
-        json_arr.append(poll_json)
+        now = datetime.now(est).replace(tzinfo=None)
+        if archive or poll.expiration >= now:
+            poll_json = get_poll_json(poll, archive)
+            json_arr.append(poll_json)
     
     return jsonify({"polls": json_arr})
 
 
 def get_poll_json(poll, archive):
-    poll_json = {
-        "id": poll.id,
-        "approved": poll.approved,
-        "question": poll.question,
-        "orgAuthor": poll.source,
-        "expiration": poll.expiration
-        "options": []
-    }
+    now = datetime.now(est).replace(tzinfo=None)
 
-    options = PollOption.query.filter_by(poll=poll.id).all()
-    for obj in options:
-        if archive:
+    if archive:
+        poll_json = {
+            "id": poll.id,
+            "approved": poll.approved,
+            "question": poll.question,
+            "orgAuthor": poll.source,
+            "expiration": poll.expiration
+            "options": []
+        }
+        options = PollOption.query.filter_by(poll=poll.id).all()
+        for obj in options:
             poll_json["options"].append({
                 "id": obj.id,
                 "optionText": obj.choice,
@@ -87,12 +90,61 @@ def get_poll_json(poll, archive):
                     }
                 ]
             })
-        else:
+    elif not archive and poll.expiration >= now:
+        poll_json = {
+            "id": poll.id,
+            "approved": poll.approved,
+            "question": poll.question,
+            "orgAuthor": poll.source,
+            "expiration": poll.expiration
+            "options": []
+        }
+        options = PollOption.query.filter_by(poll=poll.id).all()
+        for obj in options:
             poll_json["options"].append({
                 "id": obj.id,
                 "optionText": obj.choice,
-                "votes": PollVote.query.filter_by(choice=obj.id).count()
+                "votes": PollVote.query.filter_by(choice=obj.id).count(),
+                "votesByYear": [
+                    {
+                        "demographic": "2021",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="2021").count()
+                    },
+                    {
+                        "demographic": "2022",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="2022").count()
+                    },
+                    {
+                        "demographic": "2023",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="2023").count()
+                    },
+                    {
+                        "demographic": "2024",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="2024").count()
+                    }
+                ],
+                "votesBySchool": [
+                    {
+                        "demographic": "WH",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="WH").count()
+                    },
+                    {
+                        "demographic": "COL",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="COL").count()
+                    },
+                    {
+                        "demographic": "EAS",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="EAS").count()
+                    },
+                    {
+                        "demographic": "NURS",
+                        "votes": PollVote.query.filter_by(choice=obj.id, year="NURS").count()
+                    }
+                ]
             })
+    else:
+        poll_json = {}
+
     
     return poll_json
 
