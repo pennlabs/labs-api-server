@@ -21,23 +21,36 @@ Returns list of polls
 @app.route("/api/polls", methods=["GET"])
 def get_all_polls():
     archive = request.args.get("archives")
+    email = request.args.get("email")
 
     polls = Poll.query.all()
-    polls_query = sqldb.session.query(Poll.id).subquery()
+    votes = PollVote.query.filter_by(email=email).all()
+    now = datetime.now(est).replace(tzinfo=None)
 
     json_arr = []
-    for poll in polls:
-        now = datetime.now(est).replace(tzinfo=None)
-        if archive:
-            poll_json = get_poll_json(poll)
-            json_arr.append(poll_json)
-        else:
-            if poll.expiration >= now:
+    if not email or not votes:
+        for poll in polls:
+            if archive and now > poll.expiration:
                 poll_json = get_poll_json(poll)
                 json_arr.append(poll_json)
+            else:
+                if poll.expiration >= now:
+                    poll_json = get_poll_json(poll)
+                    json_arr.append(poll_json)
+    else:
+        for vote in votes:
+            poll = Poll.query.filter_by(id=vote.poll).first()
+            if archive and now > poll.expiration:
+                poll_json = get_poll_json(poll)
+                poll_json["optionChosen"] = vote.choice
+                json_arr.append(poll_json)
+            else:
+                if poll.expiration >= now:
+                    poll_json = get_poll_json(poll)
+                    poll_json["optionChosen"] = vote.choice
+                    json_arr.append(poll_json)
     
     return jsonify({"polls": json_arr})
-
 
 def get_poll_json(poll):
     poll_json = {
@@ -45,7 +58,8 @@ def get_poll_json(poll):
         "approved": poll.approved,
         "question": poll.question,
         "orgAuthor": poll.source,
-        "expiration": poll.expiration
+        "expiration": poll.expiration,
+        "optionChosen": None,
         "options": []
     }
     options = PollOption.query.filter_by(poll=poll.id).all()
@@ -56,38 +70,38 @@ def get_poll_json(poll):
             "votes": PollVote.query.filter_by(choice=obj.id).count(),
             "votesByYear": [
                 {
-                    "demographic": "2021",
+                    "demographic": "year_3",
                     "votes": PollVote.query.filter_by(choice=obj.id, year="2021").count()
                 },
                 {
-                    "demographic": "2022",
+                    "demographic": "year_2",
                     "votes": PollVote.query.filter_by(choice=obj.id, year="2022").count()
                 },
                 {
-                    "demographic": "2023",
+                    "demographic": "year_1",
                     "votes": PollVote.query.filter_by(choice=obj.id, year="2023").count()
                 },
                 {
-                    "demographic": "2024",
+                    "demographic": "year_0",
                     "votes": PollVote.query.filter_by(choice=obj.id, year="2024").count()
                 }
             ],
             "votesBySchool": [
                 {
                     "demographic": "WH",
-                    "votes": PollVote.query.filter_by(choice=obj.id, year="WH").count()
+                    "votes": PollVote.query.filter_by(choice=obj.id, school="WH").count()
                 },
                 {
                     "demographic": "COL",
-                    "votes": PollVote.query.filter_by(choice=obj.id, year="COL").count()
+                    "votes": PollVote.query.filter_by(choice=obj.id, school="COL").count()
                 },
                 {
                     "demographic": "EAS",
-                    "votes": PollVote.query.filter_by(choice=obj.id, year="EAS").count()
+                    "votes": PollVote.query.filter_by(choice=obj.id, school="EAS").count()
                 },
                 {
                     "demographic": "NURS",
-                    "votes": PollVote.query.filter_by(choice=obj.id, year="NURS").count()
+                    "votes": PollVote.query.filter_by(choice=obj.id, school="NURS").count()
                 }
             ]
         })

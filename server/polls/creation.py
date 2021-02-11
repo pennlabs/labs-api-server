@@ -61,7 +61,7 @@ Parameters: question, orgAuthor, expiration, options
 Updates existing poll
 If successful, returns bool
 """
-@app.route("/api/polls/<int:poll_id>", methods=["PUT"])
+"""@app.route("/api/polls/<int:poll_id>", methods=["PUT"])
 def update_poll():
     data = request.get_json()
     poll = Poll.query.filter_by(id=poll_id).first()
@@ -95,7 +95,7 @@ def update_poll():
 
         sqldb.session.commit()
     
-    return jsonify({"success": True})
+    return jsonify({"success": True})"""
 
 
 """
@@ -107,7 +107,7 @@ Content-Type: application/json
 Deletes existing poll
 If successful, returns bool
 """
-@app.route("/api/polls/<int:poll_id>", methods=["DELETE"])
+"""@app.route("/api/polls/<int:poll_id>", methods=["DELETE"])
 def update_poll():
     poll = Poll.query.filter_by(id=poll_id).first()
     if not poll:
@@ -117,4 +117,4 @@ def update_poll():
     PollOption.query.filter_by(poll=poll.id).delete()
     PollVote.query.filter_by(poll=poll.id).delete()
     
-    return jsonify({"success": True})
+    return jsonify({"success": True})"""

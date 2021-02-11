@@ -337,6 +337,7 @@ class PollVote(sqldb.Model):
     choice = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("poll_option.id"), primary_key=True)
     school = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
     year = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
 class HomeCell(object):
