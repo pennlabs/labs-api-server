@@ -309,6 +309,7 @@ class PostTargetEmail(sqldb.Model):
 
 class Poll(sqldb.Model):
     id = sqldb.Column(sqldb.Integer, primary_key=True)
+    approved = sqldb.Column(sqldb.Boolean, default=False)
     source = sqldb.Column(sqldb.Text, nullable=True)
     question = sqldb.Column(sqldb.Text, nullable=True)
     expiration = sqldb.Column(sqldb.DateTime, nullable=True)

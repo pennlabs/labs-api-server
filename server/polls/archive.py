@@ -36,6 +36,7 @@ def get_all_polls():
 def get_poll_json(poll, archive):
     poll_json = {
         "id": poll.id,
+        "approved": poll.approved,
         "question": poll.question,
         "orgAuthor": poll.source,
         "expiration": poll.expiration
