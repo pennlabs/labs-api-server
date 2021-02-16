@@ -49,7 +49,7 @@ def add_vote():
         poll=poll_id,
         choice=choice,
         school=school,
-        year=year
+        year=year,
         email=email
     )
     sqldb.session.add(poll_vote)
