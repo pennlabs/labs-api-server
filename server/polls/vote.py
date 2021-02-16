@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from flask import jsonify, request
 
-from server.models import (Poll, PollOption, PollVote)
 from server import app, sqldb
+from server.models import Poll, PollOption, PollVote
 
 
 """

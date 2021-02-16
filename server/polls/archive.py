@@ -3,8 +3,8 @@ from datetime import datetime
 from flask import jsonify, request
 from pytz import timezone
 
-from server.models import (Poll, PollOption, PollVote)
 from server import app
+from server.models import Poll, PollOption, PollVote
 
 
 """
