@@ -54,6 +54,9 @@ import server.laundry  # noqa
 import server.news  # noqa
 import server.nso  # noqa
 import server.pcr  # noqa
+import server.polls.archive  # noqa
+import server.polls.creation  # noqa
+import server.polls.vote  # noqa
 import server.portal.account  # noqa
 import server.portal.creation  # noqa
 import server.portal.posts  # noqa
