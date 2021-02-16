@@ -2,8 +2,8 @@ from datetime import datetime
 
 from flask import jsonify, request
 
-from server import app, sqldb
 from server.models import (Poll, PollOption, PollVote)
+from server import app, sqldb
 
 
 """
@@ -16,6 +16,8 @@ Parameters: poll_id, option_id, school, year
 Adds new vote
 If successful, returns bool
 """
+
+
 @app.route("/api/choosePollOption", methods=["POST"])
 def add_vote():
     data = request.get_json()

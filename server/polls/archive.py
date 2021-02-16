@@ -3,8 +3,8 @@ from datetime import datetime
 from flask import jsonify, request
 from pytz import timezone
 
-from server import app
 from server.models import (Poll, PollOption, PollVote)
+from server import app
 
 
 """
@@ -15,6 +15,8 @@ Parameters: account
 
 Returns list of polls
 """
+
+
 @app.route("/api/polls", methods=["GET"])
 def get_all_polls():
     archive = request.args.get("archives")
@@ -48,8 +50,9 @@ def get_all_polls():
                     poll_json = get_poll_json(poll)
                     poll_json["optionChosen"] = vote.choice
                     json_arr.append(poll_json)
-    
+
     return jsonify({"polls": json_arr})
+
 
 def get_poll_json(poll):
     poll_json = {

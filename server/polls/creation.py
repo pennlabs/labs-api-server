@@ -2,8 +2,8 @@ from datetime import datetime
 
 from flask import jsonify, request
 
-from server import app, sqldb
 from server.models import (Poll, PollOption)
+from server import app, sqldb
 
 
 """
@@ -16,6 +16,8 @@ Parameters: question, orgAuthor, expiration, options
 Creates new poll
 If successful, returns poll ID
 """
+
+
 @app.route("/api/polls", methods=["POST"])
 def create_poll():
     data = request.get_json()
@@ -57,13 +59,15 @@ Parameters: question, orgAuthor, expiration, options
 Updates existing poll
 If successful, returns bool
 """
+
+
 """@app.route("/api/polls/<int:poll_id>", methods=["PUT"])
 def update_poll():
     data = request.get_json()
     poll = Poll.query.filter_by(id=poll_id).first()
     if not poll:
         return jsonify({"error": "Poll not found."}), 400
-    
+
     question = data.get("question")
     organization = data.get("orgAuthor")
     expiration_str = data.get("expiration")
@@ -81,7 +85,7 @@ def update_poll():
     if expiration_str:
         expiration = datetime.strptime(expiration_str, "%Y-%m-%dT%H:%M:%S")
         poll.expiration = expiration
-    
+
     if options:
         PollOption.query.filter_by(poll=poll.id).delete()
         PollVote.query.filter_by(poll=poll.id).delete()
@@ -90,7 +94,7 @@ def update_poll():
             sqldb.session.add(poll_option)
 
         sqldb.session.commit()
-    
+
     return jsonify({"success": True})"""
 
 
@@ -103,14 +107,16 @@ Content-Type: application/json
 Deletes existing poll
 If successful, returns bool
 """
+
+
 """@app.route("/api/polls/<int:poll_id>", methods=["DELETE"])
 def update_poll():
     poll = Poll.query.filter_by(id=poll_id).first()
     if not poll:
         return jsonify({"error": "Poll not found."}), 400
-    
+
     Poll.query.filter_by(id=poll.id).delete()
     PollOption.query.filter_by(poll=poll.id).delete()
     PollVote.query.filter_by(poll=poll.id).delete()
-    
+
     return jsonify({"success": True})"""
