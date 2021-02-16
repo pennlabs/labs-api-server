@@ -1,10 +1,6 @@
-import os
-import uuid
 from datetime import datetime
 
 from flask import jsonify, request
-from pytz import timezone
-from sqlalchemy import and_, desc, func
 
 from server import app, sqldb
 from server.models import (Poll, PollOption, PollVote)
@@ -24,14 +20,14 @@ If successful, returns bool
 def add_vote():
     data = request.get_json()
 
-    if any(x is None for x in [poll_id, option_id, school, year, email]):
-        return jsonify({"error": "Parameter is missing"}), 400
-
     poll_id = data.get("poll_id")
     choice = data.get("option_id")
     school = data.get("school")
     year = data.get("year")
     email = data.get("email")
+
+    if any(x is None for x in [poll_id, choice, school, year, email]):
+        return jsonify({"error": "Parameter is missing"}), 400
 
     poll = Poll.query.filter_by(id=poll_id).first()
     opt = PollOption.query.filter_by(id=choice).first()

@@ -1,13 +1,9 @@
-import os
-import uuid
 from datetime import datetime
 
 from flask import jsonify, request
-from pytz import timezone
-from sqlalchemy import and_, desc, func
 
 from server import app, sqldb
-from server.models import (Poll, PollOption, PollVote)
+from server.models import (Poll, PollOption)
 
 
 """
@@ -29,7 +25,7 @@ def create_poll():
     expiration_str = data.get("expiration")
     options = list(data.get("options"))
 
-    if any(x is None for x in [question, organization, expiration, options]):
+    if any(x is None for x in [question, organization, expiration_str, options]):
         return jsonify({"error": "Parameter is missing"}), 400
 
     expiration = datetime.strptime(expiration_str, "%Y-%m-%dT%H:%M:%S")

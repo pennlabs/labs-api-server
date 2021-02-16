@@ -1,12 +1,9 @@
-import os
-import uuid
 from datetime import datetime
 
 from flask import jsonify, request
 from pytz import timezone
-from sqlalchemy import and_, desc, func
 
-from server import app, sqldb
+from server import app
 from server.models import (Poll, PollOption, PollVote)
 
 
@@ -25,6 +22,8 @@ def get_all_polls():
 
     polls = Poll.query.all()
     votes = PollVote.query.filter_by(email=email).all()
+
+    est = timezone("EST")
     now = datetime.now(est).replace(tzinfo=None)
 
     json_arr = []
@@ -106,6 +105,4 @@ def get_poll_json(poll):
             ]
         })
 
-    
     return poll_json
-
