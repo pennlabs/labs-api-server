@@ -39,7 +39,7 @@ def add_vote():
     if not poll:
         return jsonify({"error": "Poll not found."}), 400
     if not opt:
-        return jsonify("error": "Poll option not found."), 400
+        return jsonify({"error": "Poll option not found."}), 400
 
     exists = PollVote.query.filter_by(poll=poll_id, email=email).first()
     if exists:
