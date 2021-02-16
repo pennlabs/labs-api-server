@@ -307,6 +307,39 @@ class PostTargetEmail(sqldb.Model):
     email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
 
 
+class Poll(sqldb.Model):
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    approved = sqldb.Column(sqldb.Boolean, default=False)
+    source = sqldb.Column(sqldb.Text, nullable=True)
+    question = sqldb.Column(sqldb.Text, nullable=True)
+    expiration = sqldb.Column(sqldb.DateTime, nullable=True)
+    created_at = sqldb.Column(sqldb.DateTime, server_default=sqldb.func.now())
+
+    @staticmethod
+    def get_poll(poll_id):
+        if not poll_id:
+            raise ValueError("No poll id provided.")
+
+        response = Poll.query.filter_by(id=poll_id).first()
+        if not response:
+            raise ValueError("Unable to find poll with provided id.")
+        return response
+
+
+class PollOption(sqldb.Model):
+    poll = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("poll.id"), primary_key=True)
+    id = sqldb.Column(sqldb.Integer, primary_key=True)
+    choice = sqldb.Column(sqldb.Text, nullable=False)
+
+
+class PollVote(sqldb.Model):
+    poll = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("poll.id"), primary_key=True)
+    choice = sqldb.Column(sqldb.Integer, sqldb.ForeignKey("poll_option.id"), primary_key=True)
+    school = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    year = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+    email = sqldb.Column(sqldb.VARCHAR(255), primary_key=True)
+
+
 class HomeCell(object):
     """A home cell which can be displayed on the home page.
 
