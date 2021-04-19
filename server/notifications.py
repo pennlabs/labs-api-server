@@ -103,6 +103,27 @@ def send_test_push_notification():
     send_push_notification(token.ios_token, title, body, token.dev)
     return jsonify({"success": True})
 
+@app.route("/notifications/send/token/internal", methods=["POST"])
+@internal_auth
+def send_test_push_notification_with_token():
+    token = request.form.get("token")
+    title = request.form.get("title")
+    body = request.form.get("body")
+    if not token:
+        return jsonify({"error": "Missing token."}), 400
+
+    if not token:
+        return (
+            jsonify(
+                {"error": "A device token has not been registered on the server for this account."}
+            ),
+            400,
+        )
+
+    # Only development tokens can be tested (not production)
+    send_push_notification(token, title, body, True)
+    return jsonify({"success": True})
+
 
 def send_push_notification(token, title, body, isDev=False):
     client = get_client(isDev)
@@ -122,7 +143,7 @@ def get_client(isDev):
     auth_key_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ios_key.p8"
     )
-    auth_key_id = "6MBD9SUNGE"
+    auth_key_id = "443RV92X4F"
     team_id = "VU59R57FGM"
     token_credentials = TokenCredentials(
         auth_key_path=auth_key_path, auth_key_id=auth_key_id, team_id=team_id
