@@ -103,6 +103,7 @@ def send_test_push_notification():
     send_push_notification(token.ios_token, title, body, token.dev)
     return jsonify({"success": True})
 
+
 @app.route("/notifications/send/token/internal", methods=["POST"])
 @internal_auth
 def send_test_push_notification_with_token():
