@@ -56,7 +56,8 @@ def pull_today():
     est = timezone("EST")
     now = datetime.datetime.now(est)
     today = now.date()
-    return pull_calendar_response(today)
+    # return pull_calendar_response(today)
+    return jsonify({"calendar": []})
 
 
 @app.route("/calendar/<date>", methods=["GET"])
